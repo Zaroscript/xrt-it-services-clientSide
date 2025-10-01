@@ -41,7 +41,7 @@ const Header = () => {
       }`}
       suppressHydrationWarning
     >
-      <div className="page-container mx-auto h-full">
+      <div className="container mx-auto h-full">
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center h-16">
