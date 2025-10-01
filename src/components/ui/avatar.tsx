@@ -1,4 +1,5 @@
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
@@ -17,14 +18,27 @@ const Avatar = React.forwardRef<
 Avatar.displayName = "Avatar"
 
 const AvatarImage = React.forwardRef<
-  HTMLImageElement,
-  React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, ...props }, ref) => (
-  <img
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    src: string
+    alt: string
+    width?: number
+    height?: number
+  }
+>(({ className, src, alt, width = 40, height = 40, ...props }, ref) => (
+  <div
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn("relative aspect-square h-full w-full overflow-hidden", className)}
     {...props}
-  />
+  >
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className="h-full w-full object-cover"
+    />
+  </div>
 ))
 AvatarImage.displayName = "AvatarImage"
 

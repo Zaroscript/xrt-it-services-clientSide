@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -58,14 +59,19 @@ export function AuthCard({
             <div className="absolute inset-0 rounded-full -z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500
               bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"
             />
-            <img 
-              src="/logo.png" 
-              alt="Company Logo" 
-              className="w-full h-full object-contain transition-all duration-300 hover:scale-105 p-2"
-              style={{
-                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08))',
-              }}
-            />
+            <div className="relative w-full h-full p-2">
+              <Image 
+                src="/logo.png" 
+                alt="Company Logo" 
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-contain transition-all duration-300 hover:scale-105"
+                style={{
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08))',
+                }}
+                priority
+              />
+            </div>
           </motion.div>
         </div>
         <motion.h1

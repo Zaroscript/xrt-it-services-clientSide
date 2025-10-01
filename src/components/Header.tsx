@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { NAV_LINKS } from "@/config/constants";
@@ -45,11 +46,14 @@ const Header = () => {
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center h-16">
-            <div className="h-10 w-32 flex items-center">
-              <img
+            <div className="relative h-16 w-48 flex items-center">
+              <Image
                 src="/logo.png"
                 alt="XRT Tech Logo"
-                className="w-auto object-contain"
+                fill
+                sizes="(max-width: 768px) 140px, 192px"
+                className="object-contain"
+                priority
               />
             </div>
           </Link>
