@@ -10,7 +10,6 @@ import { NAV_LINKS } from "@/config/constants";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { Button } from "./ui/button";
 import { MobileMenu } from "./MobileMenu";
-import { DropdownMenu } from "./ui/DropdownMenu";
 
 const Header = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -30,7 +29,7 @@ const Header = () => {
   }, []);
 
   if (!isMounted) {
-    return null; // or a loading state that matches your design
+    return null;
   }
 
   return (
@@ -42,16 +41,16 @@ const Header = () => {
       }`}
       suppressHydrationWarning
     >
-      <div className="container mx-auto px-4 sm:px-6 h-full">
+      <div className="page-container mx-auto h-full">
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center h-16">
-            <div className="relative h-16 w-48 flex items-center">
+            <div className="relative flex items-center">
               <Image
                 src="/logo.png"
                 alt="XRT Tech Logo"
-                fill
-                sizes="(max-width: 768px) 140px, 192px"
+                width={80}
+                height={80}
                 className="object-contain"
                 priority
               />

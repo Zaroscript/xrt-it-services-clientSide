@@ -70,8 +70,8 @@ export function CompanySection() {
             </div>
 
             {/* Video and Images */}
-            <div className="relative mt-16 lg:mt-0">
-              <div className="relative mx-auto w-[350px] sm:w-[500px] lg:w-[400px]">
+            <div className="relative mt-16 lg:mt-0 max-sm:hidden">
+              <div className="relative mx-auto w-[250px] sm:w-[500px] lg:w-[400px]">
                 {/* Main Video Thumbnail */}
                 <Link
                   href="https://youtu.be/9No-FiEInLA?si=2z829SYXtfU3uqiB"

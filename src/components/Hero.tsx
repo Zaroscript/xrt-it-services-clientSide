@@ -51,9 +51,9 @@ export default function Hero() {
       />
 
       <div className="relative page-container mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 py-20">
           {/* Content Section */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0, y: 20 }}

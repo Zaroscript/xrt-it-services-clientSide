@@ -57,7 +57,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <div className="min-h-screen flex flex-col">
               <Header />
-              <main className="flex-1">
+              <main className="flex-1 overflow-x-hidden">
                 <Suspense fallback={<Loading />}>
                   {children}
                 </Suspense>
