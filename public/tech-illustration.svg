@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d3b073;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#d3b073;stop-opacity:0.3" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d3b073;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#d3b073;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circles -->
+  <circle cx="400" cy="400" r="300" fill="none" stroke="url(#grad1)" stroke-width="2" />
+  <circle cx="400" cy="400" r="200" fill="none" stroke="url(#grad1)" stroke-width="2" />
+  
+  <!-- Tech Grid Pattern -->
+  <g stroke="url(#grad2)" stroke-width="1">
+    <line x1="200" y1="400" x2="600" y2="400" />
+    <line x1="400" y1="200" x2="400" y2="600" />
+    <circle cx="400" cy="400" r="100" fill="none" />
+  </g>
+  
+  <!-- Dots -->
+  <g fill="#d3b073">
+    <circle cx="400" cy="300" r="4" />
+    <circle cx="400" cy="500" r="4" />
+    <circle cx="300" cy="400" r="4" />
+    <circle cx="500" cy="400" r="4" />
+  </g>
+  
+  <!-- Connecting Lines -->
+  <g stroke="#d3b073" stroke-width="2" stroke-dasharray="4,4">
+    <line x1="400" y1="300" x2="300" y2="400" />
+    <line x1="300" y1="400" x2="400" y2="500" />
+    <line x1="400" y1="500" x2="500" y2="400" />
+    <line x1="500" y1="400" x2="400" y2="300" />
+  </g>
+  
+  <!-- Central Elements -->
+  <g transform="translate(400, 400)">
+    <!-- Hexagon -->
+    <path d="M0,-50 L43.3,-25 L43.3,25 L0,50 L-43.3,25 L-43.3,-25 Z" 
+          fill="none" stroke="#232325" stroke-width="2" />
+    <!-- Inner Circle -->
+    <circle cx="0" cy="0" r="20" fill="#232325" fill-opacity="0.2" stroke="#232325" stroke-width="2" />
+  </g>
+  
+  <!-- Floating Elements -->
+  <g fill="none" stroke="#232325" stroke-width="2">
+    <rect x="250" y="250" width="40" height="40" transform="rotate(45, 270, 270)" />
+    <rect x="510" y="510" width="40" height="40" transform="rotate(45, 530, 530)" />
+    <rect x="510" y="250" width="40" height="40" transform="rotate(45, 530, 270)" />
+    <rect x="250" y="510" width="40" height="40" transform="rotate(45, 270, 530)" />
+  </g>
+</svg>
