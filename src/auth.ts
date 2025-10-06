@@ -12,7 +12,7 @@ declare module 'next-auth' {
   }
 }
 
-export const authOptions = {
+export const authOptions: any = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -49,16 +49,17 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
   session: {
     strategy: 'jwt' as const,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         (session.user as any).role = token.role as string;
@@ -66,7 +67,7 @@ export const authOptions = {
       return session;
     }
   },
-  trustHost: process.env.NODE_ENV === 'development',
+  trustHost: true,
   debug: process.env.NODE_ENV === 'development',
   pages: {
     signIn: '/auth/login',

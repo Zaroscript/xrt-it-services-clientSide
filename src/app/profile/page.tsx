@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -110,8 +110,15 @@ export default function ProfilePage() {
     features: ['Unlimited projects', 'Team collaboration', 'Priority support'],
   };
 
-  // Handle loading state
-  if (status === 'loading') {
+  // Handle loading and authentication states
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login');
+    }
+  }, [status, router]);
+
+  // Show loading state
+  if (status === 'loading' || !session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin" />
@@ -119,10 +126,19 @@ export default function ProfilePage() {
     );
   }
 
-  // Redirect if not authenticated
-  if (status === 'unauthenticated') {
-    router.push('/auth/login');
-    return null;
+  // Ensure user data is available
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Session Error</h2>
+          <p className="text-gray-600 mb-4">Unable to load user data. Please try again.</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

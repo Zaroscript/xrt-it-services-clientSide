@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
+import { SessionProvider } from 'next-auth/react';
 import { store, initializeStore } from './store/store';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -10,5 +11,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     initializeStore();
   }, []);
 
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <SessionProvider>
+      <Provider store={store}>
+        {children}
+      </Provider>
+    </SessionProvider>
+  );
 }
