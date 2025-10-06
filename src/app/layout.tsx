@@ -1,3 +1,6 @@
+// Global CSS
+import "./globals.css";
+
 // Packages
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
@@ -15,18 +18,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/chat/ChatWidget";
 
-// Global styles
-import "./globals.css";
+
 
 // Fonts variables
 const robotoFont = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  display: "swap",
 });
 
 const interFont = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 // Metadata
@@ -46,6 +51,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>

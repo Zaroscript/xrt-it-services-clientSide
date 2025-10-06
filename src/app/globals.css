@@ -5,50 +5,50 @@
 
 :root {
   --card: #ffffff;
-  --card-foreground: #1a1a1a;
+  --card-foreground: #1C1C1E;
   --popover: #ffffff;
-  --popover-foreground: #1a1a1a;
-  --main-color: #1a1a1a;
+  --popover-foreground: #1C1C1E;
+  --main-color: #1C1C1E;
   --secondary-color: #d3b073;
-  --primary: #1a1a1a;
+  --primary: #1C1C1E;
   --primary-foreground: #ffffff;
   --secondary: #d3b073;
-  --secondary-foreground: #1a1a1a;
+  --secondary-foreground: #1C1C1E;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #e2e8f0;
-  --accent-foreground: #1a1a1a;
+  --accent-foreground: #1C1C1E;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #ffffff;
-  --ring: #1a1a1a;
+  --ring: #1C1C1E;
   --radius: 0.625rem;
   --gold: #d3b073;
-  --gold-foreground: #1a1a1a;
+  --gold-foreground: #1C1C1E;
   --background: #f8f9fa;
-  --foreground: #1a1a1a;
-  --chart-1: #1a1a1a;
+  --foreground: #1C1C1E;
+  --chart-1: #1C1C1E;
   --chart-2: #d3b073;
   --chart-3: #fbbf24;
   --chart-4: #10b981;
   --chart-5: #3b82f6;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #1a1a1a;
+  --sidebar-foreground: #1C1C1E;
+  --sidebar-primary: #1C1C1E;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-accent-foreground: #1C1C1E;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #1a1a1a;
+  --sidebar-ring: #1C1C1E;
 }
 
 .dark {
-  --background: #232325;
+  --background: #000000;
   --foreground: #ffffff;
-  --card: #171718;
+  --card: #1C1C1E;
   --card-foreground: #ffffff;
-  --popover: #171718;
+  --popover: #1C1C1E;
   --popover-foreground: #ffffff;
   --primary: #d3b073;
   --primary-foreground: #232325;
@@ -70,7 +70,8 @@
   --chart-3: #d3b073;
   --chart-4: #d3b073;
   --chart-5: #d3b073;
-  --sidebar: #171718;
+  --sidebar: #1C1C1E;
+  --sidebar-ring: #d3b073;
   --sidebar-foreground: #ffffff;
   --sidebar-primary: #d3b073;
   --sidebar-primary-foreground: #232325;
@@ -199,35 +200,7 @@
 
 
 @layer components {
-  /* Container System */
-  .container {
-    @apply w-full px-4 mx-auto;
-  }
-
-  .container-sm {
-    @apply w-full max-w-sm px-4 mx-auto;
-  }
-
-  .container-md {
-    @apply w-full max-w-2xl px-4 mx-auto;
-  }
-
-  .container-lg {
-    @apply w-full max-w-4xl px-4 mx-auto;
-  }
-
-  .container-xl {
-    @apply w-full max-w-6xl px-4 mx-auto;
-  }
-
-  .container-2xl {
-    @apply w-full max-w-7xl px-4 mx-auto;
-  }
-
-  .container-3xl {
-    @apply w-full max-w-screen-2xl px-4 mx-auto;
-  }
-
+  
   /* Responsive Container with Breakpoint Variants */
   .page-container {
     @apply w-full mx-auto px-4;
@@ -258,13 +231,12 @@
 
   /* Wide Container for Landing Pages */
   .wide-container {
-    @apply w-full mx-auto px-4;
+    @apply w-full mx-auto px-2;
 
     @apply sm:max-w-4xl sm:px-6;
     @apply md:max-w-5xl md:px-8;
     @apply lg:max-w-6xl lg:px-12;
-    @apply xl:max-w-7xl xl:px-16;
-    @apply 2xl:max-w-screen-2xl 2xl:px-20;
+    @apply xl:max-w-7xl xl:px-4;
   }
 
   /* Full Width Container (no max-width) */
@@ -340,10 +312,10 @@
     @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
   .btn-primary {
-    @apply h-10 bg-[#d3b073] px-4 py-2 text-[#1a1a1a] hover:bg-[#d3b073]/90;
+    @apply h-10 bg-[#d3b073] px-4 py-2 text-[#1C1C1E] hover:bg-[#d3b073]/90;
   }
   .btn-secondary {
-    @apply h-10 border border-input bg-transparent px-4 py-2 text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-white;
+    @apply h-10 border border-input bg-transparent px-4 py-2 text-[#1C1C1E] hover:bg-[#1C1C1E] hover:text-white;
   }
   /* Input */
   .input {
@@ -351,11 +323,11 @@
   }
 
   .text-primary {
-    @apply text-[#1a1a1a] dark:text-[#d3b073];
+    @apply text-[#1C1C1E] dark:text-[#d3b073];
   }
 
   .bg-primary {
-    @apply bg-[#1a1a1a] dark:bg-[#d3b073];
+    @apply bg-[#1C1C1E] dark:bg-[#d3b073];
   }
 
   .hover\:bg-primary\/10:hover {

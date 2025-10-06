@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 type FormData = {
   name: string;
   email: string;
+  phone: string;
   service: string;
   message: string;
 };
@@ -36,8 +37,8 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 bg-background">
-      <div className="max-w-7xl mx-auto">
+    <section id="quote" className="py-20 px-4 sm:px-6 bg-background">
+      <div className="page-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Contact Form */}
           <motion.div
@@ -48,10 +49,10 @@ const ContactSection = () => {
             className="bg-card p-8 rounded-2xl shadow-lg"
           >
             <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Need a Hand?
+              <h2 className="text-3xl md:text-4xl font-bold text-primary  mb-2">
+                Get A Quote
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-secondary dark:text-white">
                 We're here to help! Fill out the form and our team will get back to
                 you as soon as possible.
               </p>
@@ -69,7 +70,7 @@ const ContactSection = () => {
                   type="text"
                   id="name"
                   {...register("name", { required: "Name is required" })}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                   placeholder="John Doe"
                 />
                 {errors.name && (
@@ -96,7 +97,7 @@ const ContactSection = () => {
                       message: "Invalid email address",
                     },
                   })}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-lg  bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                   placeholder="you@example.com"
                 />
                 {errors.email && (
@@ -104,6 +105,22 @@ const ContactSection = () => {
                     {errors.email.message}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
+                  Phone Number <span className="text-muted-foreground">(optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  {...register("phone")}
+                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                  placeholder="+1 (234) 567-8900"
+                />
               </div>
 
               <div>
@@ -116,7 +133,7 @@ const ContactSection = () => {
                 <select
                   id="service"
                   {...register("service", { required: "Please select a service" })}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all appearance-none"
+                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all appearance-none"
                   defaultValue=""
                 >
                   <option value="" disabled>
@@ -146,7 +163,7 @@ const ContactSection = () => {
                   id="message"
                   rows={4}
                   {...register("message", { required: "Message is required" })}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                   placeholder="Tell us more about your project..."
                 ></textarea>
                 {errors.message && (
@@ -194,10 +211,10 @@ const ContactSection = () => {
                     Email Us
                   </h4>
                   <a
-                    href="mailto:contact@xrt-tech.com"
+                    href="mailto:support@xrttech.com"
                     className="text-foreground hover:text-gold transition-colors"
                   >
-                    contact@xrt-tech.com
+                    support@xrttech.com
                   </a>
                 </div>
               </div>
@@ -225,7 +242,7 @@ const ContactSection = () => {
                 </div>
                 <div className="ml-4">
                   <h4 className="text-sm font-medium text-muted-foreground">
-                    Visit Us
+                    Location
                   </h4>
                   <p className="text-foreground">
                     123 Tech Street, Silicon Valley

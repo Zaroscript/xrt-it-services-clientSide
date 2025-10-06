@@ -5,20 +5,28 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
 import { NAV_LINKS } from "@/config/constants";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { Button } from "./ui/button";
 import { MobileMenu } from "./MobileMenu";
+import lightLogo from "../assets/images/logo-light.png";
+import darkLogo from "../assets/images/logo-dark.png";
+import { useThemeDetector } from "@/hooks/useThemeDetector";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
-  const [isMounted, setIsMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { isDark, isMounted } = useThemeDetector();
+  const router = useRouter();
 
   useEffect(() => {
-    setIsMounted(true);
+    if (isMounted) {
+      setIsClient(true);
+    }
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -27,10 +35,6 @@ const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  if (!isMounted) {
-    return null;
-  }
 
   return (
     <header
@@ -41,13 +45,13 @@ const Header = () => {
       }`}
       suppressHydrationWarning
     >
-      <div className="container mx-auto h-full">
+      <div className="px-4">
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center h-16">
             <div className="relative flex items-center">
               <Image
-                src="/logo.png"
+                src={isMounted ? (isDark ? darkLogo : lightLogo) : darkLogo}
                 alt="XRT Tech Logo"
                 width={80}
                 height={80}
@@ -57,45 +61,55 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                href={link.path}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
+          <div className="flex items-center space-x-4">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-2">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.path}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
                   ${
                     pathname === link.path
                       ? "text-primary bg-primary/5"
                       : "text-foreground/80 hover:text-primary hover:bg-primary/5"
                   }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Right side buttons */}
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
               >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+                <Link href="/auth/login">Sign In</Link>
+              </Button>
 
-          {/* Right side buttons */}
-          <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
-              asChild
-            >
-              <Link href="/auth/login">Sign In</Link>
-            </Button>
+              <Button
+                className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                onClick={() => router.push("/#quote")}
+              >
+                Get a Quote
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden hover:bg-primary/5"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Open menu</span>
-            </Button>
+              {/* Mobile menu button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden hover:bg-primary/5"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -42,7 +42,7 @@ export function FAQ() {
 
   return (
     <div className="mt-24 bg-[#343438] py-16">
-      <div className="container">
+      <div className="page-container">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white">

@@ -21,7 +21,7 @@ export function CompanySection() {
   
   return (
     <section className="py-24">
-      <div className="container">
+      <div className="page-container">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-end gap-12 lg:grid-cols-2">
             {/* About Content */}

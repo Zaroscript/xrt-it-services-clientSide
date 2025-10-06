@@ -1,49 +1,59 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// List of paths that require authentication
-const protectedPaths = [
-  '/dashboard',
+const publicRoutes: string[] = [
+  '/',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/_next',
+  '/favicon.ico'
+];
+
+const protectedRoutes: string[] = [
   '/profile',
-  // Add more protected paths here
+  '/settings',
+  '/billing'
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isProtectedPath = protectedPaths.some(path => 
-    pathname.startsWith(path)
-  );
-
-  // If it's not a protected path, continue
-  if (!isProtectedPath) {
+  
+  // Allow public routes
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // Check for token in the request
-  const token = await getToken({ req: request });
+  // Check if route is protected
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   
-  // If no token and trying to access protected route, redirect to signin
-  if (!token) {
-    const signInUrl = new URL('/auth/signin', request.url);
-    signInUrl.searchParams.set('callbackUrl', encodeURI(request.url));
-    return NextResponse.redirect(signInUrl);
+  if (isProtectedRoute) {
+    const token = await getToken({ 
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET || 'your-secret-key'
+    });
+
+    // If no token and trying to access protected route, redirect to login
+    if (!token) {
+      const loginUrl = new URL('/auth/login', request.url);
+      loginUrl.searchParams.set('callbackUrl', encodeURI(request.url));
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
-  // If token exists, continue with the request
   return NextResponse.next();
 }
-
-// For now, we'll protect all routes except auth and public assets
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth API routes)
+     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - auth/ (authentication pages)
+     * - auth (authentication pages)
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|auth/).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|auth/).*)',
   ],
 };

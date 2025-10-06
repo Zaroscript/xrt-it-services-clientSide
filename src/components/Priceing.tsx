@@ -7,7 +7,7 @@ import { useState } from "react";
 const Priceing = () => {
   const [isYearly, setIsYearly] = useState(false);
   return (
-    <div className="container mt-16">
+    <div className="page-container mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn className="mb-12 text-center">
           <PricingToggle

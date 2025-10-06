@@ -70,18 +70,13 @@ const services = [
 ];
 
 export function Services() {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  // Double the services array for smooth infinite loop
-  const extendedServices = [...services, ...services];
-
   return (
     <section className="relative overflow-hidden py-20 ">
       {/* Background decorations */}
       <div className="absolute inset-0 bg-gradient-to-b from-secondary/5 via-transparent to-transparent" />
       
       {/* Section header */}
-      <div className="container relative">
+      <div className="page-container relative">
         <div className="mx-auto max-w-2xl text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -107,23 +102,11 @@ export function Services() {
         {/* Services carousel */}
         <div 
           className="mt-16"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
-          <motion.div
+          <div
             className="flex gap-6"
-            animate={{
-              x: isHovered ? ["0%", "-50%"] : ["0%", "-50%"],
-            }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                duration: isHovered ? 30 : 20,
-                ease: "linear",
-              },
-            }}
           >
-            {extendedServices.map((service, index) => (
+            {services.map((service, index) => (
               <div
                 key={index}
                 className="w-[300px] flex-shrink-0"
@@ -131,7 +114,7 @@ export function Services() {
                 <ServiceCard {...service} />
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

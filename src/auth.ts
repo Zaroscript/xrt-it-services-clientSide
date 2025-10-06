@@ -1,18 +1,18 @@
-import { type DefaultSession, type Session } from "next-auth"
-import { type JWT } from "next-auth/jwt"
-import type { NextAuthConfig } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import NextAuth, { type DefaultSession, type User, type Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
-declare module "next-auth" {
-  interface Session {
+// Extend the built-in session and user types
+declare module 'next-auth' {
+  interface Session extends DefaultSession {
     user: {
-      id: string
-      email: string
-    } & DefaultSession["user"]
+      id: string;
+      role?: string;
+    } & DefaultSession['user'];
   }
 }
 
-export const authOptions: NextAuthConfig = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -21,46 +21,59 @@ export const authOptions: NextAuthConfig = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter an email and password')
-        }
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Please enter both email and password');
+          }
 
-        // TODO: Replace with your actual user authentication logic
-        // This is a placeholder that will always fail authentication
-        // In a real app, you would check against your database here
-        throw new Error('Authentication not implemented')
-        
-        // Example of what a successful authentication might look like:
-        // return {
-        //   id: '1',
-        //   email: credentials.email,
-        //   name: 'Test User'
-        // }
-      }
+          // Replace this with your actual authentication logic
+          if (credentials.email === 'test@example.com' && credentials.password === 'password123') {
+            return {
+              id: '1',
+              name: 'Test User',
+              email: 'test@example.com',
+              role: 'admin'
+            } as User;
+          }
+
+          // Return null with an error message
+          throw new Error('Invalid email or password');
+        } catch (error) {
+          console.error('Authentication error:', error);
+          // Return null with an error message that will be shown to the user
+          throw new Error(error instanceof Error ? error.message : 'Invalid credentials');
+        }
+      },
     })
   ],
   secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
   session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/auth/login',
+    strategy: 'jwt' as const,
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.id = user.id
-        token.email = user.email
+        token.id = user.id;
+        token.role = (user as any).role;
       }
-      return token
+      return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
-        session.user.id = token.id as string
-        session.user.email = token.email as string
+        session.user.id = token.id as string;
+        (session.user as any).role = token.role as string;
       }
-      return session
-    },
+      return session;
+    }
   },
-  debug: process.env.NODE_ENV === 'development'
-}
+  trustHost: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === 'development',
+  pages: {
+    signIn: '/auth/login',
+    error: '/error',
+  }
+};
+
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

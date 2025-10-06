@@ -230,7 +230,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="John Doe"
                   className={cn(
-                    "pl-10 w-full placeholder:text-white",
+                    "pl-10 w-full dark:placeholder:text-white",
                     errors.fullName && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('fullName')}
@@ -255,7 +255,7 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="you@example.com"
                   className={cn(
-                    "pl-10 w-full placeholder:text-white",
+                    "pl-10 w-full dark:placeholder:text-white",
                     errors.email && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('email')}
@@ -291,7 +291,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Acme Inc."
                   className={cn(
-                    "pl-10 w-full placeholder:text-white",
+                    "pl-10 w-full dark:placeholder:text-white",
                     errors.businessName && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('businessName')}
@@ -316,7 +316,7 @@ export default function RegisterPage() {
                   type="tel"
                   placeholder="+1 (555) 123-4567"
                   className={cn(
-                    "pl-10 w-full placeholder:text-white",
+                    "pl-10 w-full dark:placeholder:text-white",
                     errors.phoneNumber && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('phoneNumber')}
@@ -367,7 +367,7 @@ export default function RegisterPage() {
                         type="url"
                         placeholder="https://example.com"
                         className={cn(
-                          "pl-10 w-full placeholder:text-white",
+                          "pl-10 w-full dark:placeholder:text-white",
                           errors.websiteUrl && "border-destructive focus-visible:ring-destructive"
                         )}
                         {...register('websiteUrl')}
@@ -405,7 +405,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a strong password"
                   className={cn(
-                    "w-full pr-10 pl-10 placeholder:text-white",
+                    "w-full pr-10 pl-10 dark:placeholder:text-white",
                     errors.password && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('password')}
@@ -464,7 +464,7 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   className={cn(
-                    "w-full pl-10 pr-10 placeholder:text-white",
+                    "w-full pl-10 pr-10 dark:placeholder:text-white",
                     errors.confirmPassword && "border-destructive focus-visible:ring-destructive"
                   )}
                   {...register('confirmPassword')}

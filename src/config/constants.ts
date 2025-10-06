@@ -9,23 +9,35 @@ import company_5 from "../assets/images/home-processing-video-intro-slider-slide
 import global from "../assets/images/global.webp";
 import testimonial_1 from "../assets/images/mitech-testimonial-avata-02-90x90.webp";
 import testimonial_2 from "../assets/images/mitech-testimonial-avata-03-90x90.webp";
-import { Code2, Cpu, Smartphone } from "lucide-react";
+import lightLogo from "../assets/images/logo-light.png";
+import darkLogo from "../assets/images/logo-dark.png";
+import techX from "../assets/images/techx.png";
+import partner1 from "../assets/images/partner1.webp";
+import partner2 from "../assets/images/partner2.webp";
+import partner3 from "../assets/images/partner3.webp";
+import partner4 from "../assets/images/partner4.webp";
+import partner5 from "../assets/images/partner5.webp";
+import partner6 from "../assets/images/partner6.webp";
+
+import {
+  CloudCog,
+  Code2,
+  Cpu,
+  HardDrive,
+  ShieldCheck,
+  Smartphone,
+} from "lucide-react";
 
 // src/config/constants.ts
 export const NAV_LINKS = [
   { name: "Home", path: "/" },
-  { name: "About", path: "/about" },
+  { name: "About Us", path: "/about" },
   {
     name: "Services",
     path: "/services",
-    submenu: [
-      { name: "Web Development", path: "/services/#web-development" },
-      { name: "Cloud Solutions", path: "/services/#cloud-solutions" },
-      { name: "Mobile Apps", path: "/services/#mobile-apps" },
-    ],
   },
   { name: "Plans", path: "/plans" },
-  { name: "Portfolio", path: "/portfolio" },
+  // { name: "Portfolio", path: "/portfolio" },
   { name: "Contact", path: "/contact" },
 ];
 
@@ -150,7 +162,7 @@ export const testimonials = [
   },
 ];
 
-export const services = [
+export const servicesDetails = [
   {
     id: "web-development",
     icon: Code2,
@@ -302,6 +314,103 @@ export const values = [
   },
 ];
 
+export const partners = [
+  { name: "partner1", logo: partner1 },
+  { name: "partner2", logo: partner2 },
+  { name: "partner3", logo: partner3 },
+  { name: "partner4", logo: partner4 },
+  { name: "partner5", logo: partner5 },
+  { name: "partner6", logo: partner6 },
+  { name: "TechX", logo: techX },
+];
+
+export const services = [
+  {
+    id: "web-development",
+    icon: Code2,
+    title: "Web Development",
+    description: "Custom websites and web applications built with modern technologies for optimal performance.",
+    color: "from-blue-500 to-cyan-400",
+    features: [
+      "Responsive Design",
+      "E-commerce Integration",
+      "Content Management",
+      "Performance Optimization",
+      "SEO Optimization"
+    ]
+  },
+  {
+    id: "cloud-solutions",
+    icon: CloudCog,
+    title: "Cloud Solutions",
+    description: "Scalable cloud infrastructure and services to optimize your business operations.",
+    color: "from-purple-500 to-pink-500",
+    features: [
+      "Cloud Migration",
+      "Serverless Architecture",
+      "Cloud Security",
+      "Cost Optimization",
+      "24/7 Monitoring"
+    ]
+  },
+  {
+    id: "mobile-apps",
+    icon: Smartphone,
+    title: "Mobile Apps",
+    description: "Beautiful and functional mobile applications for iOS and Android platforms.",
+    color: "from-green-500 to-emerald-400",
+    features: [
+      "iOS & Android Development",
+      "Cross-Platform Solutions",
+      "UI/UX Design",
+      "App Store Optimization",
+      "Maintenance & Support"
+    ]
+  },
+  {
+    id: "database-management",
+    icon: HardDrive,
+    title: "Database Management",
+    description: "Efficient data storage and management solutions for your business needs.",
+    color: "from-amber-500 to-yellow-400",
+    features: [
+      "Database Design",
+      "Performance Tuning",
+      "Data Migration",
+      "Backup & Recovery",
+      "Security Management"
+    ]
+  },
+  {
+    id: "cybersecurity",
+    icon: ShieldCheck,
+    title: "Cybersecurity",
+    description: "Comprehensive security solutions to protect your digital assets.",
+    color: "from-red-500 to-orange-400",
+    features: [
+      "Security Audits",
+      "Threat Detection",
+      "Vulnerability Assessment",
+      "Incident Response",
+      "Security Training"
+    ]
+  },
+  {
+    id: "ai-ml-solutions",
+    icon: Cpu,
+    title: "AI & ML Solutions",
+    description: "Intelligent systems that automate processes and provide valuable insights.",
+    color: "from-indigo-500 to-purple-400",
+    features: [
+      "Predictive Analytics",
+      "Computer Vision",
+      "Natural Language Processing",
+      "Chatbot Development",
+      "AI Integration"
+    ]
+  }
+];
+
 // Export images
 export {
   case_study,
@@ -313,4 +422,6 @@ export {
   global,
   testimonial_1,
   testimonial_2,
+  darkLogo,
+  lightLogo,
 };

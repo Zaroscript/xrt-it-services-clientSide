@@ -54,12 +54,12 @@ export default function AboutPage() {
         
         <div className=" px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <FadeUp delay={0.2} className="mb-6">
+            {/* <FadeUp delay={0.2} className="mb-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm text-primary mb-6">
                 <Sparkles className="w-4 h-4" />
                 <span>Innovating Since 2025</span>
               </div>
-            </FadeUp>
+            </FadeUp> */}
             
             <FadeUp delay={0.3}>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8">
@@ -84,7 +84,7 @@ export default function AboutPage() {
               
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" className="group px-8 h-12 rounded-full bg-primary hover:bg-primary/90 text-card transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
-                  <Link href="/auth/login" className="text-card">Get Started</Link>
+                  <Link href="/auth/login" className="text-card">Get a quote</Link>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <Button size="lg" variant="outline" className="px-8 h-12 rounded-full border-2 border-border/50 hover:border-primary/50 bg-background/80 dark:bg-background/90 backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-0.5">
@@ -119,7 +119,7 @@ export default function AboutPage() {
           <div className="absolute inset-0 dark:bg-[url('/grid-pattern-dark.svg')] bg-[url('/grid-pattern.svg')] bg-center opacity-5" />
         </div>
         
-        <div className="container px-4 mx-auto">
+        <div className="page-container px-4 mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <FadeIn>
               <div className="space-y-8 max-w-2xl">
@@ -170,7 +170,7 @@ export default function AboutPage() {
 
       {/* Mission & Vision */}
       <section className="py-16 md:py-24 bg-background">
-        <div className="container px-4 mx-auto">
+        <div className="page-container px-4 mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Mission */}
             <FadeIn className="p-8 bg-card rounded-2xl shadow-sm border border-border/20 hover:shadow-md transition-shadow">

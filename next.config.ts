@@ -20,27 +20,43 @@ const nextConfig: NextConfig = {
   
   // Development tools
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
   
   typescript: {
-    // !! WARN !! - Only enable in development or if you understand the risks
     ignoreBuildErrors: true,
   },
   
-  // Configure Turbopack
+  // Configure experimental features
   experimental: {
-    turbo: process.env.TURBO ? {
-      // Add any Turbopack specific configurations here
-      // For now, we'll use an empty config object
-    } : undefined,
+    turbo: process.env.TURBO ? {} : undefined,
+    serverComponentsExternalPackages: ['bcryptjs'],
+    serverActions: {
+      allowedOrigins: ['localhost:3000']
+    },
   },
   
   // Custom webpack config
-  webpack: (config) => {
-    // Important: return the modified config
+  webpack: (config, { isServer }) => {
+    // Add polyfills for Node.js modules
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+      };
+    }
+
+    // Add support for ES modules
+    config.experiments = {
+      ...config.experiments,
+      topLevelAwait: true,
+      layers: true,
+    };
+
     return config;
   },
 };

@@ -1,205 +1,375 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect } from "react";
-import { 
-  Code2, 
-  CloudCog, 
-  Smartphone, 
-  HardDrive, 
-  ShieldCheck, 
-  Cpu,
-  Globe2,
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
   ArrowRight,
   Check,
-  Server,
-  Database,
-  Shield,
-  CpuIcon,
-  Network,
-  Code
+  Code2,
+  CloudCog,
+  Cpu,
+  HardDrive,
+  ShieldCheck,
+  Smartphone,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { services, howItWorks, faqs } from "@/config/constants";
+import { useRouter } from "next/navigation";
 
-import { services, howItWorks, whyChooseUs, faqs } from "@/config/constants";
-
-// Function to scroll to a specific section with smooth behavior
-const scrollToSection = (id: string) => {
-  const element = document.getElementById(id);
-  if (element) {
-    const headerOffset = 80; 
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-    
-    // Update URL without page reload
-    window.history.pushState({}, '', `#${id}`);
-  }
+const serviceIcons = {
+  "Web Development": Code2,
+  "Cloud Solutions": CloudCog,
+  "Mobile Apps": Smartphone,
+  "Database Management": HardDrive,
+  Cybersecurity: ShieldCheck,
+  "AI & ML Solutions": Cpu,
 };
 
 export default function ServicesPage() {
-  // Handle initial scroll on page load with hash
-  useEffect(() => {
-    const handleHashScroll = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash) {
-        // Small delay to ensure the page is fully loaded
-        const timer = setTimeout(() => {
-          scrollToSection(hash);
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    };
+  const targetRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"],
+  });
 
-    // Handle initial load with hash
-    handleHashScroll();
-
-    // Handle hash changes
-    window.addEventListener('hashchange', handleHashScroll);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashScroll);
-    };
-  }, []);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
+  const router = useRouter();
   return (
     <div className="min-h-screen">
-      {/* Services Navigation */}
+      {/* Hero Section */}
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background -z-10"
+          style={{ opacity, scale }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent via-background/80 to-background"></div>
+        </motion.div>
 
-      {/* Services Navigation */}
-      <section className="sticky top-16 z-40 bg-background/90 backdrop-blur-lg border-b border-border/50 py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-4">
-            {services.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => scrollToSection(service.id)}
-                className="px-4 py-2 text-sm font-medium rounded-full bg-card hover:bg-secondary/10 hover:text-foreground dark:hover:bg-accent dark:hover:text-accent-foreground transition-colors border border-transparent hover:border-secondary/30 dark:border-border/50"
+        <div className="page-container px-4 text-center relative z-10">
+          <FadeIn className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-block px-6 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
+            >
+              Our Services
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80 mb-6"
+            >
+              Transforming Ideas Into
+              <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Digital Reality
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-xl text-muted-foreground max-w-3xl mx-auto"
+            >
+              Comprehensive IT solutions tailored to your business needs.
+              Explore our range of services to find the perfect fit for your
+              organization.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="pt-6 flex flex-col sm:flex-row justify-center gap-4"
+            >
+              <Button
+                onClick={() => router.push("/#quote")}
+                size="lg"
+                className="group px-8 h-12"
               >
-                {service.title}
-              </button>
-            ))}
+                Get A Quote
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </motion.div>
+          </FadeIn>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
+      </section>
+
+      {/* Services Grid */}
+      <section
+        ref={targetRef}
+        className="relative py-24 overflow-hidden bg-background"
+      >
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background"></div>
+        </div>
+
+        <div className="page-container px-4">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <FadeIn>
+              <div className="inline-block px-6 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                What We Offer
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Our Comprehensive Services
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                We offer a wide range of IT services to help your business
+                thrive in the digital age.
+              </p>
+            </FadeIn>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => {
+              const Icon =
+                serviceIcons[service.title as keyof typeof serviceIcons];
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="h-full"
+                >
+                  <Link href={`/services/${service.id}`}>
+                    <div className="group h-full flex flex-col bg-card/50 backdrop-blur-sm rounded-2xl border border-border/20 overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-2">
+                      <div
+                        className={`h-1.5 w-full bg-gradient-to-r ${service.color}`}
+                      ></div>
+                      <div className="p-8 flex-1 flex flex-col">
+                        <div
+                          className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${service.color} text-white shadow-lg`}
+                        >
+                          {Icon && <Icon className="w-7 h-7" />}
+                        </div>
+                        <h3 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+                          {service.title}
+                        </h3>
+                        <p className="text-muted-foreground mb-6 flex-1">
+                          {service.description}
+                        </p>
+                        <div className="flex items-center text-primary font-medium group-hover:text-primary/80 transition-colors">
+                          <span className="relative">
+                            Learn more
+                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+                          </span>
+                          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Services Sections */}
-      <div className="container mx-auto px-4 py-16">
-        {services.map((service, index) => (
-          <section 
-            key={service.id}
-            id={service.id}
-            className={`py-16 ${index !== services.length - 1 ? 'border-b border-border/50' : ''}`}
-          >
-            <FadeIn>
-              <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="w-full md:w-1/3">
-                    <div className={`w-20 h-20 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${service.color} text-white border-2 border-secondary/20 dark:border-transparent`}>
-                      <service.icon className="w-10 h-10" />
-                    </div>
-                    <h2 className="text-3xl font-bold mb-4">{service.title}</h2>
-                    <p className="text-lg text-muted-foreground mb-6">{service.description}</p>
-                    <Button className="mt-4 bg-gradient-to-r from-secondary/90 to-secondary/70 hover:from-secondary hover:to-secondary/90 text-white border-secondary/50 hover:border-secondary/70">
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </div>
-                  
-                  <div className="w-full md:w-2/3 bg-card p-8 rounded-2xl border border-border/50">
-                    <h3 className="text-xl font-semibold mb-6">What's Included</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {service.features.map((feature, i) => (
-                        <div key={i} className="flex items-start p-4 bg-secondary/5 dark:bg-muted/30 rounded-lg border border-secondary/10 dark:border-border/50">
-                          <Check className="w-5 h-5 text-secondary dark:text-green-500 mt-0.5 mr-3 flex-shrink-0" />
-                          <div>
-                            <h4 className="font-medium">{feature}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Comprehensive solution for all your {feature.toLowerCase()} needs.
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </FadeIn>
-          </section>
-        ))}
-      </div>
+      {/* How It Works - Process Flow */}
+      <section className="relative py-24 overflow-hidden bg-gradient-to-b from-background to-muted/5">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 opacity-[0.03] [background:radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-primary to-transparent"></div>
+          <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_30%,transparent_100%)]"></div>
+        </div>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-gradient-to-b from-background via-secondary/5 to-secondary/5 dark:via-transparent">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-muted-foreground">
-              Our proven process ensures your project's success from concept to launch and beyond.
-            </p>
+        <div className="page-container px-4">
+          <div className="max-w-4xl mx-auto text-center mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-medium bg-primary/10 text-primary/90 border border-primary/20 backdrop-blur-sm mb-4">
+                <span className="relative flex h-2 w-2 mr-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/80 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Our Process
+              </span>
+              <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80 mb-6">
+                Our{" "}
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Workflow
+                </span>
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                A streamlined process that ensures your project's success from
+                start to finish.
+              </p>
+            </motion.div>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {howItWorks.map((step) => (
-              <FadeIn key={step.id} delay={step.id * 0.1}>
-                <div className="bg-card p-6 rounded-2xl border border-border/50 h-full flex flex-col items-center text-center">
-                  <div className="text-4xl mb-4">{step.icon}</div>
-                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground">{step.description}</p>
-                </div>
-              </FadeIn>
-            ))}
+
+          <div className="relative">
+            {/* Process Steps */}
+            <div className="relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+                {howItWorks.map((step, index) => {
+                  const colors = [
+                    "from-blue-500/10 to-blue-600/10",
+                    "from-purple-500/10 to-purple-600/10",
+                    "from-pink-500/10 to-pink-600/10",
+                    "from-cyan-500/10 to-cyan-600/10",
+                  ];
+
+                  return (
+                    <motion.div
+                      key={step.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-30px" }}
+                      transition={{
+                        duration: 0.4,
+                        delay: index * 0.08,
+                      }}
+                      className="relative"
+                    >
+                      <div className="relative h-full bg-card/80 backdrop-blur-sm rounded-2xl p-8 border border-border/20 transition-all duration-300">
+                        <div className="relative z-10 text-center">
+                          <div className="w-16 h-16 mx-auto mb-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-border/20 flex items-center justify-center text-3xl text-primary">
+                            {step.icon}
+                          </div>
+                          <h3 className="text-xl font-semibold mb-3 text-foreground">
+                            {step.title}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            {step.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-16 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                >
+                  <p className="text-muted-foreground mb-6">
+                    Ready to start your project?
+                  </p>
+                  <Button
+                    onClick={() => router.push("/contact")}
+                    size="lg"
+                    className="group px-8 h-12 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 transition-all"
+                  >
+                    Get Started
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-secondary/5 dark:to-transparent">
-        <div className="container mx-auto px-4">
+      <section className="relative py-24 bg-background">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]"></div>
+        </div>
+
+        <div className="page-container px-4">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-muted-foreground">
-              Find answers to common questions about our services and processes.
-            </p>
+            <FadeIn>
+              <div className="inline-block px-6 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                FAQ
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Find answers to common questions about our services and
+                processes.
+              </p>
+            </FadeIn>
           </div>
-          
-          <div className="max-w-3xl mx-auto space-y-6">
+
+          <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, index) => (
-              <FadeIn key={index} delay={index * 0.1}>
-                <div className="bg-card p-6 rounded-2xl border border-border/50">
-                  <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-                  <p className="text-muted-foreground">{faq.answer}</p>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="group"
+              >
+                <div className="bg-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/20 hover:border-primary/30 transition-colors group-hover:shadow-lg">
+                  <h3 className="text-lg font-semibold mb-2 text-left">
+                    {faq.question}
+                  </h3>
+                  <p className="text-muted-foreground text-left">
+                    {faq.answer}
+                  </p>
                 </div>
-              </FadeIn>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-b from-background to-secondary/10">
-        <div className="container mx-auto px-4 text-center">
-          <FadeIn>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your business?</h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let's discuss how our services can help you achieve your business goals.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
-                Get Started
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <Button variant="outline" size="lg" className="border-2">
-                Contact Us
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </FadeIn>
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-transparent via-background/80 to-background"></div>
+        </div>
+
+        <div className="page-container px-4">
+          <div className="relative z-10 max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-block px-6 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                Ready to Start?
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                Transform Your Business
+                <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Today
+                </span>
+              </h2>
+              <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+                Let's discuss how our services can help you achieve your
+                business goals and drive growth.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="group px-8 h-14 border-2 hover:bg-foreground/5"
+                  >
+                    <span className="group-hover:text-secondary">Contact Us</span>
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 group-hover:text-secondary transition-transform" />
+                  </Button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl -z-10"></div>
+          <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-secondary/10 blur-3xl -z-10"></div>
         </div>
       </section>
     </div>

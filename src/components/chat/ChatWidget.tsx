@@ -36,9 +36,7 @@ export default function ChatWidget() {
   // Focus input when chat opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      inputRef.current?.focus();
     }
   }, [isOpen]);
 

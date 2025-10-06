@@ -1,1048 +1,708 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppSelector } from '@/hooks/useAppDispatch';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Bell, 
-  CreditCard, 
-  Key, 
-  Mail, 
-  User, 
-  Building, 
-  Phone, 
-  Globe, 
-  Lock, 
-  Check, 
-  Download, 
-  Plus, 
-  Edit, 
-  Trash2,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  ArrowUpRight,
-  ChevronRight
-} from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Types
-type Plan = {
+// This ensures the page is only rendered on the client side
+export const dynamic = 'force-dynamic';
+
+type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+  image?: string;
+  phone?: string;
+  company?: string;
+  website?: string;
+};
+
+type BillingInfo = {
+  firstName: string;
+  lastName: string;
+  company: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  postalCode: string;
+  country: string;
+};
+
+type PaymentMethod = {
+  id: string;
+  lastFour: string;
+  expiryDate: string;
+  cardName: string;
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+};
+
+type Subscription = {
   id: string;
   name: string;
   description: string;
   price: string;
   billingCycle: string;
+  status: string;
+  nextBillingDate: string;
   features: string[];
-  isCurrent: boolean;
-  isPopular?: boolean;
 };
 
-type Invoice = {
-  id: string;
-  date: Date;
-  amount: number;
-  status: 'paid' | 'pending' | 'failed';
-  plan: string;
-  downloadUrl: string;
-};
-
-type NotificationPreference = {
-  id: string;
-  label: string;
-  description: string;
-  enabled: boolean;
-};
+type TabType = 'overview' | 'billing' | 'security' | 'notifications';
 
 export default function ProfilePage() {
-  const { user } = useAppSelector((state) => state.auth);
-  const [activeTab, setActiveTab] = useState('account');
+  const { data: session, status } = useSession();
+  const user = session?.user as UserProfile | undefined;
+  const router = useRouter();
+  
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isEditing, setIsEditing] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isAddingPayment, setIsAddingPayment] = useState(false);
   
-  // Mock data
-  const plans: Plan[] = [
-    {
-      id: 'starter',
-      name: 'Starter',
-      description: 'Perfect for small teams getting started',
-      price: '$29',
-      billingCycle: 'per month, billed annually',
-      features: [
-        'Up to 5 team members',
-        '10GB storage',
-        'Basic analytics',
-        'Email support',
-        'API access (read-only)'
-      ],
-      isCurrent: true
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      description: 'For growing businesses with more needs',
-      price: '$79',
-      billingCycle: 'per month, billed annually',
-      features: [
-        'Up to 20 team members',
-        '50GB storage',
-        'Advanced analytics',
-        'Priority support',
-        'Full API access',
-        'Custom branding'
-      ],
-      isCurrent: false,
-      isPopular: true
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      description: 'For large organizations with complex needs',
-      price: 'Custom',
-      billingCycle: 'custom billing',
-      features: [
-        'Unlimited team members',
-        'Unlimited storage',
-        'Advanced analytics & reporting',
-        '24/7 dedicated support',
-        'Full API access',
-        'Custom integrations',
-        'Dedicated account manager'
-      ],
-      isCurrent: false
-    }
-  ];
-
-  const invoices: Invoice[] = [
-    {
-      id: 'INV-001',
-      date: new Date('2023-06-15'),
-      amount: 29.00,
-      status: 'paid',
-      plan: 'Starter Plan',
-      downloadUrl: '#'
-    },
-    {
-      id: 'INV-002',
-      date: new Date('2023-05-15'),
-      amount: 29.00,
-      status: 'paid',
-      plan: 'Starter Plan',
-      downloadUrl: '#'
-    },
-    {
-      id: 'INV-003',
-      date: new Date('2023-04-15'),
-      amount: 29.00,
-      status: 'paid',
-      plan: 'Starter Plan',
-      downloadUrl: '#'
-    }
-  ];
-
-  const notificationPreferences: NotificationPreference[] = [
-    {
-      id: 'product-updates',
-      label: 'Product updates',
-      description: 'News, announcements, and product updates',
-      enabled: true
-    },
-    {
-      id: 'security-alerts',
-      label: 'Security alerts',
-      description: 'Important notifications about your account security',
-      enabled: true
-    },
-    {
-      id: 'billing-updates',
-      label: 'Billing updates',
-      description: 'Invoices, payment receipts, and billing notifications',
-      enabled: true
-    },
-    {
-      id: 'marketing',
-      label: 'Marketing communications',
-      description: 'Tips, promotions, and special offers',
-      enabled: false
-    }
-  ];
-
+  // Form states
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    company: 'Acme Inc.',
-    phone: '+1 (555) 123-4567',
-    website: 'acmeinc.example.com',
+    phone: user?.phone || '',
+    company: user?.company || '',
+    website: user?.website || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
-  const [billingAddress, setBillingAddress] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    company: 'Acme Inc.',
-    address: '123 Main St',
-    city: 'San Francisco',
-    state: 'CA',
-    zip: '94103',
-    country: 'United States'
+  const [billingAddress, setBillingAddress] = useState<BillingInfo>({
+    firstName: user?.name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+    company: user?.company || '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    postalCode: '',
+    country: ''
   });
 
-  const [paymentMethod, setPaymentMethod] = useState({
-    cardNumber: '4242',
-    cardName: 'John Doe',
-    expiry: '12/25',
-    cvc: '123'
+  const [paymentMethod, setPaymentMethod] = useState<Omit<PaymentMethod, 'id' | 'lastFour' | 'expiryDate'>>({
+    cardNumber: '',
+    cardName: user?.name || '',
+    expiry: '',
+    cvc: ''
   });
 
-  if (!user) {
-    return null; // ProtectedRoute will handle the redirection
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+
+  // Sample subscription data
+  const subscription: Subscription = {
+    id: 'sub_123',
+    name: 'Pro Plan',
+    description: 'For professionals and businesses',
+    price: '$29.99',
+    billingCycle: 'monthly',
+    status: 'active',
+    nextBillingDate: '2023-12-01',
+    features: ['Unlimited projects', 'Team collaboration', 'Priority support'],
+  };
+
+  // Handle loading state
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
-  const handleBillingAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setBillingAddress(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
-  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setPaymentMethod(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditing(false);
-    // TODO: Implement save to API
-  };
-
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsChangingPassword(false);
-    // TODO: Implement password change
-  };
-
-  const handleSaveBillingAddress = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement save billing address
-  };
-
-  const handleSavePaymentMethod = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsAddingPayment(false);
-    // TODO: Implement save payment method
-  };
-
-  const toggleNotification = (id: string) => {
-    // TODO: Implement notification toggle
-  };
-
-  const formatDate = (date: Date) => {
-    return format(date, 'MMM d, yyyy');
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Paid
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="outline" className="border-amber-200 text-amber-700 dark:border-amber-900 dark:text-amber-400">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
-          </Badge>
-        );
-      case 'failed':
-        return (
-          <Badge variant="destructive">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Failed
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
+  // Redirect if not authenticated
+  if (status === 'unauthenticated') {
+    router.push('/auth/login');
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-muted/20 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="md:flex md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Account Settings</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your account settings and preferences
-            </p>
-          </div>
-          <div className="mt-4 flex items-center space-x-3 md:mt-0">
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export Data
-            </Button>
-            <Button size="sm" onClick={() => setActiveTab('account')}>
-              <User className="h-4 w-4 mr-2" />
-              My Profile
-            </Button>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar */}
+        <div className="w-full md:w-64 flex-shrink-0">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                  {user?.image ? (
+                    <img 
+                      src={user.image} 
+                      alt={user.name || 'User'} 
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl text-gray-500">
+                      {user?.name?.charAt(0) || 'U'}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-xl font-semibold">{user?.name || 'User'}</h2>
+                <p className="text-sm text-gray-500">{user?.email}</p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <nav className="space-y-1">
+                {(['overview', 'billing', 'security', 'notifications'] as TabType[]).map((tab) => (
+                  <button
+                    key={tab}
+                    className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+                      activeTab === tab
+                        ? 'bg-blue-50 text-blue-600 font-medium'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </nav>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Sidebar */}
-          <div className="lg:col-span-3 space-y-4">
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 text-center">
-                <div className="relative mx-auto h-24 w-24 rounded-full bg-background/80 backdrop-blur-sm p-1">
-                  <Avatar className="h-full w-full">
-                    <AvatarImage src={user.image} alt={user.name} />
-                    <AvatarFallback className="text-2xl">
-                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <button className="absolute bottom-0 right-0 rounded-full bg-background p-1.5 shadow-sm border">
-                    <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </div>
-                <h2 className="mt-4 text-lg font-semibold">{user.name}</h2>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-                <Badge variant="outline" className="mt-2 bg-background/80 backdrop-blur-sm">
-                  {user.role || 'Company Admin'}
-                </Badge>
+        {/* Main content */}
+        <div className="flex-1">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>
+                  {activeTab === 'overview' && 'Profile Overview'}
+                  {activeTab === 'billing' && 'Billing Information'}
+                  {activeTab === 'security' && 'Security'}
+                  {activeTab === 'notifications' && 'Notification Settings'}
+                </CardTitle>
+                {activeTab !== 'overview' && (
+                  <Button
+                    variant={isEditing ? 'outline' : 'default'}
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    {isEditing ? 'Cancel' : 'Edit'}
+                  </Button>
+                )}
               </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <Building className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                    <span className="truncate text-sm">Acme Inc.</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                    <span className="truncate text-sm">{user.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                    <span className="text-sm">+1 (555) 123-4567</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Globe className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                    <a href="#" className="truncate text-sm text-primary hover:underline">acmeinc.example.com</a>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Usage</CardTitle>
-                <CardDescription>Your current plan usage</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-muted-foreground">Storage</span>
-                    <span className="font-medium">4.2 GB <span className="text-muted-foreground">of 10 GB</span></span>
-                  </div>
-                  <Progress value={42} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-muted-foreground">Team Members</span>
-                    <span className="font-medium">3 <span className="text-muted-foreground">of 5</span></span>
-                  </div>
-                  <Progress value={60} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span className="text-muted-foreground">API Requests</span>
-                    <span className="font-medium">1,234 <span className="text-muted-foreground">of 10,000</span></span>
-                  </div>
-                  <Progress value={12} className="h-2" />
-                </div>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-                <Button variant="outline" className="w-full" onClick={() => setActiveTab('subscription')}>
-                  Upgrade Plan
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-9 space-y-6">
-            <Tabs 
-              value={activeTab} 
-              onValueChange={setActiveTab}
-              className="space-y-6"
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="account" className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span>Account</span>
-                </TabsTrigger>
-                <TabsTrigger value="subscription" className="flex items-center space-x-2">
-                  <CreditCard className="h-4 w-4" />
-                  <span>Subscription</span>
-                </TabsTrigger>
-                <TabsTrigger value="billing" className="flex items-center space-x-2">
-                  <CreditCard className="h-4 w-4" />
-                  <span>Billing</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Account Tab */}
-              <TabsContent value="account" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Profile Information</CardTitle>
-                        <CardDescription>Update your account information and email address.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Account Information</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Full Name</p>
+                          <p>{user?.name || 'Not set'}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Email</p>
+                          <p>{user?.email || 'Not set'}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Phone</p>
+                          <p>{user?.phone || 'Not set'}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Company</p>
+                          <p>{user?.company || 'Not set'}</p>
+                        </div>
                       </div>
-                      {isEditing ? (
-                        <div className="space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-medium">Subscription</h3>
+                      <Button variant="outline" size="sm">
+                        Manage Subscription
+                      </Button>
+                    </div>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{subscription.name}</h4>
+                            <p className="text-sm text-gray-500">
+                              {subscription.billingCycle}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{subscription.price}</p>
+                            <p className="text-sm text-gray-500">
+                              Next billing: {subscription.nextBillingDate}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <h5 className="text-sm font-medium mb-2">Features:</h5>
+                          <ul className="text-sm space-y-1">
+                            {subscription.features.map((feature, index) => (
+                              <li key={index} className="flex items-center">
+                                <svg
+                                  className="h-4 w-4 text-green-500 mr-2"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'billing' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Billing Address</h3>
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              First Name
+                            </label>
+                            <input
+                              type="text"
+                              value={billingAddress.firstName}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  firstName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Last Name
+                            </label>
+                            <input
+                              type="text"
+                              value={billingAddress.lastName}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  lastName: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Company (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={billingAddress.company}
+                            onChange={(e) =>
+                              setBillingAddress({
+                                ...billingAddress,
+                                company: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Street Address
+                          </label>
+                          <input
+                            type="text"
+                            value={billingAddress.street}
+                            onChange={(e) =>
+                              setBillingAddress({
+                                ...billingAddress,
+                                street: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              value={billingAddress.city}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  city: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              State/Province
+                            </label>
+                            <input
+                              type="text"
+                              value={billingAddress.state}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  state: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              ZIP/Postal Code
+                            </label>
+                            <input
+                              type="text"
+                              value={billingAddress.postalCode}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  postalCode: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Country
+                            </label>
+                            <select
+                              value={billingAddress.country}
+                              onChange={(e) =>
+                                setBillingAddress({
+                                  ...billingAddress,
+                                  country: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Select a country</option>
+                              <option value="US">United States</option>
+                              <option value="CA">Canada</option>
+                              <option value="UK">United Kingdom</option>
+                              <option value="AU">Australia</option>
+                              {/* Add more countries as needed */}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <Button
+                            variant="outline"
                             onClick={() => setIsEditing(false)}
                           >
                             Cancel
                           </Button>
-                          <Button 
-                            size="sm"
-                            onClick={handleSaveProfile}
-                          >
-                            Save Changes
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setIsEditing(true)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Profile
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSaveProfile}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="name" 
-                              value={formData.name} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              disabled={!isEditing}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="email" 
-                              type="email" 
-                              value={formData.email} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              disabled={!isEditing}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="company">Company</Label>
-                          <div className="relative">
-                            <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="company" 
-                              value={formData.company} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              disabled={!isEditing}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone</Label>
-                          <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="phone" 
-                              type="tel" 
-                              value={formData.phone} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              disabled={!isEditing}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="website">Website</Label>
-                          <div className="relative">
-                            <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="website" 
-                              type="url" 
-                              value={formData.website} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              disabled={!isEditing}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Change Password</CardTitle>
-                        <CardDescription>Update your password associated with your account.</CardDescription>
-                      </div>
-                      {isChangingPassword ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setIsChangingPassword(false)}
-                        >
-                          Cancel
-                        </Button>
-                      ) : (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setIsChangingPassword(true)}
-                        >
-                          <Key className="h-4 w-4 mr-2" />
-                          Change Password
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  {isChangingPassword && (
-                    <CardContent>
-                      <form onSubmit={handleChangePassword} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="current-password">Current Password</Label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="currentPassword" 
-                              type="password" 
-                              value={formData.currentPassword} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              placeholder="Enter your current password"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="new-password">New Password</Label>
-                          <div className="relative">
-                            <Key className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="newPassword" 
-                              type="password" 
-                              value={formData.newPassword} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              placeholder="Enter a new password"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="confirm-password">Confirm New Password</Label>
-                          <div className="relative">
-                            <Key className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              id="confirmPassword" 
-                              type="password" 
-                              value={formData.confirmPassword} 
-                              onChange={handleInputChange}
-                              className="pl-10" 
-                              placeholder="Confirm your new password"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end pt-2">
-                          <Button type="submit">
-                            Update Password
-                          </Button>
-                        </div>
-                      </form>
-                    </CardContent>
-                  )}
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Email Notifications</CardTitle>
-                    <CardDescription>Manage your email notification preferences.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {notificationPreferences.map((pref) => (
-                        <div key={pref.id} className="flex items-start justify-between">
-                          <div className="space-y-1">
-                            <h4 className="font-medium">{pref.label}</h4>
-                            <p className="text-sm text-muted-foreground">{pref.description}</p>
-                          </div>
-                          <Switch 
-                            checked={pref.enabled} 
-                            onCheckedChange={() => toggleNotification(pref.id)}
-                            className="ml-4"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end border-t px-6 py-4">
-                    <Button>Save Preferences</Button>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-
-              {/* Subscription Tab */}
-              <TabsContent value="subscription" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <CardTitle>Your Plan</CardTitle>
-                        <CardDescription>
-                          You're currently on the <span className="font-medium text-foreground">Starter</span> plan.
-                          Your next billing date is <span className="font-medium text-foreground">
-                            {format(new Date().setMonth(new Date().getMonth() + 1), 'MMMM d, yyyy')}
-                          </span>.
-                        </CardDescription>
-                      </div>
-                      <div className="mt-4 md:mt-0">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download Invoice
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {plans.map((plan) => (
-                        <Card 
-                          key={plan.id}
-                          className={`relative overflow-hidden ${
-                            plan.isCurrent 
-                              ? 'ring-2 ring-primary' 
-                              : plan.isPopular 
-                                ? 'border-primary/30' 
-                                : ''
-                          }`}
-                        >
-                          {plan.isPopular && (
-                            <div className="absolute right-0 top-0 bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                              Popular
-                            </div>
-                          )}
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg">{plan.name}</CardTitle>
-                              {plan.isCurrent && (
-                                <Badge variant="secondary">Current</Badge>
-                              )}
-                            </div>
-                            <div className="mt-2">
-                              <span className="text-3xl font-bold">{plan.price}</span>
-                              {plan.price !== 'Custom' && (
-                                <span className="text-muted-foreground">/month</span>
-                              )}
-                              <p className="text-sm text-muted-foreground mt-1">{plan.billingCycle}</p>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{plan.description}</p>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            <ul className="space-y-2">
-                              {plan.features.map((feature, i) => (
-                                <li key={i} className="flex items-start">
-                                  <Check className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                                  <span className="text-sm">{feature}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </CardContent>
-                          <CardFooter className="border-t px-6 py-4">
-                            <Button 
-                              className="w-full" 
-                              variant={plan.isCurrent ? 'outline' : 'default'}
-                              disabled={plan.isCurrent}
-                            >
-                              {plan.isCurrent ? 'Current Plan' : plan.price === 'Custom' ? 'Contact Sales' : 'Upgrade'}
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Billing History</CardTitle>
-                    <CardDescription>View your past invoices and payments.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {invoices.map((invoice) => (
-                        <div 
-                          key={invoice.id} 
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                              <CreditCard className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium">{invoice.plan}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {formatDate(invoice.date)} • {invoice.id}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4 mt-3 sm:mt-0">
-                            <div className="text-right">
-                              <p className="font-medium">${invoice.amount.toFixed(2)}</p>
-                              <div className="mt-1">
-                                {getStatusBadge(invoice.status)}
-                              </div>
-                            </div>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Download className="h-4 w-4" />
-                              <span className="sr-only">Download</span>
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Billing Tab */}
-              <TabsContent value="billing" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Payment Methods</CardTitle>
-                        <CardDescription>Manage your payment methods and billing information.</CardDescription>
-                      </div>
-                      {!isAddingPayment && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => setIsAddingPayment(true)}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Payment Method
-                        </Button>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isAddingPayment ? (
-                      <div className="space-y-6">
-                        <div className="rounded-lg border p-6">
-                          <h4 className="font-medium mb-4">Add a new payment method</h4>
-                          <form onSubmit={handleSavePaymentMethod} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label htmlFor="card-number">Card Number</Label>
-                                <Input 
-                                  id="cardNumber" 
-                                  placeholder="4242 4242 4242 4242" 
-                                  value={paymentMethod.cardNumber}
-                                  onChange={handlePaymentMethodChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="card-name">Name on Card</Label>
-                                <Input 
-                                  id="cardName" 
-                                  placeholder="John Doe" 
-                                  value={paymentMethod.cardName}
-                                  onChange={handlePaymentMethodChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="expiry">Expiry Date</Label>
-                                <Input 
-                                  id="expiry" 
-                                  placeholder="MM/YY" 
-                                  value={paymentMethod.expiry}
-                                  onChange={handlePaymentMethodChange}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="cvc">CVC</Label>
-                                <Input 
-                                  id="cvc" 
-                                  placeholder="123" 
-                                  value={paymentMethod.cvc}
-                                  onChange={handlePaymentMethodChange}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex justify-end space-x-3 pt-2">
-                              <Button 
-                                variant="outline" 
-                                type="button"
-                                onClick={() => setIsAddingPayment(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button type="submit">Save Payment Method</Button>
-                            </div>
-                          </form>
+                          <Button>Save Changes</Button>
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        <div className="rounded-lg border p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="p-2 rounded-lg bg-primary/10">
-                                <CreditCard className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-medium">Visa ending in 4242</p>
-                                <p className="text-sm text-muted-foreground">Expires 12/25</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <AlertCircle className="h-4 w-4 mr-2" />
-                          <span>Your next payment of $29.00 will be processed on {format(new Date().setMonth(new Date().getMonth() + 1), 'MMMM d, yyyy')}.</span>
-                        </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="font-medium">
+                          {billingAddress.firstName} {billingAddress.lastName}
+                        </p>
+                        {billingAddress.company && (
+                          <p>{billingAddress.company}</p>
+                        )}
+                        <p>{billingAddress.street}</p>
+                        <p>
+                          {billingAddress.city}, {billingAddress.state}{' '}
+                          {billingAddress.postalCode}
+                        </p>
+                        <p>{billingAddress.country}</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Billing Address</CardTitle>
-                    <CardDescription>Update your billing address for invoices.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSaveBillingAddress}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName">First Name</Label>
-                          <Input 
-                            id="firstName" 
-                            value={billingAddress.firstName} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName">Last Name</Label>
-                          <Input 
-                            id="lastName" 
-                            value={billingAddress.lastName} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="company">Company (Optional)</Label>
-                          <Input 
-                            id="company" 
-                            value={billingAddress.company} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="address">Address</Label>
-                          <Input 
-                            id="address" 
-                            value={billingAddress.address} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="city">City</Label>
-                          <Input 
-                            id="city" 
-                            value={billingAddress.city} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="state">State/Province</Label>
-                          <Input 
-                            id="state" 
-                            value={billingAddress.state} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="zip">ZIP/Postal Code</Label>
-                          <Input 
-                            id="zip" 
-                            value={billingAddress.zip} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="country">Country</Label>
-                          <Input 
-                            id="country" 
-                            value={billingAddress.country} 
-                            onChange={handleBillingAddressChange}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end mt-6">
-                        <Button type="submit">Save Address</Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium">Payment Methods</h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddingPayment(true)}
+                      >
+                        Add Payment Method
+                      </Button>
+                    </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Billing Information</CardTitle>
-                    <CardDescription>Manage your billing information and download invoices.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="p-2 rounded-lg bg-primary/10">
-                            <CreditCard className="h-5 w-5 text-primary" />
+                    {isAddingPayment ? (
+                      <Card className="p-4">
+                        <h4 className="font-medium mb-4">Add New Card</h4>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Card Number
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="1234 5678 9012 3456"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
                           </div>
                           <div>
-                            <p className="font-medium">Current Plan</p>
-                            <p className="text-sm text-muted-foreground">Starter Plan - $29.00/month</p>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Name on Card
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="John Doe"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
                           </div>
-                        </div>
-                        <Button variant="outline">Change Plan</Button>
-                      </div>
-
-                      <div className="border rounded-lg overflow-hidden">
-                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
-                          <div className="p-4">
-                            <p className="text-sm text-muted-foreground">Billing Cycle</p>
-                            <p className="font-medium">Monthly</p>
-                          </div>
-                          <div className="p-4">
-                            <p className="text-sm text-muted-foreground">Next Billing Date</p>
-                            <p className="font-medium">
-                              {format(new Date().setMonth(new Date().getMonth() + 1), 'MMMM d, yyyy')}
-                            </p>
-                          </div>
-                          <div className="p-4">
-                            <p className="text-sm text-muted-foreground">Payment Method</p>
-                            <div className="flex items-center">
-                              <span className="font-medium">Visa ending in 4242</span>
-                              <Button variant="ghost" size="sm" className="ml-auto h-8 w-8 p-0">
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Expiry Date
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="MM/YY"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                CVC
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="123"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              />
                             </div>
                           </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium mb-4">Recent Invoices</h4>
-                        <div className="space-y-3">
-                          {invoices.slice(0, 3).map((invoice) => (
-                            <div 
-                              key={invoice.id} 
-                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
+                          <div className="flex justify-end space-x-3 pt-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsAddingPayment(false)}
                             >
-                              <div className="flex items-center space-x-3">
-                                <div className="p-2 rounded-lg bg-muted">
-                                  <CreditCard className="h-4 w-4" />
-                                </div>
+                              Cancel
+                            </Button>
+                            <Button>Add Card</Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ) : paymentMethods.length > 0 ? (
+                      <div className="space-y-4">
+                        {paymentMethods.map((method) => (
+                          <Card key={method.id}>
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-center">
                                 <div>
-                                  <p className="font-medium">Invoice #{invoice.id}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {formatDate(invoice.date)} • {invoice.plan}
+                                  <p className="font-medium">
+                                    •••• •••• •••• {method.lastFour}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Expires {method.expiryDate}
                                   </p>
                                 </div>
-                              </div>
-                              <div className="flex items-center space-x-4">
-                                <p className="font-medium">${invoice.amount.toFixed(2)}</p>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Download className="h-4 w-4" />
-                                  <span className="sr-only">Download</span>
+                                <Button variant="ghost" size="sm">
+                                  Edit
                                 </Button>
                               </div>
-                            </div>
-                          ))}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 mb-4">
+                          No payment methods added yet.
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsAddingPayment(true)}
+                        >
+                          Add Payment Method
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'security' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Change Password</h3>
+                    <div className="space-y-4 max-w-lg">
+                      <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Current Password
+                            </label>
+                            <input
+                              type="password"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              New Password
+                            </label>
+                            <input
+                              type="password"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Confirm New Password
+                            </label>
+                            <input
+                              type="password"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div className="pt-2">
+                            <Button>Update Password</Button>
+                          </div>
                         </div>
-                        <div className="mt-4 text-center">
-                          <Button variant="ghost">
-                            View all invoices
-                            <ChevronRight className="ml-2 h-4 w-4" />
-                          </Button>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-6">
+                        <h3 className="text-lg font-medium mb-4">Two-Factor Authentication</h3>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Two-factor authentication</p>
+                            <p className="text-sm text-gray-500">
+                              Add an extra layer of security to your account
+                            </p>
+                          </div>
+                          <Button variant="outline">Enable 2FA</Button>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-6">
+                        <h3 className="text-lg font-medium text-red-600 mb-4">Danger Zone</h3>
+                        <div className="border border-red-100 bg-red-50 rounded-lg p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">Delete Account</p>
+                              <p className="text-sm text-red-600">
+                                Permanently delete your account and all associated data
+                              </p>
+                            </div>
+                            <Button variant="destructive">Delete Account</Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  )}
+
+                  {activeTab === 'notifications' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Email Notifications</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Account activity</p>
+                              <p className="text-sm text-gray-500">
+                                Important notifications about your account
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" defaultChecked />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Newsletter</p>
+                              <p className="text-sm text-gray-500">
+                                Updates, announcements, and product news
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Promotions</p>
+                              <p className="text-sm text-gray-500">
+                                Special offers and discounts
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" defaultChecked />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 pt-6">
+                        <h3 className="text-lg font-medium mb-4">Push Notifications</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">New messages</p>
+                              <p className="text-sm text-gray-500">
+                                Get notified about new messages
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" defaultChecked />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Reminders</p>
+                              <p className="text-sm text-gray-500">
+                                Get reminders for important tasks
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" className="sr-only peer" defaultChecked />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4">
+                        <Button>Save Preferences</Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      );
+    }

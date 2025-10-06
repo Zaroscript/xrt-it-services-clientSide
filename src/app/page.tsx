@@ -1,5 +1,6 @@
 "use client";
 
+import "./globals.css";
 import React from "react";
 
 import Hero from "@/components/Hero";
@@ -15,6 +16,7 @@ import { useState } from "react";
 import Priceing from "@/components/Priceing";
 import Testimonials from "@/components/Testimonials";
 import ContactSection from "@/components/ContactSection";
+import Partners from "@/components/Partners";
 
 export default function Home() {
   
@@ -22,12 +24,13 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Services />
+      {/* <Services /> */}
+      <Partners />
       <CompanySection />
       <ServicesShowcase />
       <Success />
-      <OurProjects />
-      <Service />
+      {/* <OurProjects /> */}
+      {/* <Service /> */}
       <Studies />
       <Priceing />
       <Testimonials />

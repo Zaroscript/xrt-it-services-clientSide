@@ -128,7 +128,7 @@ export function AuthCard({
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.3 }}
-          className="text-center text-sm text-white pt-2"
+          className="text-center text-sm text-foreground dark:text-white pt-2"
         >
           <span className="opacity-80">{footerText}</span>
           {footerLink && footerLinkText && (

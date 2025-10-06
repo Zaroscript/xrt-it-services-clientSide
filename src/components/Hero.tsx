@@ -75,15 +75,16 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-8 py-3 rounded-lg bg-primary text-white font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                className="px-8 py-3 rounded-lg bg-primary text-card cursor-pointer font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
               >
-                Get Started
+                Get a Quote
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-8 py-3 rounded-lg border border-gold  text-slate-300 font-medium hover:bg-gold/80 transition-colors"
+                className="px-8 py-3 rounded-lg border border-gold text-secondary dark:text-primary cursor-pointer 
+                font-medium hover:text-primary hover:bg-gold/80 transition-colors"
               >
                 Learn More
               </motion.button>
@@ -127,6 +128,7 @@ export default function Hero() {
                 height={800}
                 className="object-contain"
                 priority
+                fetchPriority="high"
               />
             </motion.div>
             <Image
@@ -136,6 +138,7 @@ export default function Hero() {
               height={600}
               className="object-contain relative z-10"
               priority
+              fetchPriority="high"
             />
           </motion.div>
         </div>
