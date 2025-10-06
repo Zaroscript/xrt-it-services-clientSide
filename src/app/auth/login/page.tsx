@@ -29,13 +29,12 @@ export default function LoginPage() {
     setIsSubmitting(true);
     
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = formData.get('email')?.toString().trim() || '';
+    const password = formData.get('password')?.toString() || '';
     
     // Add callback URL for successful login
     const searchParams = new URLSearchParams(window.location.search);
     const callbackUrl = searchParams.get('callbackUrl') || '/profile';
-    formData.append('callbackUrl', callbackUrl);
     
     try {
       // Validate with Zod
@@ -48,21 +47,42 @@ export default function LoginPage() {
       }
       
       // Proceed with authentication
+      const response = await fetch('/api/auth/csrf');
+      const csrf = await response.json();
+      
       const signInResult = await signIn('credentials', {
         email,
         password,
         redirect: false,
-        callbackUrl: '/profile'
+        callbackUrl,
+        csrfToken: csrf?.csrfToken
       });
 
-      if (signInResult?.error) {
-        toast.error('Invalid credentials');
-      } else {
-        // Redirect to profile page or the URL from the callback
-        const callbackUrl = signInResult?.url || '/profile';
-        router.push(callbackUrl);
-        router.refresh();
+      if (!signInResult) {
+        throw new Error('No response from authentication server');
       }
+
+      if (signInResult.error) {
+        console.error('Sign in error:', signInResult.error);
+        if (signInResult.error === 'CredentialsSignin') {
+          toast.error('Invalid email or password');
+        } else {
+          toast.error(signInResult.error || 'Authentication failed');
+        }
+        return;
+      }
+
+      // If we have a URL, redirect to it
+      if (signInResult.url) {
+        // Add a small delay to ensure session is properly set
+        setTimeout(() => {
+          window.location.href = signInResult.url || callbackUrl;
+        }, 100);
+        return;
+      }
+
+      // Fallback redirect
+      router.push(callbackUrl);
     } catch (error) {
       console.error('Login error:', error);
       toast.error('An error occurred during login');

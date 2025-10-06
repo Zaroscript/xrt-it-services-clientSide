@@ -77,7 +77,7 @@ export function PricingCard({
                 : "text-[#D3B073]"
             )}
           >
-            {price}
+            {price}   
           </h2>
           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
             <p>Paid Yearly at {yearlyPrice}</p>

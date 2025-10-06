@@ -1,4 +1,4 @@
-import NextAuth, { type DefaultSession, type User, type Session } from 'next-auth';
+import NextAuth, { type DefaultSession, type User, type Session, type NextAuthOptions } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -6,13 +6,12 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
-      id: string;
       role?: string;
     } & DefaultSession['user'];
   }
 }
 
-export const authOptions: any = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -20,10 +19,13 @@ export const authOptions: any = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error('Please enter both email and password');
+          if (!credentials?.email) {
+            throw new Error('Email is required');
+          }
+          if (!credentials?.password) {
+            throw new Error('Password is required');
           }
 
           // Replace this with your actual authentication logic
@@ -36,42 +38,70 @@ export const authOptions: any = {
             } as User;
           }
 
-          // Return null with an error message
-          throw new Error('Invalid email or password');
+          // If we get here, the credentials are invalid
+          console.error('Invalid credentials for email:', credentials.email);
+          return null; // Return null to indicate authentication failure
         } catch (error) {
           console.error('Authentication error:', error);
           // Return null with an error message that will be shown to the user
-          throw new Error(error instanceof Error ? error.message : 'Invalid credentials');
+          return null;
         }
       },
     })
   ],
   secret: process.env.NEXTAUTH_SECRET || 'your-secret-key',
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  pages: {
+    signIn: '/auth/login',
+    error: '/auth/error',
+  },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, account }) {
+      // Initial sign in
+      if (account && user) {
         token.id = user.id;
         token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session?.user) {
         session.user.id = token.id as string;
         (session.user as any).role = token.role as string;
       }
       return session;
     }
   },
+  logger: {
+    error(code, metadata) {
+      console.error('NextAuth Error:', { code, metadata });
+    },
+    warn(code) {
+      console.warn('NextAuth Warning:', code);
+    },
+    debug(code, metadata) {
+      console.debug('NextAuth Debug:', { code, metadata });
+    }
+  },
   trustHost: true,
   debug: process.env.NODE_ENV === 'development',
+  events: {
+    async signIn(message) {
+      console.log('User signed in', message);
+    },
+    async signOut() {
+      console.log('User signed out');
+    },
+    async error(error) {
+      console.error('Auth error:', error);
+    },
+  },
   pages: {
     signIn: '/auth/login',
-    error: '/error',
+    error: '/auth/error',
   }
 };
 
