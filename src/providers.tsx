@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
-import { SessionProvider } from 'next-auth/react';
 import { store, initializeStore } from './store/store';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Initialize the store on the client side
@@ -12,10 +12,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionProvider>
-      <Provider store={store}>
+    <Provider store={store}>
+      <AuthProvider>
         {children}
-      </Provider>
-    </SessionProvider>
+      </AuthProvider>
+    </Provider>
   );
 }

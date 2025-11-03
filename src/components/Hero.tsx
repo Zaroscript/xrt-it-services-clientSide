@@ -7,26 +7,13 @@ import { useEffect, useState } from "react";
 
 import heroImage from "../../public/tech-bg.png";
 
-const heroContent = [
-  {
-    title: "Transform Your Business with Modern Tech Solutions",
-    description:
-      "Empower your business with cutting-edge technology and innovative solutions that drive growth and success.",
-  },
-  {
-    title: "Enterprise-Grade Solutions for Every Business",
-    description:
-      "Custom software development and IT solutions tailored to meet your unique business needs.",
-  },
-  {
-    title: "Stay Ahead with Future-Ready Technology",
-    description:
-      "Leverage the latest technologies and best practices to keep your business competitive in the digital age.",
-  },
-];
+import { heroContent } from "../config/constants";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,12 +48,12 @@ export default function Hero() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-6"
             >
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              <h1 className="text-2xl md:text-4xl font-bold leading-tight">
                 <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-gold">
                   {heroContent[currentSlide].title}
                 </span>
               </h1>
-              <p className="text-lg text-background dark:text-slate-300 max-w-xl">
+              <p className="text-md text-background dark:text-slate-300 max-w-xl">
                 {heroContent[currentSlide].description}
               </p>
             </motion.div>
@@ -75,18 +62,20 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => router.push(heroContent[currentSlide].primBtn.path)}
                 className="px-8 py-3 rounded-lg bg-primary text-card cursor-pointer font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
               >
-                Get a Quote
+                {heroContent[currentSlide].primBtn.text}
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => router.push(heroContent[currentSlide].secBtn.path)}
                 className="px-8 py-3 rounded-lg border border-gold text-secondary dark:text-primary cursor-pointer 
                 font-medium hover:text-primary hover:bg-gold/80 transition-colors"
               >
-                Learn More
+                {heroContent[currentSlide].secBtn.text}
               </motion.button>
             </div>
 

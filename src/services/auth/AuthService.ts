@@ -1,24 +1,14 @@
-import {
-  AuthResponse,
-  LoginCredentials,
-  RegisterData,
-  User,
-  GoogleAuthCredentials,
-} from "@/features/auth/types";
-import { BaseApiService } from "../api/BaseApiService";
-
-declare global {
-  interface Window {
-    google: any;
-  }
-}
+import { LoginCredentials, RegisterData, AuthResponse, User } from "@/features/auth/types";
+import { BaseApiService } from "@/services/api/BaseApiService";
 
 class AuthService extends BaseApiService {
   private static instance: AuthService;
-  private static readonly AUTH_ENDPOINT = "/auth";
+  private static readonly AUTH_ENDPOINT = "/api/auth";
+  private user: User | null = null;
 
   private constructor(baseURL: string) {
     super(baseURL);
+    this.loadUserFromStorage();
   }
 
   public static getInstance(
@@ -30,24 +20,66 @@ class AuthService extends BaseApiService {
     return AuthService.instance;
   }
 
+  private loadUserFromStorage() {
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        this.user = JSON.parse(userStr);
+        this.setAuthToken(this.user?.token);
+      }
+    }
+  }
+
+  private saveUserToStorage(user: User) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }
+
+  private clearUserFromStorage() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+    }
+  }
+
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await this.post<AuthResponse>(
-      `${AuthService.AUTH_ENDPOINT}/login`,
-      credentials
-    );
-    this.setAuthToken(response.token);
-    return response;
+    try {
+      const response = await this.post<AuthResponse>(
+        `${AuthService.AUTH_ENDPOINT}/login`,
+        credentials
+      );
+      
+      if (response.user && response.token) {
+        this.user = { ...response.user, token: response.token };
+        this.setAuthToken(response.token);
+        this.saveUserToStorage(this.user);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   }
 
   public async register(userData: RegisterData): Promise<AuthResponse> {
-    // The registration endpoint will now receive the additional fields (phoneNumber, businessName)
-    // from the RegisterData interface
-    const response = await this.post<AuthResponse>(
-      `${AuthService.AUTH_ENDPOINT}/register`,
-      userData
-    );
-    this.setAuthToken(response.token);
-    return response;
+    try {
+      const response = await this.post<AuthResponse>(
+        `${AuthService.AUTH_ENDPOINT}/register`,
+        userData
+      );
+      
+      if (response.user && response.token) {
+        this.user = { ...response.user, token: response.token };
+        this.setAuthToken(response.token);
+        this.saveUserToStorage(this.user);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   }
 
   public async getCurrentUser(): Promise<User | null> {
@@ -135,9 +167,13 @@ class AuthService extends BaseApiService {
     return localStorage.getItem("token");
   }
 
-  private clearAuthToken(): void {
-    localStorage.removeItem("token");
-    this.updateAxiosInstance();
+  public clearAuthToken(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      this.user = null;
+      this.updateAxiosInstance();
+    }
   }
 
   private updateAxiosInstance(): void {

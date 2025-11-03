@@ -2,25 +2,46 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '@/lib/store';
 import { authService } from '@/services/auth/AuthService';
 import { 
-  AuthState, 
   LoginPayload, 
   RegisterPayload, 
-  initialState, 
   ApiError,
-  isApiError
+  isApiError,
+  User
 } from './types';
+
+// Define the auth state type
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}
+
+// Initial state
+export const initialState: AuthState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  status: 'idle',
+  error: null,
+};
 
 // Async thunks
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginPayload, { rejectWithValue }) => {
     try {
-      return await authService.login(credentials);
+      const response = await authService.login(credentials);
+      if (!response.token) {
+        throw new Error('No token received');
+      }
+      return response;
     } catch (error) {
       return rejectWithValue(
         isApiError(error) 
           ? error.message 
-          : 'An unexpected error occurred during login'
+          : 'Invalid email or password'
       );
     }
   }
@@ -30,12 +51,16 @@ export const register = createAsyncThunk(
   'auth/register',
   async (userData: RegisterPayload, { rejectWithValue }) => {
     try {
-      return await authService.register(userData);
+      const response = await authService.register(userData);
+      if (!response.token) {
+        throw new Error('No token received');
+      }
+      return response;
     } catch (error) {
       return rejectWithValue(
         isApiError(error)
           ? error.message
-          : 'An unexpected error occurred during registration'
+          : 'Registration failed. Please try again.'
       );
     }
   }
@@ -47,14 +72,16 @@ export const fetchCurrentUser = createAsyncThunk(
     try {
       const user = await authService.getCurrentUser();
       if (!user) {
-        throw new Error('No user logged in');
+        throw new Error('No active session');
       }
       return { user };
     } catch (error) {
+      // Clear invalid token if any
+      authService.clearAuthToken();
       return rejectWithValue(
         isApiError(error)
           ? error.message
-          : 'Failed to fetch current user'
+          : 'Session expired. Please log in again.'
       );
     }
   }
@@ -67,11 +94,16 @@ export const logout = createAsyncThunk(
       await authService.logout();
       return true;
     } catch (error) {
+      // Clear token even if logout API fails
+      authService.clearAuthToken();
       return rejectWithValue(
         isApiError(error)
           ? error.message
-          : 'An error occurred during logout'
+          : 'Logged out successfully (with warning)'
       );
+    } finally {
+      // Ensure we clear the token in any case
+      authService.clearAuthToken();
     }
   }
 );
@@ -86,7 +118,9 @@ const authSlice = createSlice({
     setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.isAuthenticated = true;
     },
+    resetAuthState: () => initialState,
   },
   extraReducers: (builder) => {
     // Login
@@ -98,6 +132,7 @@ const authSlice = createSlice({
       state.status = 'succeeded';
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.isAuthenticated = true;
     });
     builder.addCase(login.rejected, (state, action) => {
       state.status = 'failed';
@@ -113,6 +148,7 @@ const authSlice = createSlice({
       state.status = 'succeeded';
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.isAuthenticated = true;
     });
     builder.addCase(register.rejected, (state, action) => {
       state.status = 'failed';
@@ -126,11 +162,13 @@ const authSlice = createSlice({
     builder.addCase(fetchCurrentUser.fulfilled, (state, action) => {
       state.status = 'succeeded';
       state.user = action.payload.user;
+      state.isAuthenticated = true;
     });
     builder.addCase(fetchCurrentUser.rejected, (state) => {
       state.status = 'idle';
       state.user = null;
       state.token = null;
+      state.isAuthenticated = false;
     });
 
     // Logout
@@ -138,6 +176,7 @@ const authSlice = createSlice({
       state.status = 'idle';
       state.user = null;
       state.token = null;
+      state.isAuthenticated = false;
       state.error = null;
     });
   },

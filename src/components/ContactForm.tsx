@@ -18,70 +18,118 @@ const services = [
 export function ContactForm() {
   const [businessType, setBusinessType] = useState("personal");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    businessName: '',
-    website: '',
-    streetAddress: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    service: '',
-    message: ''
+    name: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    website: "",
+    streetAddress: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    service: "",
+    message: "",
   });
 
   const usStates = [
-    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
-    'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-    'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-    'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
   ];
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+
+    if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
     if (!formData.phone) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = "Phone number is required";
     } else if (!/^\+?[\d\s-]{10,}$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number';
+      newErrors.phone = "Please enter a valid phone number";
     }
-    
-    if (businessType === 'business') {
-      if (!formData.businessName.trim()) newErrors.businessName = 'Business name is required';
+
+    if (businessType === "business") {
+      if (!formData.businessName.trim())
+        newErrors.businessName = "Business name is required";
       if (formData.website && !/^https?:\/\//.test(formData.website)) {
-        newErrors.website = 'Please include http:// or https://';
+        newErrors.website = "Please include http:// or https://";
       }
-      if (!formData.service) newErrors.service = 'Please select a service';
+      if (!formData.service) newErrors.service = "Please select a service";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,26 +139,26 @@ export function ContactForm() {
     if (validateForm()) {
       setIsSubmitting(true);
       // Handle form submission here
-      console.log('Form submitted:', { ...formData, type: businessType });
+      console.log("Form submitted:", { ...formData, type: businessType });
       // Reset form after submission
       setTimeout(() => {
         setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          businessName: '',
-          website: '',
-          streetAddress: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          service: '',
-          message: ''
+          name: "",
+          email: "",
+          phone: "",
+          businessName: "",
+          website: "",
+          streetAddress: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          service: "",
+          message: "",
         });
-        setBusinessType('personal');
+        setBusinessType("personal");
         setIsSubmitting(false);
         // Show success message
-        alert('Thank you for your message! We will get back to you soon.');
+        alert("Thank you for your message! We will get back to you soon.");
       }, 1000);
     }
   };
@@ -127,17 +175,22 @@ export function ContactForm() {
               transition={{ duration: 0.5 }}
               className="lg:col-span-5"
             >
-              <h2 className="relative border-l-4 border-secondary pl-6 text-3xl font-bold text-primary dark:text-white sm:text-4xl lg:text-[45px]">
-                To make requests for further information,{" "}
+              <p className="relative border-l-4 text-2xl border-secondary pl-6  font-bold text-primary dark:text-white  ">
+                Have a question or need more information? information,{" "}
                 <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
-                  contact us
+                  Fill out the form or reach out to us via our social channels.
                 </span>{" "}
-                via our social channels.
-              </h2>
-              <p className="mt-6 pl-6 text-lg text-gray-400">
-                We just need a couple of hours! <br />
-                No more than 2 working days since receiving your issue ticket.
+                We're here to help you with anything you need. To make requests
+                for further
               </p>
+              <div className="mt-6 pl-6 space-y-4">
+                <div className="text-gray-400">
+                  <p className="font-medium text-white">Working Hours:</p>
+                  <p>Monday to Friday: 10 AM to 10 PM</p>
+                  <p>Saturday: 8 AM to 8 PM</p>
+                  <p>Sunday: Closed</p>
+                </div>
+              </div>
             </motion.div>
 
             {/* Form Section */}
@@ -191,10 +244,16 @@ export function ContactForm() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="Phone number *"
-                      className={`w-full rounded-lg bg-[#343438] px-4 py-3 text-white placeholder:text-gray-400 focus:border-secondary focus:outline-none focus:ring-1 ${errors.phone ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-transparent focus:ring-secondary'}`}
+                      className={`w-full rounded-lg bg-[#343438] px-4 py-3 text-white placeholder:text-gray-400 focus:border-secondary focus:outline-none focus:ring-1 ${
+                        errors.phone
+                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                          : "border-transparent focus:ring-secondary"
+                      }`}
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-400">{errors.phone}</p>
+                      <p className="mt-1 text-sm text-red-400">
+                        {errors.phone}
+                      </p>
                     )}
                   </div>
                 </motion.div>
@@ -215,11 +274,12 @@ export function ContactForm() {
                     onChange={(e) => setBusinessType(e.target.value)}
                     className={`w-full rounded-lg bg-[#343438] px-4 py-3 text-white focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary appearance-none`}
                     style={{
-                      backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 0.75rem center',
-                      backgroundSize: '1.25em 1.25em',
-                      paddingRight: '2.5rem'
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 0.75rem center",
+                      backgroundSize: "1.25em 1.25em",
+                      paddingRight: "2.5rem",
                     }}
                   >
                     <option value="personal">Personal</option>
@@ -231,7 +291,7 @@ export function ContactForm() {
                 <AnimatePresence>
                   {businessType === "business" && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0, }}
+                      initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
@@ -239,7 +299,10 @@ export function ContactForm() {
                     >
                       {/* Business Name */}
                       <div className="relative">
-                        <label htmlFor="businessName" className="mb-1 block text-sm font-medium text-gray-300">
+                        <label
+                          htmlFor="businessName"
+                          className="mb-1 block text-sm font-medium text-gray-300"
+                        >
                           Business Name *
                         </label>
                         <input
@@ -256,7 +319,10 @@ export function ContactForm() {
 
                       {/* Website URL */}
                       <div className="relative">
-                        <label htmlFor="website" className="mb-1 block text-sm font-medium text-gray-300">
+                        <label
+                          htmlFor="website"
+                          className="mb-1 block text-sm font-medium text-gray-300"
+                        >
                           Website (Optional)
                         </label>
                         <div className="relative">
@@ -277,8 +343,10 @@ export function ContactForm() {
 
                       {/* Company Address - US Only */}
                       <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-gray-300">Company Address (US Only) *</h4>
-                        
+                        <h4 className="text-sm font-medium text-gray-300">
+                          Company Address (US Only) *
+                        </h4>
+
                         {/* Street Address */}
                         <div className="relative">
                           <input
@@ -315,17 +383,22 @@ export function ContactForm() {
                               onChange={handleChange}
                               className="w-full appearance-none rounded-lg bg-[#343438] pl-10 pr-10 py-3 text-white focus:outline-none focus:ring-1 focus:border-secondary focus:ring-secondary"
                               style={{
-                                backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'right 0.75rem center',
-                                backgroundSize: '1.25em 1.25em',
-                                paddingRight: '2.5rem'
+                                backgroundImage:
+                                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
+                                backgroundRepeat: "no-repeat",
+                                backgroundPosition: "right 0.75rem center",
+                                backgroundSize: "1.25em 1.25em",
+                                paddingRight: "2.5rem",
                               }}
                               required
                             >
-                              <option value="" disabled>Select State</option>
-                              {usStates.map(state => (
-                                <option key={state} value={state}>{state}</option>
+                              <option value="" disabled>
+                                Select State
+                              </option>
+                              {usStates.map((state) => (
+                                <option key={state} value={state}>
+                                  {state}
+                                </option>
                               ))}
                             </select>
                           </div>
@@ -348,7 +421,10 @@ export function ContactForm() {
 
                       {/* Service Selection */}
                       <div className="relative">
-                        <label htmlFor="service" className="mb-1 block text-sm font-medium text-gray-300">
+                        <label
+                          htmlFor="service"
+                          className="mb-1 block text-sm font-medium text-gray-300"
+                        >
                           Service of Interest *
                         </label>
                         <div className="relative">
@@ -362,35 +438,44 @@ export function ContactForm() {
                             onChange={handleChange}
                             className="w-full appearance-none rounded-lg bg-[#343438] pl-10 pr-10 py-3 text-white focus:outline-none focus:ring-1 focus:border-secondary focus:ring-secondary"
                             style={{
-                              backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
-                              backgroundRepeat: 'no-repeat',
-                              backgroundPosition: 'right 0.75rem center',
-                              backgroundSize: '1.25em 1.25em',
-                              paddingRight: '2.5rem'
+                              backgroundImage:
+                                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")",
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "right 0.75rem center",
+                              backgroundSize: "1.25em 1.25em",
+                              paddingRight: "2.5rem",
                             }}
                             required
                           >
-                            <option value="" disabled>Select a service</option>
+                            <option value="" disabled>
+                              Select a service
+                            </option>
                             <optgroup label="Development">
-                              {services.filter(s => [1, 2].includes(s.id)).map(service => (
-                                <option key={service.id} value={service.name}>
-                                  {service.name}
-                                </option>
-                              ))}
+                              {services
+                                .filter((s) => [1, 2].includes(s.id))
+                                .map((service) => (
+                                  <option key={service.id} value={service.name}>
+                                    {service.name}
+                                  </option>
+                                ))}
                             </optgroup>
                             <optgroup label="Infrastructure">
-                              {services.filter(s => [3, 4, 5, 6].includes(s.id)).map(service => (
-                                <option key={service.id} value={service.name}>
-                                  {service.name}
-                                </option>
-                              ))}
+                              {services
+                                .filter((s) => [3, 4, 5, 6].includes(s.id))
+                                .map((service) => (
+                                  <option key={service.id} value={service.name}>
+                                    {service.name}
+                                  </option>
+                                ))}
                             </optgroup>
                             <optgroup label="Other">
-                              {services.filter(s => [7, 8].includes(s.id)).map(service => (
-                                <option key={service.id} value={service.name}>
-                                  {service.name}
-                                </option>
-                              ))}
+                              {services
+                                .filter((s) => [7, 8].includes(s.id))
+                                .map((service) => (
+                                  <option key={service.id} value={service.name}>
+                                    {service.name}
+                                  </option>
+                                ))}
                             </optgroup>
                           </select>
                         </div>
@@ -429,13 +514,33 @@ export function ContactForm() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`group flex h-[55px] w-[180px] items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:gap-4 hover:shadow-lg hover:shadow-secondary/20'}`}
+                    className={`group flex h-[55px] w-[180px] items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all ${
+                      isSubmitting
+                        ? "opacity-70 cursor-not-allowed"
+                        : "hover:gap-4 hover:shadow-lg hover:shadow-secondary/20"
+                    }`}
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-[#232325]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-5 w-5 text-[#232325]"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Sending...
                       </>

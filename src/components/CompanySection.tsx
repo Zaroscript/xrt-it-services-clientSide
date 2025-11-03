@@ -6,19 +6,26 @@ import { Play } from "lucide-react";
 import Link from "next/link";
 
 // images
-import {company_1, company_2, company_3, company_4, company_5} from "../config/constants";
+import {
+  company_1,
+  company_2,
+  company_3,
+  company_4,
+  company_5,
+} from "../config/constants";
+import { useRouter } from "next/navigation";
 
 export function CompanySection() {
-  
+  const router = useRouter();
   const floatingAnimation = {
     y: [0, -20, 0],
     transition: {
       duration: 3,
       repeat: Infinity,
-      ease: [0.4, 0, 0.2, 1] as Easing, 
+      ease: [0.4, 0, 0.2, 1] as Easing,
     },
   };
-  
+
   return (
     <section className="py-24">
       <div className="page-container">
@@ -33,29 +40,31 @@ export function CompanySection() {
               >
                 OUR COMPANY
               </motion.span>
-              
+
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="text-3xl font-bold text-primary dark:text-slate-200 sm:text-4xl"
               >
-                We&apos;ve been triumphing all these{" "}
-                <span className="text-secondary">38 years.</span>
+                From Small Ideas to Big Impact
                 <br />
-                Sacrifices are made up with success
+                <span className="text-secondary">
+                  {" "}
+                  We Build Technology That Works for You
+                </span>
               </motion.h2>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-gray-400"
               >
-                mitech takes into consideration every little detail to make sure the
-                system run smoothly and responsively. Mitech employs a new
-                technique called Minified Technology for securing customers&apos;
-                database & building up highly confidential firewalls.
+                We started XRT Tech with one mission: to make modern technology
+                accessible to every business. Whether it's a custom website, an
+                app, or IT support, we're here to simplify digital
+                transformation and make success easy to reach.
               </motion.p>
 
               <motion.div
@@ -63,7 +72,10 @@ export function CompanySection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <button className="h-[55px] w-[180px] rounded-lg bg-gradient-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all hover:scale-105 hover:shadow-lg hover:shadow-secondary/20">
+                <button
+                  onClick={() => router.push("/about")}
+                  className="h-[55px] w-[180px] cursor-pointer rounded-lg bg-gradient-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all hover:scale-105 hover:shadow-lg hover:shadow-secondary/20"
+                >
                   Find Out More
                 </button>
               </motion.div>
@@ -73,28 +85,14 @@ export function CompanySection() {
             <div className="relative mt-16 lg:mt-0 max-sm:hidden">
               <div className="relative mx-auto w-[250px] sm:w-[500px] lg:w-[400px]">
                 {/* Main Video Thumbnail */}
-                <Link
-                  href="https://youtu.be/9No-FiEInLA?si=2z829SYXtfU3uqiB"
-                  target="_blank"
-                  className="group relative block"
-                >
-                  <Image
-                    src={company_1}
-                    alt="Company Video"
-                    width={500}
-                    height={300}
-                    className="relative z-10 rounded-lg"
-                  />
-                  <div className="absolute inset-0 z-20 flex items-center justify-center">
-                    <motion.div
-                      className="rounded-full bg-secondary p-4 text-[#232325] shadow-lg transition-transform group-hover:scale-110"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Play className="h-8 w-8" />
-                    </motion.div>
-                  </div>
-                </Link>
+
+                <Image
+                  src={company_1}
+                  alt="Company Video"
+                  width={500}
+                  height={300}
+                  className="relative z-10 rounded-lg"
+                />
 
                 {/* Floating Images */}
                 <motion.div

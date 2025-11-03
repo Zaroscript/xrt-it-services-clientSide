@@ -8,8 +8,9 @@ import { AuthLayout } from '@/components/ui/AuthLayout';
 import { AuthCard } from '@/components/ui/AuthCard';
 import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useAppDispatch } from '@/lib/hooks';
+import { login } from '@/features/auth/authSlice';
 
 // Define the login schema for form validation
 const loginSchema = z.object({
@@ -23,6 +24,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +34,9 @@ export default function LoginPage() {
     const email = formData.get('email')?.toString().trim() || '';
     const password = formData.get('password')?.toString() || '';
     
-    // Add callback URL for successful login
+    // Get callback URL for successful login
     const searchParams = new URLSearchParams(window.location.search);
-    const callbackUrl = searchParams.get('callbackUrl') || '/profile';
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
     
     try {
       // Validate with Zod
@@ -46,46 +48,22 @@ export default function LoginPage() {
         return;
       }
       
-      // Proceed with authentication
-      const response = await fetch('/api/auth/csrf');
-      const csrf = await response.json();
+      // Dispatch login action
+      const resultAction = await dispatch(login({ email, password }));
       
-      const signInResult = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-        callbackUrl,
-        csrfToken: csrf?.csrfToken
-      });
-
-      if (!signInResult) {
-        throw new Error('No response from authentication server');
-      }
-
-      if (signInResult.error) {
-        console.error('Sign in error:', signInResult.error);
-        if (signInResult.error === 'CredentialsSignin') {
-          toast.error('Invalid email or password');
-        } else {
-          toast.error(signInResult.error || 'Authentication failed');
-        }
-        return;
-      }
-
-      // If we have a URL, redirect to it
-      if (signInResult.url) {
-        // Add a small delay to ensure session is properly set
+      if (login.fulfilled.match(resultAction)) {
+        toast.success('Login successful');
+        // Add a small delay to ensure session is properly set before redirect
         setTimeout(() => {
-          window.location.href = signInResult.url || callbackUrl;
+          window.location.href = callbackUrl;
         }, 100);
-        return;
+      } else if (resultAction.payload) {
+        // Handle API errors
+        throw new Error(resultAction.payload as string);
       }
-
-      // Fallback redirect
-      router.push(callbackUrl);
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('An error occurred during login');
+      toast.error(error instanceof Error ? error.message : 'An error occurred during login');
     } finally {
       setIsSubmitting(false);
     }

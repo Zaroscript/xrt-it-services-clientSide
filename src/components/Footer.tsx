@@ -98,23 +98,18 @@ const Footer = () => {
             </p>
             <div className="flex gap-6">
               <Link
-                href="#"
-                className="text-xs text-[#1a1a1a] dark:text-[#d3b073] hover:text-[#d3b073] dark:hover:opacity-75 hover:underline hover:underline-offset-2transition-colors"
+                href="/privacy-policy"
+                className="text-xs text-[#1a1a1a] dark:text-[#d3b073] hover:text-[#d3b073] dark:hover:opacity-75 hover:underline hover:underline-offset-2 transition-colors"
               >
-                Privacy
+                Privacy & Policy
               </Link>
               <Link
-                href="#"
-                className="text-xs text-[#1a1a1a] dark:text-[#d3b073] hover:text-[#d3b073] dark:hover:opacity-75 hover:underline hover:underline-offset-2transition-colors"
+                href="/terms-and-conditions"
+                className="text-xs text-[#1a1a1a] dark:text-[#d3b073] hover:text-[#d3b073] dark:hover:opacity-75 hover:underline hover:underline-offset-2 transition-colors"
               >
-                Terms
+                Terms & Conditions
               </Link>
-              <Link
-                href="#"
-                className="text-xs text-[#1a1a1a] dark:text-[#d3b073] hover:text-[#d3b073] dark:hover:opacity-75 hover:underline hover:underline-offset-2transition-colors"
-              >
-                Cookies
-              </Link>
+              
             </div>
           </div>
         </div>

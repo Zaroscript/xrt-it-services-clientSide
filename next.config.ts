@@ -30,11 +30,13 @@ const nextConfig: NextConfig = {
   // Configure experimental features
   experimental: {
     turbo: process.env.TURBO ? {} : undefined,
-    serverComponentsExternalPackages: ['bcryptjs'],
     serverActions: {
       allowedOrigins: ['localhost:3000']
     },
   },
+  
+  // External packages for server components
+  serverExternalPackages: ['bcryptjs'],
   
   // Custom webpack config
   webpack: (config, { isServer }) => {

@@ -22,10 +22,10 @@ import partner6 from "../assets/images/partner6.webp";
 import {
   CloudCog,
   Code2,
-  Cpu,
-  HardDrive,
-  ShieldCheck,
-  Smartphone,
+  Palette,
+  Rocket,
+  Settings,
+  ShoppingCart,
 } from "lucide-react";
 
 // src/config/constants.ts
@@ -41,24 +41,47 @@ export const NAV_LINKS = [
   { name: "Contact", path: "/contact" },
 ];
 
-export const heroSlides = [
+export const heroContent = [
   {
-    id: 1,
-    title: "AI-Powered Solutions",
-    text: "Unlock the future with advanced AI services tailored to your business needs.",
-    image: "/images/home-services-hero-bg.webp",
+    title:
+      "Turn Clicks into Customers with an Easy-to-Use Online Ordering System",
+    description:
+      " Take your business online with a simple, user-friendly ordering platform built for sales, speed, and customer satisfaction. No complexity — just seamless ordering that works.",
+    primBtn: {
+      text: "Free Consultation",
+      path: "/contact",
+    },
+    secBtn: {
+      text: "How It Works",
+      path: "/about",
+    },
   },
   {
-    id: 2,
-    title: "Cloud Security",
-    text: "Protect your digital infrastructure with next-gen cloud security solutions.",
-    image: "/images/slider-cloud.webp",
+    title:
+      "Tailored Websites and Apps Built to Achieve Your Business GoalsDevelopment",
+    description:
+      "We don’t just design — we strategize. Every website and app we create is customized to your industry, crafted to meet your goals, and optimized to turn visitors into results.",
+    primBtn: {
+      text: "Free Consultation",
+      path: "/contact",
+    },
+    secBtn: {
+      text: "Recent Projects",
+      path: "/services",
+    },
   },
   {
-    id: 3,
-    title: "Smart Analytics",
-    text: "Transform your data into actionable insights with machine learning.",
-    image: "/images/slider-analytics.webp",
+    title: "Simplify Technology with Reliable IT Solutions That Work for You",
+    description:
+      "We handle the tech so you can focus on your business. From setup to support, XRT Tech delivers smart, dependable IT services built around your goals.",
+    primBtn: {
+      text: "Talk to an IT Expert",
+      path: "/contact",
+    },
+    secBtn: {
+      text: "Explore Our Services",
+      path: "/services",
+    },
   },
 ];
 
@@ -120,20 +143,24 @@ export const plans = [
 
 export const steps = [
   {
-    title: "Personal Information",
-    description: "Start with your basic information",
+    id: 1,
+    title: "01. Discovery & Discussion",
+    text: "We start with a conversation to understand your goals, challenges, and vision. This helps us identify what your business truly needs before we begin designing the right solution.",
   },
   {
-    title: "Business Details",
-    description: "Tell us about your business",
+    id: 2,
+    title: "02. Strategy & Concept Design",
+    text: "Once we know your goals, our team creates a tailored plan and visual concept. Every idea is designed to match your brand and deliver measurable results",
   },
   {
-    title: "Website Information",
-    description: "Share your existing website details",
+    id: 3,
+    title: "03. Development & Testing",
+    text: "We bring your project to life — building, testing, and refining every detail to ensure it performs flawlessly across all devices and platforms.",
   },
   {
-    title: "Create Password",
-    description: "Secure your account",
+    id: 4,
+    title: "04. Launch & Ongoing Support",
+    text: "After final approval, we launch your project with confidence. But our job doesn’t end there — we stay by your side with maintenance, updates, and continuous support.",
   },
 ];
 
@@ -162,43 +189,84 @@ export const testimonials = [
   },
 ];
 
-export const servicesDetails = [
+export const services = [
   {
     id: "web-development",
     icon: Code2,
-    title: "Web Development",
+    title: "Web Design, Development & Maintenance",
     description:
-      "Custom websites and web applications built with modern technologies for optimal performance and user experience.",
+      "Your website is the heart of your online presence. We design, build, host, and maintain fast, modern sites that work flawlessly on every device — so your business looks professional and runs smoothly, 24/7",
+    color: "from-blue-500 to-cyan-400",
     features: [
       "Responsive Design",
-      "E-commerce Solutions",
-      "CMS Integration",
-      "API Development",
-      "Progressive Web Apps",
+      "E-commerce Integration",
+      "Content Management",
+      "Performance Optimization",
+      "SEO Optimization",
     ],
-    color: "from-blue-500 to-cyan-400",
   },
   {
-    id: "mobile-apps",
-    icon: Smartphone,
-    title: "Mobile Apps",
+    id: "cloud-solutions",
+    icon: CloudCog,
+    title: "Cloud & Backup Solutions",
     description:
-      "Beautiful and functional mobile applications for iOS and Android platforms.",
+      "Protect your data and access it anywhere. We provide secure cloud storage and automated backups to ensure your files and systems are always safe, synced, and accessible.",
+    color: "from-purple-500 to-pink-500",
     features: [
-      "Cross-Platform Development",
-      "Native iOS & Android",
-      "UI/UX Design",
-      "App Store Optimization",
-      "Maintenance & Support",
+      "Cloud Migration",
+      "Serverless Architecture",
+      "Cloud Security",
+      "Cost Optimization",
+      "24/7 Monitoring",
     ],
-    color: "from-green-500 to-emerald-400",
   },
   {
-    id: "ai-ml",
-    icon: Cpu,
-    title: "AI & ML Solutions",
+    id: "online-ordering-systems",
+    icon: ShoppingCart,
+    title: "Online Ordering Systems",
     description:
-      "Leverage artificial intelligence and machine learning to transform your business operations.",
+      "Bring your store or restaurant online with a custom ordering system that’s easy to use and built for results. Accept orders, manage menus, and track performance — all from one simple dashboard.",
+    color: "from-green-500 to-emerald-400",
+    features: [
+      "Custom Ordering System",
+      "Order Management",
+      "Menu Management",
+      "Performance Tracking",
+      "Dashboard",
+    ],
+  },
+  {
+    id: "digital-branding-e-design",
+    icon: Palette,
+    title: "Digital Branding & eDesign",
+    description:
+      "Make your first impression count. We craft logos, digital materials, and visuals that reflect your brand’s personality and help you stand out in a crowded market.",
+    color: "from-amber-500 to-yellow-400",
+    features: [
+      "Logo Design",
+      "Digital Materials",
+      "Visual Identity",
+      "Brand Identity",
+      "Social Media Management",
+      "Content Creation",
+    ],
+  },
+  {
+    id: "it-setup-support",
+    icon: Settings,
+    title: "IT Setup & Support",
+    description:
+      "We handle the technical side so you don’t have to. From email systems and cloud setup to troubleshooting and maintenance — we keep your business connected and running without downtime.",
+    color: "from-red-500 to-orange-400",
+    features: ["Email Setup", "Cloud Setup", "Troubleshooting", "Maintenance"],
+  },
+  {
+    id: "seo-performance-optimization",
+    icon: Rocket,
+    title: "SEO & Performance Optimization",
+    description:
+      "Boost your visibility and website performance. Our optimization strategies help your site load faster, rank higher, and deliver a seamless experience that turns visitors into customers.",
+    color: "from-indigo-500 to-purple-400",
     features: [
       "Predictive Analytics",
       "Computer Vision",
@@ -206,7 +274,6 @@ export const servicesDetails = [
       "Chatbot Development",
       "AI Integration",
     ],
-    color: "from-purple-500 to-pink-500",
   },
 ];
 
@@ -270,24 +337,35 @@ export const whyChooseUs = [
 
 export const faqs = [
   {
-    question: "What is your development process?",
+    question: "How much does a website or system project usually cost?",
     answer:
-      "Our development process follows industry best practices including requirements gathering, design, development, testing, and deployment. We maintain transparent communication throughout the project lifecycle.",
+      "Every project is unique — pricing depends on your goals, features, and overall complexity. After a quick consultation, we’ll provide a clear, itemized proposal so you know exactly what you’re paying for — no hidden fees, no surprises.",
   },
   {
     question: "How long does a typical project take?",
     answer:
-      "Project timelines vary based on complexity. A simple website might take 4-6 weeks, while more complex applications can take several months. We'll provide a detailed timeline after our initial consultation.",
+      "Project timelines vary depending on scope, complexity, and the client’s specific needs. After our initial consultation, we’ll create a clear project plan with defined milestones and launch goals. Our priority is to deliver every project efficiently — without ever compromising on quality or attention to detail.",
   },
   {
-    question: "Do you provide ongoing support?",
+    question: "Do you provide ongoing support after launch?",
     answer:
-      "Yes, we offer various support and maintenance packages to ensure your solution continues to perform optimally after launch.",
+      "Yes. Every project includes access to our dedicated technical team for continuous support and maintenance. We offer tailored plans designed to keep your website, systems, and IT infrastructure secure, optimized, and up to date. From regular performance checks to rapid issue resolution, our priority is to ensure your technology runs flawlessly — long after launch.",
   },
   {
-    question: "What technologies do you work with?",
+    question: "Can you work with my existing website or system?",
     answer:
-      "We work with a wide range of technologies including React, Next.js, Node.js, Python, AWS, Google Cloud, and many others. We choose the best stack for your specific needs.",
+      "Absolutely. We can improve, redesign, or integrate with your current setup — whether it’s hosted elsewhere or built on another platform.",
+  },
+  {
+    question:
+      "Can you build custom features like booking, payment, or delivery tracking?",
+    answer:
+      "Yes. Our team develops and integrates custom features such as online booking, secure payments, CRM systems, and real-time order tracking. Whether you need a tailored solution or a connection to an existing platform, we ensure every integration is seamless, secure, and built to scale with your business.",
+  },
+  {
+    question: "Do you work with clients outside the U.S.?",
+    answer:
+      "Yes. We partner with clients around the world through virtual meetings, secure collaboration tools, and clear communication across time zones.",
   },
 ];
 
@@ -322,93 +400,6 @@ export const partners = [
   { name: "partner5", logo: partner5 },
   { name: "partner6", logo: partner6 },
   { name: "TechX", logo: techX },
-];
-
-export const services = [
-  {
-    id: "web-development",
-    icon: Code2,
-    title: "Web Development",
-    description: "Custom websites and web applications built with modern technologies for optimal performance.",
-    color: "from-blue-500 to-cyan-400",
-    features: [
-      "Responsive Design",
-      "E-commerce Integration",
-      "Content Management",
-      "Performance Optimization",
-      "SEO Optimization"
-    ]
-  },
-  {
-    id: "cloud-solutions",
-    icon: CloudCog,
-    title: "Cloud Solutions",
-    description: "Scalable cloud infrastructure and services to optimize your business operations.",
-    color: "from-purple-500 to-pink-500",
-    features: [
-      "Cloud Migration",
-      "Serverless Architecture",
-      "Cloud Security",
-      "Cost Optimization",
-      "24/7 Monitoring"
-    ]
-  },
-  {
-    id: "mobile-apps",
-    icon: Smartphone,
-    title: "Mobile Apps",
-    description: "Beautiful and functional mobile applications for iOS and Android platforms.",
-    color: "from-green-500 to-emerald-400",
-    features: [
-      "iOS & Android Development",
-      "Cross-Platform Solutions",
-      "UI/UX Design",
-      "App Store Optimization",
-      "Maintenance & Support"
-    ]
-  },
-  {
-    id: "database-management",
-    icon: HardDrive,
-    title: "Database Management",
-    description: "Efficient data storage and management solutions for your business needs.",
-    color: "from-amber-500 to-yellow-400",
-    features: [
-      "Database Design",
-      "Performance Tuning",
-      "Data Migration",
-      "Backup & Recovery",
-      "Security Management"
-    ]
-  },
-  {
-    id: "cybersecurity",
-    icon: ShieldCheck,
-    title: "Cybersecurity",
-    description: "Comprehensive security solutions to protect your digital assets.",
-    color: "from-red-500 to-orange-400",
-    features: [
-      "Security Audits",
-      "Threat Detection",
-      "Vulnerability Assessment",
-      "Incident Response",
-      "Security Training"
-    ]
-  },
-  {
-    id: "ai-ml-solutions",
-    icon: Cpu,
-    title: "AI & ML Solutions",
-    description: "Intelligent systems that automate processes and provide valuable insights.",
-    color: "from-indigo-500 to-purple-400",
-    features: [
-      "Predictive Analytics",
-      "Computer Vision",
-      "Natural Language Processing",
-      "Chatbot Development",
-      "AI Integration"
-    ]
-  }
 ];
 
 // Export images

@@ -58,8 +58,8 @@ type TabType = 'overview' | 'billing' | 'security' | 'notifications';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-  const user = session?.user as UserProfile | undefined;
   const router = useRouter();
+  const user = session?.user as UserProfile | undefined;
   
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isEditing, setIsEditing] = useState(false);
@@ -67,20 +67,20 @@ export default function ProfilePage() {
   
   // Form states
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    company: user?.company || '',
-    website: user?.website || '',
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    website: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
   const [billingAddress, setBillingAddress] = useState<BillingInfo>({
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ').slice(1).join(' ') || '',
-    company: user?.company || '',
+    firstName: '',
+    lastName: '',
+    company: '',
     street: '',
     city: '',
     state: '',
@@ -91,7 +91,7 @@ export default function ProfilePage() {
 
   const [paymentMethod, setPaymentMethod] = useState<Omit<PaymentMethod, 'id' | 'lastFour' | 'expiryDate'>>({
     cardNumber: '',
-    cardName: user?.name || '',
+    cardName: '',
     expiry: '',
     cvc: ''
   });
@@ -110,7 +110,35 @@ export default function ProfilePage() {
     features: ['Unlimited projects', 'Team collaboration', 'Priority support'],
   };
 
-  // Handle loading and authentication states
+  // Initialize form data when user is available
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        company: user.company || '',
+        website: user.website || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+
+      setBillingAddress(prev => ({
+        ...prev,
+        firstName: user.name?.split(' ')[0] || '',
+        lastName: user.name?.split(' ').slice(1).join(' ') || '',
+        company: user.company || ''
+      }));
+
+      setPaymentMethod(prev => ({
+        ...prev,
+        cardName: user.name || ''
+      }));
+    }
+  }, [user]);
+
+  // Handle authentication state changes
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/login');
@@ -118,7 +146,7 @@ export default function ProfilePage() {
   }, [status, router]);
 
   // Show loading state
-  if (status === 'loading' || !session) {
+  if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin" />
@@ -127,14 +155,14 @@ export default function ProfilePage() {
   }
 
   // Ensure user data is available
-  if (!user) {
+  if (!user || !session) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Session Error</h2>
-          <p className="text-gray-600 mb-4">Unable to load user data. Please try again.</p>
-          <Button onClick={() => window.location.reload()}>
-            Refresh Page
+          <h2 className="text-xl font-semibold mb-2">Session Expired</h2>
+          <p className="text-gray-600 mb-4">Please log in to continue</p>
+          <Button onClick={() => router.push('/auth/login')}>
+            Go to Login
           </Button>
         </div>
       </div>

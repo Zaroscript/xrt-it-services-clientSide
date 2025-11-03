@@ -1,10 +1,9 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import {
   ArrowRight,
-  Check,
   Code2,
   CloudCog,
   Cpu,
@@ -18,14 +17,6 @@ import { FadeIn } from "@/components/ui/FadeIn";
 import { services, howItWorks, faqs } from "@/config/constants";
 import { useRouter } from "next/navigation";
 
-const serviceIcons = {
-  "Web Development": Code2,
-  "Cloud Solutions": CloudCog,
-  "Mobile Apps": Smartphone,
-  "Database Management": HardDrive,
-  Cybersecurity: ShieldCheck,
-  "AI & ML Solutions": Cpu,
-};
 
 export default function ServicesPage() {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -128,8 +119,7 @@ export default function ServicesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => {
-              const Icon =
-                serviceIcons[service.title as keyof typeof serviceIcons];
+              
               return (
                 <motion.div
                   key={service.id}
@@ -148,7 +138,7 @@ export default function ServicesPage() {
                         <div
                           className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${service.color} text-white shadow-lg`}
                         >
-                          {Icon && <Icon className="w-7 h-7" />}
+                          {service.icon && <service.icon className="w-7 h-7" />}
                         </div>
                         <h3 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
                           {service.title}
