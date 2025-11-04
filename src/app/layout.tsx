@@ -60,20 +60,18 @@ export default function RootLayout({
         className={`${robotoFont.variable} ${interFont.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
         suppressHydrationWarning={true}
       >
-        <Providers>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-1 overflow-x-hidden">
-                <Suspense fallback={<Loading />}>
-                  {children}
-                </Suspense>
-              </main>
-              <Footer />
-              <ChatWidget />
-            </div>
-          </ThemeProvider>
-        </Providers>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Suspense fallback={<Loading />}>
+            <Providers session={null}>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="flex-1 overflow-x-hidden">{children}</main>
+                <Footer />
+                <ChatWidget />
+              </div>
+            </Providers>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );
