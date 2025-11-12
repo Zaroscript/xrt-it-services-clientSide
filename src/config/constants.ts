@@ -1,11 +1,11 @@
 // Images
 
 import case_study from "../assets/images/case-study.png";
-import company_1 from "../assets/images/home-processing-video-intro-slider-slide-01-image-01.webp";
-import company_2 from "../assets/images/home-processing-video-intro-slider-slide-01-image-02.webp";
-import company_3 from "../assets/images/home-processing-video-intro-slider-slide-01-image-03.webp";
-import company_4 from "../assets/images/home-processing-video-intro-slider-slide-01-image-04.webp";
-import company_5 from "../assets/images/home-processing-video-intro-slider-slide-01-image-05.webp";
+import company_1 from "../assets/images/chess.png";
+import company_2 from "../assets/images/company2.jpg";
+import company_3 from "../assets/images/company3.jpg";
+import company_4 from "../assets/images/company4.jpg";
+import company_5 from "../assets/images/company5.jpg";
 import global from "../assets/images/global.webp";
 import testimonial_1 from "../assets/images/mitech-testimonial-avata-02-90x90.webp";
 import testimonial_2 from "../assets/images/mitech-testimonial-avata-03-90x90.webp";
@@ -18,6 +18,24 @@ import partner3 from "../assets/images/partner3.webp";
 import partner4 from "../assets/images/partner4.webp";
 import partner5 from "../assets/images/partner5.webp";
 import partner6 from "../assets/images/partner6.webp";
+import heroSection from "../../public/assets/hero-section.jpg";
+import webIcon from "../assets/images/icons/001-deployment.png";
+import cloudIcon from "../assets/images/icons/002-upload.png";
+import onlineOrderingIcon from "../assets/images/icons/004-order.png"
+import digitalIcon from "../assets/images/icons/006-content-strategy.png"
+import itIcon from "../assets/images/icons/008-technical-support.png"
+import seoIcon from "../assets/images/icons/010-seo.png";
+import missionIcon from "../assets/images/icons/012-environment.png"
+import vission from "../assets/images/icons/013-company-vision.png"
+import whoWeAre from "../assets/images/who-we-are.jpg";
+import aboutImg from "../assets/images/about.jpg";
+import webImg from "../assets/images/web-development.jpg";
+import onlineImg from "../assets/images/online-ordering.jpg";
+import cloud from "../assets/images/cloud.jpg";
+import digital from "../assets/images/digital.jpg";
+import seoImg from "../assets/images/seo.jpg";
+import it from "../assets/images/it.jpg";
+
 
 import {
   CloudCog,
@@ -36,9 +54,10 @@ export const NAV_LINKS = [
     name: "Services",
     path: "/services",
   },
-  { name: "Plans", path: "/plans" },
-  // { name: "Portfolio", path: "/portfolio" },
+  { name: "Pricing", path: "/pricing" },
   { name: "Contact", path: "/contact" },
+  // Protected routes - will be conditionally rendered
+  { name: "Profile", path: "/profile", protected: true },
 ];
 
 export const heroContent = [
@@ -87,7 +106,7 @@ export const heroContent = [
 
 export const plans = [
   {
-    title: "XRT-Tech STANDARD",
+    title: "Start Plan — Get Online Fast",
     monthlyPrice: "USD 15/m",
     yearlyPrice: "USD 180/y",
     monthlyTotal: "$180",
@@ -96,13 +115,23 @@ export const plans = [
     yearlyOriginal: "$228",
     discount: "21%",
     features: [
-      { text: "All Standard Courses", included: true },
-      { text: "All Hands-on Labs", included: true },
+      { text: "Branded online ordering website (your domain)", included: true },
+      {
+        text: "Secure payment integration (Stripe, PayPal, etc.)",
+        included: true,
+      },
+      { text: "Menu management with unlimited items", included: true },
+      { text: "Real-time order notifications", included: true },
+      { text: "Mobile-friendly design", included: true },
+      { text: "Hosting & maintenance included", included: true },
+      { text: "Unlimited orders — no commissions", included: true },
+      { text: "Basic analytics dashboard", included: true },
+      { text: "24/7 technical support", included: true },
     ],
     isPopular: false,
   },
   {
-    title: "XRT-Tech PRO",
+    title: "Grow Plan",
     monthlyPrice: "USD 25/m",
     yearlyPrice: "USD 300/y",
     monthlyTotal: "$300",
@@ -111,18 +140,22 @@ export const plans = [
     yearlyOriginal: "$380",
     discount: "21%",
     features: [
-      { text: "All Standard Courses", included: true },
-      { text: "All Hands-on Labs", included: true },
-      { text: "All PRO courses", included: false },
-      { text: "60+ DevOps Playgrounds", included: false },
-      { text: "3 Cloud Playgrounds", included: false },
-      { text: "AI Assisted Labs", included: false },
-      { text: "Personalized AI Tutor", included: false },
+      { text: "All in Start Plan", included: true },
+      { text: "Multi-location support (up to 3)", included: true },
+      { text: "WhatsApp / SMS order alerts", included: true },
+      {
+        text: "Discount codes, loyalty rewards & scheduled promotions",
+        included: true,
+      },
+      { text: "Cloud backup & secure data storage", included: true },
+      { text: "POS & delivery app integrations", included: true },
+      { text: "Automated customer receipts & follow-ups", included: true },
+      { text: "Priority support", included: true },
     ],
     isPopular: true,
   },
   {
-    title: "XRT-Tech ENTERPRISE",
+    title: " Success Plan",
     monthlyPrice: "USD 35/m",
     yearlyPrice: "USD 420/y",
     monthlyTotal: "$420",
@@ -131,11 +164,16 @@ export const plans = [
     yearlyOriginal: "$530",
     discount: "21%",
     features: [
-      { text: "All Standard Courses", included: true },
-      { text: "All Hands-on Labs", included: true },
-      { text: "Team management dashboard", included: false },
-      { text: "Learning Tracker & Report", included: false },
-      { text: "1x user license transfer", included: false },
+      { text: "All in Grow Plan", included: true },
+      { text: "Unlimited branches & users", included: true },
+      { text: "Custom design & white-label branding", included: true },
+      { text: "API integrations (POS, ERP, delivery)", included: true },
+      { text: "Custom feature development", included: true },
+      { text: "Centralized admin dashboard", included: true },
+      { text: "Data insights & reporting portal", included: true },
+      { text: "Dedicated account manager", included: true },
+      { text: "Advanced automation tools", included: true },
+      { text: "24/7 premium support", included: true },
     ],
     isPopular: false,
   },
@@ -192,7 +230,8 @@ export const testimonials = [
 export const services = [
   {
     id: "web-development",
-    icon: Code2,
+    icon: webIcon,
+    img: webImg,
     title: "Web Design, Development & Maintenance",
     description:
       "Your website is the heart of your online presence. We design, build, host, and maintain fast, modern sites that work flawlessly on every device — so your business looks professional and runs smoothly, 24/7",
@@ -207,7 +246,8 @@ export const services = [
   },
   {
     id: "cloud-solutions",
-    icon: CloudCog,
+    icon: cloudIcon,
+    img: cloud,
     title: "Cloud & Backup Solutions",
     description:
       "Protect your data and access it anywhere. We provide secure cloud storage and automated backups to ensure your files and systems are always safe, synced, and accessible.",
@@ -222,7 +262,8 @@ export const services = [
   },
   {
     id: "online-ordering-systems",
-    icon: ShoppingCart,
+    icon: onlineOrderingIcon,
+    img: onlineImg,
     title: "Online Ordering Systems",
     description:
       "Bring your store or restaurant online with a custom ordering system that’s easy to use and built for results. Accept orders, manage menus, and track performance — all from one simple dashboard.",
@@ -236,9 +277,10 @@ export const services = [
     ],
   },
   {
-    id: "digital-branding-e-design",
-    icon: Palette,
-    title: "Digital Branding & eDesign",
+    id: "digital-marketing",
+    icon: digitalIcon,
+    img: digital,
+    title: "Digital Marketing",
     description:
       "Make your first impression count. We craft logos, digital materials, and visuals that reflect your brand’s personality and help you stand out in a crowded market.",
     color: "from-amber-500 to-yellow-400",
@@ -253,7 +295,8 @@ export const services = [
   },
   {
     id: "it-setup-support",
-    icon: Settings,
+    icon: itIcon,
+    img: it,
     title: "IT Setup & Support",
     description:
       "We handle the technical side so you don’t have to. From email systems and cloud setup to troubleshooting and maintenance — we keep your business connected and running without downtime.",
@@ -262,7 +305,8 @@ export const services = [
   },
   {
     id: "seo-performance-optimization",
-    icon: Rocket,
+    icon: seoIcon,
+    img: seoImg,
     title: "SEO & Performance Optimization",
     description:
       "Boost your visibility and website performance. Our optimization strategies help your site load faster, rank higher, and deliver a seamless experience that turns visitors into customers.",
@@ -365,7 +409,7 @@ export const faqs = [
   {
     question: "Do you work with clients outside the U.S.?",
     answer:
-      "Yes. We partner with clients around the world through virtual meetings, secure collaboration tools, and clear communication across time zones.",
+      "Yes. We partner with clients around the world through virtual meetings, secure collaboration tools, and clear communication across time zones. No matter where you’re located, you’ll receive the same level of attention, reliability, and support as our local clients.",
   },
 ];
 
@@ -402,6 +446,7 @@ export const partners = [
   { name: "TechX", logo: techX },
 ];
 
+
 // Export images
 export {
   case_study,
@@ -415,4 +460,20 @@ export {
   testimonial_2,
   darkLogo,
   lightLogo,
+  heroSection,
+  webIcon,
+  digitalIcon,
+  cloudIcon,
+  onlineOrderingIcon,
+  itIcon,
+  seoIcon,
+  missionIcon,
+  vission,
+  whoWeAre,
+  aboutImg,
+  webImg,
+  cloud,
+  onlineImg,
+  digital,
+  seoImg
 };

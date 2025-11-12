@@ -14,6 +14,7 @@ import lightLogo from "../assets/images/logo-light.png";
 import darkLogo from "../assets/images/logo-dark.png";
 import { useThemeDetector } from "@/hooks/useThemeDetector";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const Header = () => {
   const [isClient, setIsClient] = useState(false);
@@ -22,6 +23,7 @@ const Header = () => {
   const pathname = usePathname();
   const { isDark, isMounted } = useThemeDetector();
   const router = useRouter();
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     if (isMounted) {
@@ -64,31 +66,46 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-2">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.path}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
-                  ${
-                    pathname === link.path
-                      ? "text-primary bg-primary/5"
-                      : "text-foreground/80 hover:text-primary hover:bg-primary/5"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                // Skip protected routes if user is not authenticated
+                if (link.protected && !isAuthenticated) return null;
+                
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.path}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200
+                    ${
+                      pathname === link.path
+                        ? "text-primary bg-primary/5"
+                        : "text-foreground/80 hover:text-primary hover:bg-primary/5"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Right side buttons */}
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              <Button
-                variant="ghost"
-                className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
-              >
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  onClick={logout}
+                  className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
+                >
+                  Sign Out
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
+                >
+                  <Link href="/auth/login">Sign In</Link>
+                </Button>
+              )}
 
               <Button
                 className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 

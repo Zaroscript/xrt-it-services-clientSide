@@ -2,21 +2,13 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import {
-  ArrowRight,
-  Code2,
-  CloudCog,
-  Cpu,
-  HardDrive,
-  ShieldCheck,
-  Smartphone,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { services, howItWorks, faqs } from "@/config/constants";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 
 export default function ServicesPage() {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -119,7 +111,6 @@ export default function ServicesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => {
-              
               return (
                 <motion.div
                   key={service.id}
@@ -136,9 +127,15 @@ export default function ServicesPage() {
                       ></div>
                       <div className="p-8 flex-1 flex flex-col">
                         <div
-                          className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${service.color} text-white shadow-lg`}
+                          className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br text-white shadow-lg`}
                         >
-                          {service.icon && <service.icon className="w-7 h-7" />}
+                          <Image
+                            src={service.icon}
+                            alt={service.title}
+                            className="w-full h-full object-contain"
+                            width={28}
+                            height={28}
+                          />
                         </div>
                         <h3 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
                           {service.title}
@@ -350,7 +347,9 @@ export default function ServicesPage() {
                     size="lg"
                     className="group px-8 h-14 border-2 hover:bg-foreground/5"
                   >
-                    <span className="group-hover:text-secondary">Contact Us</span>
+                    <span className="group-hover:text-secondary">
+                      Contact Us
+                    </span>
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 group-hover:text-secondary transition-transform" />
                   </Button>
                 </motion.div>

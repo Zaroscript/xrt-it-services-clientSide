@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FadeIn, FadeUp, StaggerChildren } from "@/components/ui/animations";
 import AnimatedGradientText from "@/components/ui/AnimatedGradientText";
-import { values } from "@/config/constants";
+import { values, missionIcon, vission, whoWeAre, aboutImg } from "@/config/constants";
 import { useRouter } from "next/navigation";
 
 export default function AboutPage() {
@@ -102,12 +102,7 @@ export default function AboutPage() {
 
             <FadeUp delay={0.6} className="mt-16">
               <div className="relative w-full max-w-4xl h-[400px] mx-auto rounded-2xl overflow-hidden border border-border/20 dark:border-border/30 bg-gradient-to-br from-background to-muted/20 dark:from-muted/10 dark:to-background/50">
-                <div className="absolute inset-0 dark:bg-[url('/grid-pattern-dark.svg')] bg-[url('/grid-pattern.svg')] bg-[length:40px_40px] opacity-10" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-3/4 h-3/4 bg-gradient-to-br from-primary/10 to-cyan-500/10 dark:from-primary/20 dark:to-cyan-500/20 rounded-xl backdrop-blur-sm border border-border/20 dark:border-border/30 flex items-center justify-center">
-                    <Code className="w-16 h-16 text-primary/50" />
-                  </div>
-                </div>
+                <Image src={aboutImg} alt="About us image" width={700} height={400} className="w-full h-full object-cover" />
               </div>
             </FadeUp>
           </div>
@@ -132,7 +127,7 @@ export default function AboutPage() {
               <div className="space-y-8 max-w-2xl">
                 <div className="space-y-4">
                   <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-                    Our Story
+                    Who we are?
                   </h2>
                   <div className="h-1 w-20 bg-gradient-to-r from-secondary/80 to-background/80 rounded-full" />
                 </div>
@@ -173,13 +168,14 @@ export default function AboutPage() {
             </FadeIn>
 
             <FadeIn delay={0.2} className="relative">
-              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl border border-border/20 dark:border-border/30 bg-gradient-to-br from-muted/20 to-background dark:from-muted/10 dark:to-background/50">
-                <div className="absolute inset-0 dark:bg-[url('/grid-pattern-dark.svg')] bg-[url('/grid-pattern.svg')] bg-[length:40px_40px] opacity-5" />
-                <div className="relative h-full w-full flex items-center justify-center p-8">
-                  <div className="relative w-full h-full bg-gradient-to-br from-primary/5 to-cyan-500/10 dark:from-primary/10 dark:to-cyan-500/20 rounded-2xl border border-border/20 dark:border-border/30 backdrop-blur-sm flex items-center justify-center">
-                    <Layout className="w-24 h-24 text-primary/30" />
-                  </div>
-                </div>
+              <div className="relative aspect-auto rounded-3xl overflow-hidden shadow-2xl border border-border/20 dark:border-border/30 bg-gradient-to-br from-muted/20 to-background dark:from-muted/10 dark:to-background/50">
+                <Image
+                  src={whoWeAre}
+                  alt="Who we are"
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-gradient-to-br from-primary/10 to-primary/30 dark:from-primary/20 dark:to-primary/40 rounded-2xl -z-10" />
@@ -196,21 +192,14 @@ export default function AboutPage() {
             {/* Mission */}
             <FadeIn className="p-8 bg-card rounded-2xl shadow-sm border border-border/20 hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-6 h-6"
-                  >
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                  </svg>
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <Image
+                    src={missionIcon}
+                    alt="Mission icon"
+                    width={24}
+                    height={24}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <h2 className="text-2xl  font-bold">Our Mission</h2>
               </div>
@@ -226,24 +215,14 @@ export default function AboutPage() {
               className="p-8 bg-card rounded-2xl shadow-sm border border-border/20 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-6 h-6"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                  </svg>
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <Image
+                    src={vission}
+                    alt="Vision icon"
+                    width={24}
+                    height={24}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <h2 className="text-2xl font-bold">Our Vision</h2>
               </div>

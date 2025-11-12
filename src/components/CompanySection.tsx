@@ -2,8 +2,6 @@
 
 import { motion, type Easing } from "framer-motion";
 import Image from "next/image";
-import { Play } from "lucide-react";
-import Link from "next/link";
 
 // images
 import {
@@ -83,27 +81,30 @@ export function CompanySection() {
 
             {/* Video and Images */}
             <div className="relative mt-16 lg:mt-0 max-sm:hidden">
-              <div className="relative mx-auto w-[250px] sm:w-[500px] lg:w-[400px]">
+              <div className="relative mx-auto w-[250px] sm:w-[500px] rounded-sm lg:w-[400px]">
                 {/* Main Video Thumbnail */}
 
-                <Image
-                  src={company_1}
-                  alt="Company Video"
-                  width={500}
-                  height={300}
-                  className="relative z-10 rounded-lg"
-                />
+                <div className="relative z-10 rounded-sm shadow-2xl">
+                  <Image
+                    src={company_1}
+                    alt="Company middle image"
+                    width={700}
+                    height={400}
+                    className="w-full h-auto"
+                  />
+                </div>
 
                 {/* Floating Images */}
                 <motion.div
                   animate={floatingAnimation}
-                  className="absolute -left-10 -top-14 w-[183px]"
+                  className="absolute -left-10 -top-14 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_2}
                     alt="Floating Image 1"
-                    width={183}
-                    height={183}
+                    width={120}
+                    height={120}
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
 
@@ -112,13 +113,14 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 0.5 },
                   }}
-                  className="absolute -right-4 -top-16 w-[120px]"
+                  className="absolute -right-4 -top-16 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_3}
                     alt="Floating Image 2"
                     width={120}
                     height={120}
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
 
@@ -127,13 +129,14 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 1 },
                   }}
-                  className="absolute -bottom-20 left-2 w-[120px]"
+                  className="absolute -bottom-20 left-2 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_4}
                     alt="Floating Image 3"
                     width={120}
                     height={120}
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
 
@@ -142,13 +145,14 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 1.5 },
                   }}
-                  className="absolute -bottom-20 -right-10 w-[130px]"
+                  className="absolute -bottom-20 -right-10 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_5}
                     alt="Floating Image 4"
-                    width={130}
-                    height={130}
+                    width={120}
+                    height={120}
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
               </div>

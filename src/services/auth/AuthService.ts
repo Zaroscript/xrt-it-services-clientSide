@@ -1,9 +1,9 @@
 import { LoginCredentials, RegisterData, AuthResponse, User } from "@/features/auth/types";
 import { BaseApiService } from "@/services/api/BaseApiService";
 
-class AuthService extends BaseApiService {
+export class AuthService extends BaseApiService {
   private static instance: AuthService;
-  private static readonly AUTH_ENDPOINT = "/api/auth";
+  private static readonly AUTH_ENDPOINT = "/auth";
   private user: User | null = null;
 
   private constructor(baseURL: string) {
@@ -11,177 +11,158 @@ class AuthService extends BaseApiService {
     this.loadUserFromStorage();
   }
 
-  public static getInstance(
-    baseURL: string = process.env.NEXT_PUBLIC_API_URL || ""
-  ): AuthService {
-    if (!AuthService.instance) {
+  public static getInstance(baseURL: string = process.env.NEXT_PUBLIC_API_URL || ""): AuthService {
+    if (!AuthService.instance && baseURL) {
       AuthService.instance = new AuthService(baseURL);
     }
     return AuthService.instance;
   }
 
-  private loadUserFromStorage() {
-    if (typeof window !== 'undefined') {
+  private loadUserFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
-        this.user = JSON.parse(userStr);
-        this.setAuthToken(this.user?.token);
+        const userData = JSON.parse(userStr);
+        if (userData?.token) {
+          this.user = userData;
+          this.setAuthToken(userData.token);
+        }
       }
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      this.clearUserFromStorage();
     }
   }
 
-  private saveUserToStorage(user: User) {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('user', JSON.stringify(user));
-    }
-  }
-
-  private clearUserFromStorage() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('user');
-    }
+  private clearUserFromStorage(): void {
+    if (typeof window === 'undefined') return;
+    
+    localStorage.removeItem('user');
+    this.user = null;
+    this.clearAuthToken();
   }
 
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    try {
-      const response = await this.post<AuthResponse>(
-        `${AuthService.AUTH_ENDPOINT}/login`,
-        credentials
-      );
-      
-      if (response.user && response.token) {
-        this.user = { ...response.user, token: response.token };
-        this.setAuthToken(response.token);
-        this.saveUserToStorage(this.user);
-      }
-      
-      return response;
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+    if (!credentials.email || !credentials.password) {
+      throw new Error('Email and password are required');
     }
+
+    const response = await this.http.post<AuthResponse>(
+      `${AuthService.AUTH_ENDPOINT}/login`,
+      credentials
+    );
+    
+    if (!response.data.user || !response.data.token) {
+      throw new Error('Invalid response from server');
+    }
+    
+    this.user = { ...response.data.user, token: response.data.token };
+    this.setAuthToken(response.data.token);
+    this.saveUserToStorage(this.user);
+    
+    return response.data;
   }
 
   public async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await this.post<AuthResponse>(
-        `${AuthService.AUTH_ENDPOINT}/register`,
-        userData
+      // Ensure we don't double the /api/v1 part in the URL
+      const endpoint = AuthService.AUTH_ENDPOINT.startsWith('/') 
+        ? AuthService.AUTH_ENDPOINT.substring(1) 
+        : AuthService.AUTH_ENDPOINT;
+      
+      const url = `${endpoint}/register`;
+      console.log('Sending registration request to:', `${this.baseURL}${url}`);
+      console.log('Registration payload:', JSON.stringify(userData, null, 2));
+      
+      const response = await this.http.post<AuthResponse>(
+        url,  // Use the cleaned URL without leading slash
+        userData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          withCredentials: true
+        }
       );
       
-      if (response.user && response.token) {
-        this.user = { ...response.user, token: response.token };
-        this.setAuthToken(response.token);
-        this.saveUserToStorage(this.user);
+      console.log('Registration response:', response);
+      
+      if (!response.data) {
+        throw new Error('No data received from server');
       }
       
-      return response;
-    } catch (error) {
-      console.error('Registration failed:', error);
+      this.user = { ...response.data.user, token: response.data.token };
+      this.setAuthToken(response.data.token);
+      this.saveUserToStorage(this.user);
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('Registration error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.config?.data,
+          headers: error.config?.headers,
+        }
+      });
+      
+      // If we have a response with data, use that as the error message
+      if (error.response?.data) {
+        throw new Error(
+          typeof error.response.data === 'object' 
+            ? JSON.stringify(error.response.data) 
+            : error.response.data
+        );
+      }
+      
       throw error;
     }
   }
 
-  public async getCurrentUser(): Promise<User | null> {
-    try {
-      const token = this.getAuthToken();
-      if (!token) return null;
-
-      return await this.get<User>(`${AuthService.AUTH_ENDPOINT}/me`);
-    } catch (error) {
-      this.clearAuthToken();
-      return null;
-    }
-  }
-
-  // Initialize Google Auth
-  public initializeGoogleAuth(
-    clientId: string,
-    onSuccess: (response: AuthResponse) => void,
-    onFailure: (error: unknown) => void
-  ) {
-    if (typeof window === 'undefined') return;
-
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: async (response: GoogleCredentialResponse) => {
-        try {
-          const res = await this.http.post<AuthResponse>(
-            `${AuthService.AUTH_ENDPOINT}/google`,
-            { credential: response.credential }
-          );
-          if (res.data.token) {
-            this.setAuthToken(res.data.token);
-          }
-          onSuccess(res.data);
-        } catch (error) {
-          onFailure(error);
-        }
-      },
-    });
-  }
-
-  // Render Google Sign-In button
-  public renderGoogleButton(buttonId: string) {
-    if (typeof window === 'undefined') return;
-    
-    window.google.accounts.id.renderButton(
-      document.getElementById(buttonId),
-      { 
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-        shape: 'rectangular',
-        logo_alignment: 'left',
-      }
-    );
-  }
-
-  // Alternative: Google Auth with redirect
-  public async loginWithGoogle(credentials: GoogleAuthCredentials): Promise<AuthResponse> {
-    const response = await this.post<AuthResponse>(
-      `${AuthService.AUTH_ENDPOINT}/google`,
-      credentials
-    );
-    if (response.token) {
-      this.setAuthToken(response.token);
-    }
-    return response;
-  }
-
   public async logout(): Promise<void> {
     try {
-      await this.post(`${AuthService.AUTH_ENDPOINT}/logout`);
+      await this.http.post(`${AuthService.AUTH_ENDPOINT}/logout`);
+    } catch (error) {
+      console.error('Logout error:', error);
     } finally {
-      this.clearAuthToken();
+      this.clearUserFromStorage();
+    }
+  }
+
+  public getCurrentUser(): User | null {
+    return this.user;
+  }
+
+  public isAuthenticated(): boolean {
+    return !!this.user?.token;
+  }
+
+  private saveUserToStorage(user: User): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch (error) {
+      console.error('Failed to save user to storage:', error);
     }
   }
 
   private setAuthToken(token: string): void {
-    localStorage.setItem("token", token);
-    this.updateAxiosInstance();
-  }
-
-  private getAuthToken(): string | null {
-    return localStorage.getItem("token");
-  }
-
-  public clearAuthToken(): void {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      this.user = null;
-      this.updateAxiosInstance();
+    if (this.http) {
+      this.http.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   }
 
-  private updateAxiosInstance(): void {
-    const token = this.getAuthToken();
-    if (token) {
-      this.http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } else {
-      delete this.http.defaults.headers.common["Authorization"];
+  private clearAuthToken(): void {
+    if (this.http) {
+      delete this.http.defaults.headers.common['Authorization'];
     }
   }
 }

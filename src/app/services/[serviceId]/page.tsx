@@ -8,16 +8,13 @@ type ServicePageProps = {
   };
 };
 
-export default async function ServicePage({ params }: ServicePageProps) {
-  // Convert URL parameter to match service title format
-  const serviceTitle = params.serviceId
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+export default function ServicePage({ params }: ServicePageProps) {
+  // Convert URL parameter to match service ID format
+  const serviceId = params.serviceId;
 
-  // Find the service by title
+  // Find the service by ID
   const service = services.find(
-    (s) => s.title.toLowerCase() === serviceTitle.toLowerCase()
+    (s) => s.id.toLowerCase() === serviceId.toLowerCase()
   );
 
   // If service not found, return 404
@@ -28,11 +25,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
   // Create a new object with only the properties we want to pass to the client component
   const enhancedService = {
     ...service,
-    id: service.title.toLowerCase().replace(/\s+/g, "-"),
+    id: service.id,
     longDescription: getServiceDescription(service.title),
     process: getServiceProcess(service.title),
-    // Convert icon to a string identifier
-    iconName: service.icon?.name || service.title.toLowerCase().replace(/\s+/g, "-")
+    // Use the service ID as the icon name
+    iconName: service.id
   };
   
   // Remove the icon property to avoid serialization issues

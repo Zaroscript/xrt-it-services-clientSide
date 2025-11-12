@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useThemeDetector } from "@/hooks/useThemeDetector";
 import lightLogo from "../assets/images/logo-light.png";
 import darkLogo from "../assets/images/logo-dark.png";
+import { services } from "@/config/constants";
 
 const Footer = () => {
   const {isDark, isMounted} = useThemeDetector();
@@ -25,7 +26,7 @@ const Footer = () => {
                 priority
               />
             <p className="mt-2 text-[#64748b] dark:text-slate-300 text-sm leading-relaxed max-w-sm">
-              Empowering businesses through innovative technology solutions that drive growth and success.
+              Smart IT and web solutions made simple for every business.
             </p>
             <div className="flex gap-4 mt-6">
               {[Twitter, Facebook, Instagram, Linkedin].map((Icon, index) => (
@@ -44,13 +45,13 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-[#d3b073]">Solutions</h4>
             <ul className="space-y-3">
-              {["Web Development", "Mobile Apps", "Cloud Services", "IT Consulting"].map((item) => (
-                <li key={item}>
+              {services.map((service) => (
+                <li key={service.id}>
                   <Link 
-                    href="#" 
+                    href={`/services/${service.id}`}
                     className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
                   >
-                    {item}
+                    {service.title.split('&')[0].trim()}
                   </Link>
                 </li>
               ))}
@@ -59,18 +60,40 @@ const Footer = () => {
 
           {/* Company */}
           <div className="space-y-4">
-            <h4 className="text-sm font-medium text-[#d3b073] dark:text-white">Company</h4>
+            <h4 className="text-sm font-medium text-[#d3b073]">Company</h4>
             <ul className="space-y-3">
-              {["About", "services", "plans", "Contact"].map((item) => (
-                <li key={item}>
-                  <Link 
-                    href="#" 
-                    className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link 
+                  href="/about" 
+                  className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/services" 
+                  className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
+                >
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/pricing" 
+                  className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
+                >
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/contact" 
+                  className="text-sm text-[#1a1a1a] dark:text-white hover:opacity-75 transition-opacity"
+                >
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -84,7 +107,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2 text-sm text-[#64748b] dark:text-slate-200">
                 <Phone className="w-4 h-4" />
-                <a href="tel:+2348123456789">+234 812 345 6789</a>
+                <a href="tel:+15085070922">+1 508-507-0922</a>
               </li>
             </ul>
           </div>

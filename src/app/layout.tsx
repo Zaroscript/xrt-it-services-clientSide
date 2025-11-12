@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
 import { Providers } from "@/providers";
+import { AuthProvider } from "@/context/AuthContext";
 
 // Loading
 import Loading from "./loading";
@@ -17,6 +18,7 @@ import { Roboto, Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/chat/ChatWidget";
+import { Toaster } from "@/components/ui/custom-toast";
 
 
 
@@ -64,10 +66,15 @@ export default function RootLayout({
           <Suspense fallback={<Loading />}>
             <Providers session={null}>
               <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1 overflow-x-hidden">{children}</main>
-                <Footer />
-                <ChatWidget />
+                <AuthProvider>
+                  <Header />
+                  <main className="flex-1 overflow-x-hidden">
+                    <Suspense fallback={<Loading />}>{children}</Suspense>
+                  </main>
+                  <Footer />
+                  <ChatWidget />
+                  <Toaster />
+                </AuthProvider>
               </div>
             </Providers>
           </Suspense>

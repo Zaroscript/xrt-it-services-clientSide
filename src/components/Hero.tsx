@@ -1,20 +1,45 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import heroImage from "../../public/tech-bg.png";
-
-import { heroContent } from "../config/constants";
+import { heroContent, heroSection } from "../config/constants";
 import { useRouter } from "next/navigation";
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const [currentBackground, setCurrentBackground] = useState(heroImage);
   const router = useRouter();
 
+  // Handle background image change
+  useEffect(() => {
+    const backgrounds = [heroImage, heroSection];
+    let currentIndex = 0;
+    
+
+    
+    const changeBackground = () => {
+      currentIndex = (currentIndex + 1) % backgrounds.length;
+      setCurrentBackground(backgrounds[currentIndex]);
+    };
+
+    // Start with a delay for the first transition
+    const initialTimer = setTimeout(() => {
+      changeBackground();
+      // Then set up the regular interval
+      const timer = setInterval(changeBackground, 10000); 
+      return () => clearInterval(timer);
+    });
+    
+    return () => {
+      clearTimeout(initialTimer);
+    };
+  }, []);
+
+  // Handle content slide change
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroContent.length);
@@ -28,14 +53,42 @@ export default function Hero() {
       <div className="absolute inset-0 bg-primary/90 dark:bg-background/90" />
       <div className="absolute inset-0 opacity-30" />
 
-      {/* Tech Background Image */}
-      <Image
-        src={heroImage}
-        alt="Technology Background"
-        fill
-        className="object-cover opacity-30 blur-sm"
-        priority
-      />
+      {/* Animated Background Images with Blur */}
+      <div className="absolute inset-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ 
+              opacity: 0.7, 
+              scale: 1,
+              transition: { 
+                duration: 1.5, 
+                ease: [0.2, 0.8, 0.2, 1],
+                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] }
+              }
+            }}
+            exit={{ 
+              opacity: 0,
+              scale: 0.95,
+              transition: { 
+                duration: 1, 
+                ease: [0.4, 0, 0.2, 1],
+                opacity: { duration: 0.8 }
+              }
+            }}
+            className="absolute inset-0 overflow-hidden"
+          >
+            <Image
+              src={currentBackground}
+              alt="Technology Background"
+              fill
+              className="object-cover opacity-80 blur-xs"
+              priority
+              quality={100}
+             />
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       <div className="relative page-container mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 py-20">

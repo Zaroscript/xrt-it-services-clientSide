@@ -175,21 +175,17 @@ export function ContactForm() {
               transition={{ duration: 0.5 }}
               className="lg:col-span-5"
             >
-              <p className="relative border-l-4 text-2xl border-secondary pl-6  font-bold text-primary dark:text-white  ">
+              <p className="relative border-l-4 text-2xl lg:text-3xl border-secondary pl-6  font-bold text-primary dark:text-white  ">
                 Have a question or need more information? information,{" "}
                 <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
                   Fill out the form or reach out to us via our social channels.
-                </span>{" "}
-                We're here to help you with anything you need. To make requests
-                for further
+                </span>
               </p>
               <div className="mt-6 pl-6 space-y-4">
-                <div className="text-gray-400">
-                  <p className="font-medium text-white">Working Hours:</p>
-                  <p>Monday to Friday: 10 AM to 10 PM</p>
-                  <p>Saturday: 8 AM to 8 PM</p>
-                  <p>Sunday: Closed</p>
-                </div>
+                <p className="text-gray-400">
+                  We're here to help you with anything you need. To make requests
+                for further
+                </p>
               </div>
             </motion.div>
 

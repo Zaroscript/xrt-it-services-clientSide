@@ -4,6 +4,20 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  fName?: string;
+  lName?: string;
+  phone?: string;
+  businessName?: string;
+  businessAddress?: string;
+  businessCity?: string;
+  businessState?: string;
+  businessZipCode?: string;
+  businessCountry?: string;
+  websiteUrl?: string;
+  requiresBusinessInfo?: boolean;
+  token?: string; // Optional token for authenticated requests
+  isApproved?: boolean; // Indicates if the user's account is approved
+  role?: string; // User role (e.g., 'admin', 'user')
 }
 
 export interface LoginCredentials {
@@ -12,9 +26,16 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData extends LoginCredentials {
-  name: string;
-  phoneNumber: string;
-  businessName: string;
+  fName: string;
+  lName: string;
+  phone: string;
+  businessAddress?: string;
+  businessCity?: string;
+  businessState?: string;
+  businessZipCode?: string;
+  businessCountry?: string;
+  oldWebsite?: string;
+  hasExistingWebsite?: boolean;
 }
 
 export interface GoogleAuthCredentials {
@@ -52,10 +73,15 @@ export interface LoginPayload {
   password: string;
 }
 
-export interface RegisterPayload extends LoginPayload {
-  name: string;
-  phoneNumber: string;
-  businessName: string;
+export interface UpdateProfilePayload {
+  businessAddress: string;
+  businessCity: string;
+  businessState: string;
+  businessZipCode: string;
+  businessCountry: string;
+  hasExistingWebsite: boolean;
+  websiteUrl?: string;
+  requiresBusinessInfo?: boolean;
 }
 
 // Type for error responses

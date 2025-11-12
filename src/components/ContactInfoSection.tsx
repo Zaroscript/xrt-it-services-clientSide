@@ -8,27 +8,31 @@ const contactInfo = [
     icon: <Mail className="h-6 w-6 text-secondary" />,
     title: "Email Us",
     description: "We'll respond quickly",
-    value: "contact@xrt-tech.com",
-    link: "mailto:contact@xrt-tech.com"
+    value: "support@xrttech.com",
+    link: "mailto:support@xrttech.com"
   },
   {
     icon: <Phone className="h-6 w-6 text-secondary" />,
     title: "Call Us",
-    description: "Mon-Fri from 9am to 5pm",
-    value: "+1 (555) 123-4567",
-    link: "tel:+15551234567"
+    description: "Mon-Fri 10am-10pm, Sat 8am-8pm",
+    value: "+1 508-507-0922",
+    link: "tel:+15085070922"
   },
-  {
-    icon: <MapPin className="h-6 w-6 text-secondary" />,
-    title: "Visit Us",
-    description: "Our office location",
-    value: "123 Tech Street, Silicon Valley, CA 94025"
-  },
+  // {
+  //   icon: <MapPin className="h-6 w-6 text-secondary" />,
+  //   title: "Visit Us",
+  //   description: "Our office location",
+  //   value: "Franklin, MA 02038"
+  // },
   {
     icon: <Clock className="h-6 w-6 text-secondary" />,
     title: "Working Hours",
     description: "We're here for you",
-    value: "Monday - Friday: 9:00 AM - 6:00 PM"
+    value: <>
+      Monday to Friday: 10 AM to 10 PM<br />
+      Saturday: 8 AM to 8 PM<br />
+      Sunday: Closed
+    </>
   }
 ];
 
@@ -57,7 +61,7 @@ export function ContactInfoSection() {
           </motion.p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {contactInfo.map((item, index) => (
             <motion.div
               key={item.title}
@@ -128,7 +132,7 @@ export function LocationSection() {
         >
           <div className="aspect-w-16 aspect-h-9 w-full h-[400px] md:h-[500px] lg:h-[600px]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d101360.30408287247!2d-122.1207421!3d37.3871361!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fb07545f7e4b9%3A0x4a501367f3e1e71!2sSilicon%20Valley%2C%20CA%2C%20USA!5e0!3m2!1sen!2s!4v1620000000000!5m2!1sen!2s"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2966.0906008!2d-71.42676432344565!3d42.09021737130051!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e4835b9e0a9f8f%3A0x5f5e5e5e5e5e5e5e!2sFranklin%2C%20MA%2002038%2C%20USA!5e0!3m2!1sen!2s!4v1620000000000!5m2!1sen!2s"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -143,10 +147,10 @@ export function LocationSection() {
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">XRT Tech Headquarters</h3>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">123 Tech Street, Silicon Valley, CA 94025</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Franklin, MA 02038</p>
               </div>
               <a 
-                href="https://maps.google.com?q=123+Tech+Street,+Silicon+Valley,+CA+94025" 
+                href="https://maps.google.com?q=Franklin+MA+02038" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors"

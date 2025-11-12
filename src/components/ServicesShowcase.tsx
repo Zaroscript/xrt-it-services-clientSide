@@ -1,13 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 
 import { services } from "@/config/constants";
+import Image from "next/image";
 
 export function ServicesShowcase() {
   return (
@@ -48,7 +47,7 @@ export function ServicesShowcase() {
           {services.map((service, index) => (
             <motion.div
               key={service.title}
-              className="group relative bg-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              className="group relative bg-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -58,25 +57,34 @@ export function ServicesShowcase() {
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}
               />
-              <div className="relative z-10">
+              <div className="relative z-10 flex-1 flex flex-col">
                 <div
-                  className={`w-14 h-14 rounded-xl mb-6 flex items-center justify-center bg-gradient-to-br ${service.color} text-white`}
+                  className={`w-14 h-14 rounded-xl mb-6 flex items-center justify-center bg-gradient-to-br text-white`}
                 >
-                  <service.icon className="w-6 h-6" />
+                  <Image
+                    src={service.icon}
+                    alt={service.title}
+                    className="w-full h-full"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-secondary">
                   {service.title}
                 </h3>
-                <p className="dark:text-white/50 text-primary/50  mb-6">
+                <p className="dark:text-white/50 text-primary/50 mb-6 flex-1">
                   {service.description}
                 </p>
-                <Link
-                  href="/services"
-                  className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors group-hover:translate-x-1 duration-300"
-                >
-                  Learn more
-                  <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
+                <div className="mt-auto pt-4">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full bg-transparent border-primary/20 hover:bg-primary/10 text-primary hover:text-primary transition-colors group"
+                  >
+                    <Link href="/services" className="flex items-center justify-center gap-1">
+                      Learn more
+                      <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </motion.div>
           ))}

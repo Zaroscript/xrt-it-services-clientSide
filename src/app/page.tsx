@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import React from "react";
+import { motion } from "framer-motion";
 
 import Hero from "@/components/Hero";
 import { Services } from "@/components/Services";
@@ -19,8 +20,6 @@ import ContactSection from "@/components/ContactSection";
 import Partners from "@/components/Partners";
 
 export default function Home() {
-  
-
   return (
     <>
       <Hero />
@@ -29,13 +28,15 @@ export default function Home() {
       <CompanySection />
       <ServicesShowcase />
       <Success />
-      {/* <OurProjects /> */}
       {/* <Service /> */}
       <Studies />
+
+      {/* Pricing Section */}
+      
       <Priceing />
+
       <Testimonials />
       <ContactSection />
     </>
   );
 }
-

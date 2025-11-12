@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import { AlertTriangle, WifiOff } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { selectCurrentUser } from "@/features/auth/authSlice";
+import { register as registerUser, clearError } from "@/features/auth/authSlice";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -27,20 +33,22 @@ import {
   Globe, 
   CheckCircle2,
   AlertCircle,
-  Lock
+  Lock,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 
 // Form Types
-type FormValues = {
-  fullName: string;
+interface FormValues {
+  firstName: string;
+  lastName: string;
   email: string;
   phoneNumber: string;
   businessName: string;
   password: string;
   confirmPassword: string;
-  hasExistingWebsite: boolean;
-  websiteUrl: string;
+  hasExistingWebsite?: boolean;
+  websiteUrl?: string;
 };
 
 // Password validation schema
@@ -48,168 +56,330 @@ const passwordSchema = z.string()
   .min(8, { message: "Password must be at least 8 characters" })
   .regex(/[a-z]/, { message: "Must contain at least one lowercase letter" })
   .regex(/[A-Z]/, { message: "Must contain at least one uppercase letter" })
-  .regex(/\d/, { message: "Must contain at least one number" });
+  .regex(/\d/, { message: "Must contain at least one number" })
+  .regex(/[@$!%*?&]/, { message: "Must contain at least one special character (@, $, !, %, *, ?, or &)" });
 
 // Base form schema
-const baseSchema = z.object({
-  fullName: z.string()
-    .min(2, { message: "Name must be at least 2 characters" })
-    .max(50, { message: "Name must be less than 50 characters" }),
+const formSchema = z.object({
+  firstName: z.string()
+    .min(2, { message: "First name must be at least 2 characters" })
+    .max(50, { message: "First name must be less than 50 characters" }),
+  lastName: z.string()
+    .min(1, { message: "Last name is required" })
+    .max(50, { message: "Last name must be less than 50 characters" }),
   email: z.string().email({
     message: "Please enter a valid email address"
   }),
-  phoneNumber: z.string().min(10, {
-    message: "Please enter a valid phone number"
-  }),
+  phoneNumber: z.string()
+    .min(10, {
+      message: "Phone number must be at least 10 digits"
+    })
+    .regex(
+      /^(\+?1[\s.-]?)?(\([0-9]{3}\)[\s.-]?|[0-9]{3}[\s.-]?)[0-9]{3}[\s.-]?[0-9]{4}$/,
+      {
+        message: "Please enter a valid US phone number (e.g., 123-456-7890 or (123) 456-7890)"
+      }
+    ),
   businessName: z.string().min(2, {
     message: "Business name is required"
   }),
   hasExistingWebsite: z.boolean().default(false),
-  websiteUrl: z.string().url({
-    message: "Please enter a valid URL"
-  }).optional().or(z.literal('')),
+  websiteUrl: z.string()
+    .url({
+      message: "Please enter a valid URL (e.g., https://yoursite.com)"
+    })
+    .refine(
+      (val) => !val || val.startsWith('http://') || val.startsWith('https://'),
+      { message: 'URL must start with http:// or https://' }
+    )
+    .optional()
+    .or(z.literal('')),
   password: passwordSchema,
   confirmPassword: z.string()
-});
-
-// Full form schema with custom validation
-const formSchema = baseSchema.superRefine((data, ctx) => {
-  if (data.password !== data.confirmPassword) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Passwords do not match",
-      path: ["confirmPassword"]
-    });
-  }
-  
-  if (data.hasExistingWebsite && !data.websiteUrl) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Website URL is required when 'I have an existing website' is checked",
-      path: ["websiteUrl"]
-    });
-  }
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type FormData = z.infer<typeof formSchema>;
-
 
 const steps = [
   {
     id: 'personal',
     title: 'Personal Information',
-    description: 'Tell us a bit about yourself'
+    description: 'Tell us a bit about yourself',
+    fields: ['firstName', 'lastName', 'email', 'phoneNumber']
   },
   {
     id: 'business',
     title: 'Business Information',
-    description: 'Tell us about your business'
+    description: 'Tell us about your business',
+    fields: ['businessName', 'hasExistingWebsite', 'websiteUrl']
   },
   {
     id: 'security',
     title: 'Account Security',
-    description: 'Create a secure password'
+    description: 'Create a secure password',
+    fields: ['password', 'confirmPassword']
   }
 ];
 
 export default function RegisterPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { status, error, isAuthenticated } = useAppSelector((state) => state.auth);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Initialize form with proper types
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema as any), // Temporary type assertion
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    control,
+    watch,
+    trigger,
+    setValue,
+    clearErrors,
+    setError,
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phoneNumber: "",
       businessName: "",
       password: "",
       confirmPassword: "",
       hasExistingWebsite: false,
-      websiteUrl: ""
-    }
+      websiteUrl: "",
+    },
   });
+
+  const hasExistingWebsite = watch('hasExistingWebsite', false);
+
+  // Watch for changes to the hasExistingWebsite field
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'hasExistingWebsite') {
+        // Clear website URL when unchecking
+        if (!value.hasExistingWebsite) {
+          setValue('websiteUrl', '');
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
+
+  // Remove the automatic redirection to dashboard when authenticated
+  // We'll handle the redirection manually after registration
+  // This prevents the automatic redirection that was happening before
   
-  const { register, handleSubmit, watch, trigger, formState: { errors }, control } = form;
+  // Get the current user from the Redux store
+  const currentUser = useAppSelector(selectCurrentUser);
 
-  const hasExistingWebsite = watch('hasExistingWebsite');
-  const nextStep = async () => {
-    const fields = steps[currentStep].id === 'personal' 
-      ? ['fullName', 'email'] 
-      : steps[currentStep].id === 'business' 
-        ? ['businessName', 'phoneNumber', 'hasExistingWebsite', 'websiteUrl']
-        : ['password', 'confirmPassword'];
-    
-    const output = await trigger(fields as any);
-    
-    if (output) {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-      return true;
+  // Only redirect to dashboard if the user is already approved
+  useEffect(() => {
+    if (isAuthenticated && currentUser?.isApproved) {
+      router.push('/dashboard');
     }
-    return false;
+  }, [isAuthenticated, router, currentUser?.isApproved]);
+
+  const nextStep = async () => {
+    const fields = steps[currentStep].fields as (keyof FormData)[];
+    const isValid = await trigger(fields);
+    
+    if (isValid) {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const prevStep = (): void => {
+  const prevStep = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
+
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    
+    // Store registration data in session storage
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('pendingApprovalEmail', data.email);
+      sessionStorage.setItem('registrationComplete', 'true');
+    }
+    
     try {
-      setIsLoading(true);
+      setFormError(null);
+
+      // Format phone number to match backend validation (XXX) XXX-XXXX
+      const formatPhoneNumber = (phone: string) => {
+        const cleaned = phone.replace(/\D/g, '');
+        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return `(${match[1]}) ${match[2]}-${match[3]}`;
+        }
+        return phone; // Return as is if format doesn't match
+      };
+
+      // Prepare registration data matching backend expectations
+      const registrationData = {
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+        fName: data.firstName.trim(),
+        lName: data.lastName.trim(),
+        phone: formatPhoneNumber(data.phoneNumber),
+        businessName: data.businessName.trim(),
+        requiresBusinessInfo: true
+      };
       
-      // If not the last step, go to next step
-      if (currentStep < steps.length - 1) {
-        const isValid = await nextStep();
-        if (!isValid) return;
-      } else {
-        // Handle final form submission
-        console.log('Form submitted:', data);
+      console.log('Registration data:', registrationData); // For debugging
+
+      const result = await dispatch(registerUser(registrationData) as any);
+      
+      if (result.meta.requestStatus === 'fulfilled') {
+        // Store registration data in session storage
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('pendingApprovalEmail', data.email);
+          sessionStorage.setItem('registrationComplete', 'true');
+        }
+
+        // Show success toast
+        toast.success('Registration Submitted', {
+          description: 'Your account is pending admin approval. You will be notified via email once approved.',
+          position: 'top-center',
+          duration: 5000,
+          className: 'bg-background border border-green-500 text-foreground',
+          icon: <CheckCircle2 className="h-5 w-5 text-green-500" />
+        });
+
+        // Redirect to pending approval page with the email as a query parameter
+        // Using replace instead of push to prevent back navigation to signup
+        router.replace(`/auth/pending-approval?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+      
+      if (result.meta.requestStatus === 'rejected') {
+        const error = result.error as any;
+        const errorData = error.payload || {};
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        toast.success('Account created successfully!', {
-          description: 'Welcome to our platform!',
+        // Log detailed error information
+        console.error('Registration error:', {
+          status: error.status,
+          statusText: error.statusText,
+          data: error.data,
+          payload: error.payload,
+          message: error.message,
+          stack: error.stack
         });
         
-        // Reset form and redirect to login
-        form.reset();
-        router.push('/auth/login');
+        // Log the exact request being made
+        console.log('Request details:', {
+          url: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
+          method: 'POST',
+          data: registrationData,
+          headers: {
+            'Content-Type': 'application/json',
+            // Add any other headers if needed
+          }
+        });
+        
+        // Handle different error types with appropriate UI feedback
+        switch (errorData.code) {
+          case 'VALIDATION_ERROR':
+            // Handle validation errors (e.g., invalid email format)
+            toast.error('Validation Error', {
+              description: errorData.message || 'Please check your input and try again.',
+              position: 'top-center',
+              duration: 5000,
+              className: 'bg-background border border-destructive text-foreground',
+              icon: <AlertCircle className="h-5 w-5 text-destructive" />
+            });
+            break;
+            
+          case 'NETWORK_ERROR':
+          case 'OfflineError':
+            // Handle network-related errors
+            toast.error('Connection Error', {
+              description: errorData.message || 'Unable to connect to the server. Please check your internet connection.',
+              position: 'top-center',
+              duration: 5000,
+              className: 'bg-background border border-destructive text-foreground',
+              icon: <WifiOff className="h-5 w-5 text-destructive" />
+            });
+            break;
+            
+          case 'ApiError':
+          case 'AuthError':
+            // Handle API and authentication errors
+            if (errorData.message?.toLowerCase().includes('already exists')) {
+              toast.error('Email Already Registered', {
+                description: 'An account with this email already exists. Please log in or use a different email.',
+                position: 'top-center',
+                duration: 5000,
+                className: 'bg-background border border-destructive text-foreground',
+                icon: <AlertCircle className="h-5 w-5 text-destructive" />,
+                action: {
+                  label: 'Go to Login',
+                  onClick: () => router.push('/auth/login')
+                }
+              });
+            } else {
+              toast.error('Registration Failed', {
+                description: errorData.message || 'An error occurred during registration. Please try again.',
+                position: 'top-center',
+                className: 'bg-background border border-destructive text-foreground',
+                icon: <AlertCircle className="h-5 w-5 text-destructive" />
+              });
+            }
+            break;
+            
+          default:
+            // Handle all other errors
+            toast.error('Something Went Wrong', {
+              description: 'An unexpected error occurred. Please try again later.',
+              position: 'top-center',
+              duration: 5000,
+              className: 'bg-background border border-destructive text-foreground',
+              icon: <AlertTriangle className="h-5 w-5 text-destructive" />
+            });
+        }
+        
+        // If there are validation errors, set them in the form state
+        if (errorData.validationErrors) {
+          Object.entries(errorData.validationErrors).forEach(([field, messages]) => {
+            setError(field as any, {
+              type: 'manual',
+              message: Array.isArray(messages) ? messages[0] : String(messages)
+            });
+          });
+        } else {
+          setFormError(errorData.message || 'An error occurred');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Handle successful registration - redirect to login with success message
+        router.push('/auth/login?registered=true');
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create account', {
-        description: 'Please try again later.',
-      });
+    } catch (error: any) {
+      setFormError('An unexpected error occurred. Please try again.');
+      console.error('Registration error:', error);
     } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const onError = (errors: Record<string, { message?: string }>) => {
-    console.error('Form errors:', errors);
-    const firstError = Object.values(errors)[0];
-    if (firstError?.message) {
-      toast.error('Validation Error', {
-        description: firstError.message,
-        duration: 3000,
-      });
+      setIsSubmitting(false);
     }
   };
 
-  const passwordRequirements = [
-    { id: 'length', text: 'At least 8 characters', validate: (val: string) => val.length >= 8 },
-    { id: 'lowercase', text: 'At least one lowercase letter', validate: (val: string) => /[a-z]/.test(val) },
-    { id: 'uppercase', text: 'At least one uppercase letter', validate: (val: string) => /[A-Z]/.test(val) },
-    { id: 'number', text: 'At least one number', validate: (val: string) => /\d/.test(val) }
-  ];
-
-  const renderFormStep = (): React.ReactNode => {
+  const renderFormStep = () => {
     switch (currentStep) {
       case 0:
         return (
@@ -218,60 +388,80 @@ export default function RegisterPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
           >
-            <div>
-              <Label htmlFor="fullName" className="mb-2 block">
-                Full Name <span className="text-destructive">*</span>
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
               <div className="relative">
                 <Input
-                  id="fullName"
+                  id="firstName"
                   type="text"
-                  placeholder="John Doe"
-                  className={cn(
-                    "pl-10 w-full dark:placeholder:text-white",
-                    errors.fullName && "border-destructive focus-visible:ring-destructive"
-                  )}
-                  {...register('fullName')}
+                  placeholder="John"
+                  {...register('firstName')}
+                  className={errors.firstName ? 'border-destructive' : ''}
                 />
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
-              {errors.fullName && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.fullName.message}
-                </p>
+              {errors.firstName && (
+                <p className="text-sm text-destructive">{errors.firstName.message}</p>
               )}
             </div>
-            
-            <div>
-              <Label htmlFor="email" className="mb-2 block">
-                Email <span className="text-destructive">*</span>
-              </Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <div className="relative">
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Doe"
+                  {...register('lastName')}
+                  className={errors.lastName ? 'border-destructive' : ''}
+                />
+                <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+              {errors.lastName && (
+                <p className="text-sm text-destructive">{errors.lastName.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
-                  className={cn(
-                    "pl-10 w-full dark:placeholder:text-white",
-                    errors.email && "border-destructive focus-visible:ring-destructive"
-                  )}
+                  placeholder="your@email.com"
                   {...register('email')}
+                  className={errors.email ? 'border-destructive' : ''}
+                  disabled={false}
                 />
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               {errors.email && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <div className="relative">
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="(123) 456-7890"
+                  {...register('phoneNumber')}
+                  className={errors.phoneNumber ? 'border-destructive' : ''}
+                />
+                <Phone className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+              {errors.phoneNumber && (
+                <p className="text-sm text-destructive">{errors.phoneNumber.message}</p>
               )}
             </div>
           </motion.div>
         );
-        
+
       case 1:
         return (
           <motion.div
@@ -279,113 +469,79 @@ export default function RegisterPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
           >
-            <div>
-              <Label htmlFor="businessName" className="mb-2 block">
-                Business Name <span className="text-destructive">*</span>
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Business Name</Label>
               <div className="relative">
                 <Input
                   id="businessName"
                   type="text"
-                  placeholder="Acme Inc."
-                  className={cn(
-                    "pl-10 w-full dark:placeholder:text-white",
-                    errors.businessName && "border-destructive focus-visible:ring-destructive"
-                  )}
+                  placeholder="Your Business Name"
                   {...register('businessName')}
+                  className={errors.businessName ? 'border-destructive' : ''}
                 />
-                <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Briefcase className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               {errors.businessName && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.businessName.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.businessName.message}</p>
               )}
             </div>
-            
-            <div>
-              <Label htmlFor="phoneNumber" className="mb-2 block">
-                Phone Number <span className="text-destructive">*</span>
-              </Label>
-              <div className="relative">
-                <Input
-                  id="phoneNumber"
-                  type="tel"
-                  placeholder="+1 (555) 123-4567"
-                  className={cn(
-                    "pl-10 w-full dark:placeholder:text-white",
-                    errors.phoneNumber && "border-destructive focus-visible:ring-destructive"
-                  )}
-                  {...register('phoneNumber')}
+
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="hasExistingWebsite"
+                  checked={hasExistingWebsite}
+                  onCheckedChange={(checked) => {
+                    setValue('hasExistingWebsite', !!checked);
+                  }}
                 />
-                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              </div>
-              {errors.phoneNumber && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.phoneNumber.message}
-                </p>
-              )}
-            </div>
-            
-            <div className="space-y-4 pt-2">
-              <div className="flex items-start space-x-3">
-                <Controller
-                  name="hasExistingWebsite"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox 
-                      id="hasExistingWebsite" 
-                      checked={field.value} 
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label 
-                  htmlFor="hasExistingWebsite" 
-                  className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
+                <Label htmlFor="hasExistingWebsite">
                   I have an existing website
                 </Label>
               </div>
-              {hasExistingWebsite && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <div className="mt-2">
-                    <Label htmlFor="websiteUrl" className="block text-sm font-medium mb-2">
-                      Website URL <span className="text-destructive">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="websiteUrl"
-                        type="url"
-                        placeholder="https://example.com"
-                        className={cn(
-                          "pl-10 w-full dark:placeholder:text-white",
-                          errors.websiteUrl && "border-destructive focus-visible:ring-destructive"
-                        )}
-                        {...register('websiteUrl')}
-                      />
-                      <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    </div>
-                    {errors.websiteUrl && (
-                      <p className="mt-1 flex items-center text-sm text-destructive">
-                        <AlertCircle className="mr-1 h-4 w-4" />
-                        {errors.websiteUrl.message}
-                      </p>
-                    )}
+
+              <motion.div
+                initial={false}
+                animate={{
+                  height: hasExistingWebsite ? 'auto' : 0,
+                  opacity: hasExistingWebsite ? 1 : 0,
+                  marginTop: hasExistingWebsite ? '0.5rem' : 0,
+                  overflow: 'hidden'
+                }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="websiteUrl">Website URL</Label>
+                  <div className="relative">
+                    <Input
+                      id="websiteUrl"
+                      type="url"
+                      placeholder="https://yourwebsite.com"
+                      {...register('websiteUrl', {
+                        required: hasExistingWebsite ? 'Website URL is required' : false,
+                      })}
+                      className={`${errors.websiteUrl ? 'border-destructive' : ''} pr-10`}
+                    />
+                    <Globe className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   </div>
-                </motion.div>
-              )}
+                  {errors.websiteUrl && (
+                    <p className="text-sm text-destructive">
+                      {errors.websiteUrl.message}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Example: https://yourbusiness.com
+                  </p>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         );
+
       case 2:
         return (
           <motion.div
@@ -393,27 +549,23 @@ export default function RegisterPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
           >
-            <div>
-              <Label htmlFor="password" className="mb-2 block">
-                Password <span className="text-destructive">*</span>
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
-                  className={cn(
-                    "w-full pr-10 pl-10 dark:placeholder:text-white",
-                    errors.password && "border-destructive focus-visible:ring-destructive"
-                  )}
+                  placeholder="••••••••"
                   {...register('password')}
+                  className={errors.password ? 'border-destructive' : ''}
                 />
                 <button
                   type="button"
+                  className="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -421,58 +573,27 @@ export default function RegisterPage() {
                     <Eye className="h-4 w-4" />
                   )}
                 </button>
-                <Lock className="absolute  left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Lock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               {errors.password && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.password.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
-              
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium">Password must contain:</p>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  {passwordRequirements.map((req) => {
-                    const value = watch('password') || '';
-                    const isValid = req.validate(value);
-                    return (
-                      <li key={req.id} className="flex items-center">
-                        <CheckCircle2
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            isValid ? "text-green-500" : "text-muted-foreground/30"
-                          )}
-                        />
-                        <span className={!isValid ? "opacity-50" : ""}>
-                          {req.text}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
             </div>
-            
-            <div>
-              <Label htmlFor="confirmPassword" className="mb-2 block">
-                Confirm Password <span className="text-destructive">*</span>
-              </Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  className={cn(
-                    "w-full pl-10 pr-10 dark:placeholder:text-white",
-                    errors.confirmPassword && "border-destructive focus-visible:ring-destructive"
-                  )}
+                  placeholder="••••••••"
                   {...register('confirmPassword')}
+                  className={errors.confirmPassword ? 'border-destructive' : ''}
                 />
                 <button
                   type="button"
+                  className="absolute right-10 top-1/2 -translate-y-1/2 text-muted-foreground"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -480,129 +601,161 @@ export default function RegisterPage() {
                     <Eye className="h-4 w-4" />
                   )}
                 </button>
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Lock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 flex items-center text-sm text-destructive">
-                  <AlertCircle className="mr-1 h-4 w-4" />
-                  {errors.confirmPassword.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Password must contain:</p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li className="flex items-center">
+                  {watch('password')?.length >= 8 ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="inline-block mr-2 h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )}
+                  At least 8 characters
+                </li>
+                <li className="flex items-center">
+                  {/(?=.*[A-Z])/.test(watch('password') || '') ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="inline-block mr-2 h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )}
+                  At least one uppercase letter
+                </li>
+                <li className="flex items-center">
+                  {/(?=.*[a-z])/.test(watch('password') || '') ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="inline-block mr-2 h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )}
+                  At least one lowercase letter
+                </li>
+                <li className="flex items-center">
+                  {/(?=.*\d)/.test(watch('password') || '') ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="inline-block mr-2 h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )}
+                  At least one number
+                </li>
+                <li className="flex items-center">
+                  {/[@$!%*?&]/.test(watch('password') || '') ? (
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                  ) : (
+                    <span className="inline-block mr-2 h-4 w-4 rounded-full border-2 border-muted-foreground" />
+                  )}
+                  At least one special character (@$!%*?&)
+                </li>
+              </ul>
             </div>
           </motion.div>
         );
+
       default:
         return null;
     }
   };
 
   return (
-    <AuthLayout
-      title="Create an account"
-      description="Join us today and get started with your business"
-      illustration={
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
-      }
-    >
-      <AuthCard
-        title="Create an account"
-        description="Join us today and get started with your business"
-        onSubmit={handleSubmit(onSubmit)}
-        isLoading={isLoading}
-        submitText={currentStep === steps.length - 1 ? 'Create account' : 'Next'}
-        loadingText={currentStep === steps.length - 1
-          ? isLoading
-            ? "Creating account..."
-            : "Create account"
-          : "Loading..."}
+      <AuthLayout
+        title={'Create an account'}
+        description={'Join us today and get started with your business'}
+        illustration={
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
+        }
       >
-          <div className="space-y-6">
-            {/* Progress Steps */}
-            <div className="space-y-2">
-              <div className="flex justify-between mb-4">
-                {steps.map((step, index) => (
-                  <div
-                    key={step.id}
-                    className={`flex flex-col items-center ${index < steps.length - 1 ? 'flex-1' : ''}`}
-                  >
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                        currentStep >= index
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                    >
-                      {currentStep > index ? (
-                        <CheckCircle2 className="h-5 w-5" />
-                      ) : (
-                        <span>{index + 1}</span>
-                      )}
-                    </div>
-                    <span className="mt-2 text-xs text-center text-muted-foreground">
-                      {step.title}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <motion.div
-                  className="h-full bg-primary"
-                  initial={{ width: '0%' }}
-                  animate={{
-                    width: `${((currentStep + 1) / steps.length) * 100}%`
-                  }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-            </div>
+        {formError && (
+          <div className="p-4 mb-6 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800">
+            {formError}
+          </div>
+        )}
 
-            {/* Form Steps */}
-            <div className="space-y-4">
-              {renderFormStep()}
-            </div>
+        <AuthCard
+          title="Create an account"
+          description="Join us today and get started with your business"
+          onSubmit={handleSubmit(onSubmit)}
+          isLoading={isSubmitting}
+          submitText={currentStep === steps.length - 1 ? 'Create Account' : 'Continue'}
+        >
+          {/* Step indicator */}
+          <div className="flex items-center justify-between w-full mb-8">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex flex-col items-center">
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                    currentStep >= index
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {index + 1}
+                </div>
+                <span className="mt-2 text-xs font-medium text-muted-foreground">
+                  {step.title}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Form Steps */}
+          <div className="space-y-4">
+            {renderFormStep()}
+          </div>
+
+          {/* Google Sign In Button Removed */}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between pt-4">
-            {currentStep > 0 ? (
+          <div className={`flex items-center ${currentStep === 0 ? 'justify-center' : 'justify-between'} pt-6`}>
+            {currentStep > 0 && (
               <Button
                 type="button"
                 variant="ghost"
                 onClick={prevStep}
                 className="flex items-center gap-2"
+                disabled={isSubmitting}
               >
                 <ArrowLeft className="h-4 w-4" />
                 Previous
               </Button>
-            ) : (
-              <div />
             )}
+            
             <Button
               type={currentStep === steps.length - 1 ? "submit" : "button"}
-              onClick={currentStep === steps.length - 1 ? undefined : nextStep}
-              className={`bg-secondary hover:bg-secondary/90 text-secondary-foreground ${
-                currentStep === 0 ? "ml-auto" : "flex-1"
-              }`}
-              disabled={isLoading}
+              onClick={currentStep < steps.length - 1 ? nextStep : undefined}
+              className={`${currentStep === 0 ? 'w-full' : 'flex-1'}`}
+              disabled={isSubmitting}
             >
-              {currentStep === steps.length - 1
-                ? isLoading
-                  ? "Creating account..."
-                  : "Create account"
-                : "Next"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : currentStep === steps.length - 1 ? (
+                'Create Account'
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
 
-          <p className="text-center text-sm text-primary dark:text-white">
+          <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-secondary hover:text-secondary/80 font-medium transition-colors"
+              className="text-primary hover:underline font-medium"
             >
               Sign in
             </Link>
           </p>
-          </div>
         </AuthCard>
-    </AuthLayout>
+      </AuthLayout>
   );
 }

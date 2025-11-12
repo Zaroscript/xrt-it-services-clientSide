@@ -245,9 +245,7 @@ const ContactSection = () => {
                     Location
                   </h4>
                   <p className="text-foreground">
-                    123 Tech Street, Silicon Valley
-                    <br />
-                    San Francisco, CA 94107
+                    Franklin, MA 02038
                   </p>
                 </div>
               </div>

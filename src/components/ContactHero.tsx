@@ -23,8 +23,8 @@ export function ContactHero() {
       icon: <Phone className="h-8 w-8 text-secondary" />,
       title: "Call Us",
       description: "Mon-Fri from 9am to 6pm",
-      value: "+1 (555) 123-4567",
-      href: "tel:+15551234567",
+      value: "+1 508-507-0922",
+      href: "tel:+15085070922",
     },
     {
       icon: <MapPin className="h-8 w-8 text-secondary" />,

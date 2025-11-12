@@ -31,7 +31,7 @@ export function PricingCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl transition-all duration-300 group",
+        "relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 group h-full",
         isPopular
           ? "dark:bg-gradient-to-b dark:from-[#343438] dark:to-[#1a1a1a] bg-white/90 shadow-lg shadow-secondary/10 dark:shadow-secondary/20 ring-1 ring-gray-200 dark:ring-secondary/20 ring-offset-1 ring-offset-white/50 dark:ring-offset-[#1a1a1a]"
           : "bg-white/80 dark:bg-[#343438] shadow-md hover:shadow-lg transition-shadow",
@@ -57,7 +57,7 @@ export function PricingCard({
           <div className="absolute inset-0 bg-gradient-to-b from-[#343438] to-[#1a1a1a] opacity-0 group-hover:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-300 -z-10" />
         </>
       )}
-      <div className={cn("space-y-6", isPopular && "relative z-10")}>
+      <div className={cn("space-y-6 flex flex-col h-full", isPopular && "relative z-10")}>
         <div>
           <div className="flex items-center gap-2">
             <h3
@@ -111,7 +111,8 @@ export function PricingCard({
           )}
         />
 
-        <ul className="min-h-[240px] space-y-3">
+        <div className="flex-1">
+          <ul className="space-y-3">
           {features.map((feature, index) => (
             <li
               key={index}
@@ -154,7 +155,8 @@ export function PricingCard({
               </span>
             </li>
           ))}
-        </ul>
+          </ul>
+        </div>
 
         <Button
           variant={isPopular ? "default" : "outline"}
@@ -171,7 +173,7 @@ export function PricingCard({
           Choose Plan
         </Button>
 
-        <div className="space-y-2 text-center text-sm">
+        <div className="mt-auto pt-4 space-y-2 text-center text-sm">
           <p className="text-gray-500 dark:text-gray-400">
             Local taxes may apply
           </p>

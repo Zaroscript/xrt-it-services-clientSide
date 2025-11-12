@@ -3,10 +3,11 @@ import { RootState } from '@/lib/store';
 import { authService } from '@/services/auth/AuthService';
 import { 
   LoginPayload, 
-  RegisterPayload, 
-  ApiError,
-  isApiError,
-  User
+  RegisterData, 
+  User,
+  UpdateProfilePayload,
+  AuthResponse,
+  isApiError
 } from './types';
 
 // Define the auth state type
@@ -32,16 +33,10 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginPayload, { rejectWithValue }) => {
     try {
-      const response = await authService.login(credentials);
-      if (!response.token) {
-        throw new Error('No token received');
-      }
-      return response;
+      return await authService.login(credentials);
     } catch (error) {
       return rejectWithValue(
-        isApiError(error) 
-          ? error.message 
-          : 'Invalid email or password'
+        error instanceof Error ? error.message : 'Invalid email or password'
       );
     }
   }
@@ -49,19 +44,14 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (userData: RegisterPayload, { rejectWithValue }) => {
+  async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      const response = await authService.register(userData);
-      if (!response.token) {
-        throw new Error('No token received');
-      }
-      return response;
-    } catch (error) {
-      return rejectWithValue(
-        isApiError(error)
-          ? error.message
-          : 'Registration failed. Please try again.'
-      );
+      return await authService.register(userData);
+    } catch (error: any) {
+      return rejectWithValue({
+        message: error.message || 'Registration failed',
+        code: error.code || 'REGISTRATION_FAILED'
+      });
     }
   }
 );
@@ -70,40 +60,41 @@ export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      const user = await authService.getCurrentUser();
+      const user = authService.getCurrentUser();
       if (!user) {
         throw new Error('No active session');
       }
       return { user };
     } catch (error) {
-      // Clear invalid token if any
-      authService.clearAuthToken();
       return rejectWithValue(
-        isApiError(error)
-          ? error.message
-          : 'Session expired. Please log in again.'
+        error instanceof Error ? error.message : 'Failed to fetch user'
       );
     }
   }
 );
 
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
+export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
+  await authService.logout();
+  dispatch(resetAuthState());
+});
+
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData: UpdateProfilePayload, { rejectWithValue, getState }) => {
     try {
-      await authService.logout();
-      return true;
+      // In a real app, you would make an API call to update the profile
+      // For now, we'll just return the updated data
+      return {
+        ...profileData,
+        // Ensure we have the current user data
+        ...(getState() as RootState).auth.user,
+      };
     } catch (error) {
-      // Clear token even if logout API fails
-      authService.clearAuthToken();
       return rejectWithValue(
         isApiError(error)
           ? error.message
-          : 'Logged out successfully (with warning)'
+          : 'Failed to update profile. Please try again.'
       );
-    } finally {
-      // Ensure we clear the token in any case
-      authService.clearAuthToken();
     }
   }
 );
@@ -112,17 +103,40 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    clearError: (state) => {
+    clearError(state) {
       state.error = null;
     },
-    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    setCredentials(state, action: PayloadAction<{ user: User; token: string }>) {
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
     },
-    resetAuthState: () => initialState,
+    updateProfile(state, action: PayloadAction<Partial<User>>) {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
+    resetAuthState(state) {
+      return initialState;
+    },
   },
   extraReducers: (builder) => {
+    // Update Profile
+    builder.addCase(updateUserProfile.pending, (state) => {
+      state.status = 'loading';
+      state.error = null;
+    });
+    builder.addCase(updateUserProfile.fulfilled, (state, action) => {
+      state.status = 'succeeded';
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    });
+    builder.addCase(updateUserProfile.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.payload as string;
+    });
+
     // Login
     builder.addCase(login.pending, (state) => {
       state.status = 'loading';
@@ -183,7 +197,7 @@ const authSlice = createSlice({
 });
 
 // Actions
-export const { clearError, setCredentials } = authSlice.actions;
+export const { clearError, setCredentials, updateProfile, resetAuthState } = authSlice.actions;
 
 // Selectors
 export const selectCurrentUser = (state: RootState) => state.auth.user;
