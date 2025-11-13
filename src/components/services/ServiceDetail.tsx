@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { Code2, CloudCog, Cpu, HardDrive, ShieldCheck, Smartphone } from "lucide-react";
+import { StaticImageData } from "next/image";
 
 // Map of icon names to their corresponding components
 const iconMap = {
@@ -31,7 +32,7 @@ type ServiceDetailProps = {
     features: string[];
     color: string;
     iconName: string;
-    img?: string;
+    img?: string | StaticImageData;
     longDescription?: string;
   };
 };
@@ -45,7 +46,6 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Enhanced Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32 bg-background">
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
@@ -56,11 +56,11 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         
         <div className="relative z-10 wide-container px-4">
           {/* Back Button - Positioned absolutely on the left */}
-          <div className="absolute -left-2 top-8 md:left-4 md:top-10 z-20">
+          <div className="absolute left-1 top-0 md:left-4 md:top-10 z-20">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="group inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 border border-border/50 hover:border-primary/30 bg-background/80 backdrop-blur-sm rounded-full transition-all duration-300 hover:shadow-sm"
+              className="group inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-background/80 backdrop-blur-sm rounded-full transition-all duration-300 hover:shadow-sm"
               onClick={() => router.back()}
             >
               <ArrowRight className="w-4 h-4 mr-1 md:mr-2 rotate-180 group-hover:-translate-x-1 transition-transform" />
@@ -81,7 +81,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
               {/* Main Heading */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
                 {service.title.split(' ').map((word, i) => (
-                  <span key={i} className="inline-block transition-transform hover:scale-105 hover:translate-x-1">
+                  <span key={i} className="inline-block transition-colors hover:text-primary">
                     {word}{' '}
                   </span>
                 ))}
@@ -158,6 +158,10 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                         fill
                         className="object-cover"
                         sizes="(max-width: 1024px) 100vw, 50vw"
+                        quality={300}
+                        priority
+                        placeholder="blur"
+                        blurDataURL={typeof service.img === 'string' ? service.img : service.img.src}
                       />
                     </div>
                   ) : (
