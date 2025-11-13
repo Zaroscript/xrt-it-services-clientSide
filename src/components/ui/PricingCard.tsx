@@ -9,24 +9,30 @@ interface Feature {
 
 interface PricingCardProps {
   title: string;
+  description?: string;
   price: string;
-  yearlyPrice: string;
-  originalPrice: string;
-  discount: string;
+  originalPrice?: string;
+  discount?: string;
   features: Feature[];
   isPopular?: boolean;
   className?: string;
+  onSelect?: () => void;
+  isSubmitting?: boolean;
+  buttonText?: string;
 }
 
 export function PricingCard({
   title,
+  description,
   price,
-  yearlyPrice,
   originalPrice,
   discount,
   features,
   isPopular,
   className,
+  onSelect,
+  isSubmitting,
+  buttonText = 'Get Started'
 }: PricingCardProps) {
   return (
     <div
@@ -69,25 +75,26 @@ export function PricingCard({
               {title}
             </h3>
           </div>
-          <h2
-            className={cn(
-              "pb-4 pt-2 text-3xl font-bold",
-              isPopular
-                ? "bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent"
-                : "text-[#D3B073]"
-            )}
-          >
-            {price}   
-          </h2>
-          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-            <p>Paid Yearly at {yearlyPrice}</p>
-            <p>
-              <del className="text-gray-500 dark:text-gray-400">
+          <div className="flex items-baseline gap-2">
+            <h2
+              className={cn(
+                "pb-4 pt-2 text-3xl font-bold",
+                isPopular
+                  ? "bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent"
+                  : "text-[#D3B073]"
+              )}
+            >
+              {price}
+            </h2>
+            {originalPrice && (
+              <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
                 {originalPrice}
-              </del>{" "}
+              </span>
+            )}
+            {discount && (
               <span
                 className={cn(
-                  "font-medium",
+                  "text-sm font-medium",
                   isPopular
                     ? "text-secondary"
                     : "text-primary dark:text-[#D3B073]"
@@ -95,7 +102,10 @@ export function PricingCard({
               >
                 {discount} OFF
               </span>
-            </p>
+            )}
+          </div>
+          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+            {description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
             <p className="text-gray-500 dark:text-gray-400">
               No commitment. Cancel Anytime.
             </p>

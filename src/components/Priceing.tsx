@@ -110,8 +110,8 @@ const Priceing = () => {
   }
 
   return (
-    <div className="container mt-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl w-full">
         <div className="mb-12 text-center">
           <motion.span
             initial={{ opacity: 0, y: 20 }}
