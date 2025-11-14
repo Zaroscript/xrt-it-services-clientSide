@@ -154,20 +154,43 @@ const useAuthStore = create<AuthStore>()(
               }),
             });
 
-            const registerData = await registerResponse.json();
+            let registerData;
+            try {
+              registerData = await registerResponse.json().catch(() => ({}));
+            } catch (e) {
+              registerData = { message: 'Invalid server response' };
+            }
+            
             console.log('Registration response:', {
               status: registerResponse.status,
               statusText: registerResponse.statusText,
-              data: registerData
+              data: registerData,
+              headers: Object.fromEntries(registerResponse.headers.entries())
             });
 
             if (!registerResponse.ok) {
-              const errorMessage = registerData.message || 'Registration failed';
+              const errorMessage = registerData.message || 
+                                registerData.error || 
+                                registerResponse.statusText || 
+                                'Registration failed';
+                                
               console.error('Registration failed:', {
                 status: registerResponse.status,
+                statusText: registerResponse.statusText,
                 error: errorMessage,
-                response: registerData
+                response: registerData,
+                requestData: {
+                  ...userData,
+                  password: userData.password ? '[REDACTED]' : undefined
+                }
               });
+              
+              // Include validation errors if available
+              if (registerData.errors) {
+                console.error('Validation errors:', registerData.errors);
+                throw new Error(Object.values(registerData.errors).join('\n') || errorMessage);
+              }
+              
               throw new Error(errorMessage);
             }
 

@@ -184,35 +184,44 @@ export const useSignup = () => {
         websiteUrl: data.websiteUrl,
       });
 
-      const result = await registerUser({
-        email: data.email.trim().toLowerCase(),
-        password: data.password,
-        fName: data.firstName.trim(),
-        lName: data.lastName.trim(),
-        phone: formatPhoneNumber(data.phoneNumber),
-        companyName: data.businessName.trim(),
-        oldWebsite: data.websiteUrl?.trim() || "",
+      const registrationData = {
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+      fName: data.firstName.trim(),
+      lName: data.lastName.trim(),
+      phone: formatPhoneNumber(data.phoneNumber),
+      companyName: data.businessName.trim(),
+      oldWebsite: data.websiteUrl?.trim() || "",
+      hasWebsite: data.hasExistingWebsite || false,
+    };
+
+      console.log('Sending registration data:', {
+        ...registrationData,
+        password: registrationData.password ? '[PASSWORD_PROVIDED]' : '[MISSING_PASSWORD]'
       });
 
+      console.log('Sending registration request with data:', {
+        ...registrationData,
+        password: '[REDACTED]',
+        confirmPassword: '[REDACTED]'
+      });
+
+      const result = await registerUser(registrationData);
+
+      console.log('Registration response:', result);
+
       if (!result?.success) {
-        throw new Error(result?.message || "Registration failed");
+        throw new Error(result?.message || "Registration failed. Please check your information and try again.");
       }
 
       console.log("Registration successful, redirecting to approval page");
       sessionStorage.setItem("registrationComplete", "true");
 
       toast.success("Registration Submitted", {
-        description:
-          "Your account is pending admin approval. You will be notified via email once approved.",
-        position: "bottom-right",
+        description: "Your account is pending admin approval. You will be notified via email once approved.",
         duration: 5000,
-        className: "group bg-background border-l-4 right-4 border-green-500 text-foreground shadow-lg",
+        className: "group bg-background border-l-4 border-green-500 text-foreground shadow-lg",
         icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
-        closeButton: true,
-        style: {
-          animation: 'slideInRight 0.3s ease-out',
-          zIndex: 9999,
-        },
       });
 
       router.push(
@@ -239,15 +248,9 @@ export const useSignup = () => {
 
       toast.error("Registration Failed", {
         description: errorMessage,
-        position: "bottom-right",
-        className: "group bg-background border-l-4 right-4 border-destructive text-foreground shadow-lg",
+        duration: 10000,
+        className: "group bg-background border-l-4 border-destructive text-foreground shadow-lg",
         icon: <AlertCircle className="h-5 w-5 text-destructive" />,
-        closeButton: true,
-        duration: 10000, // Show for 10 seconds to ensure user sees it
-        style: {
-          animation: 'slideInRight 0.3s ease-out',
-          zIndex: 9999,
-        },
       });
     } finally {
       setIsSubmitting(false);
