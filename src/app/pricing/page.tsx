@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { IncludedFeatures } from "@/components/ui/IncludedFeatures";
 import { ComparisonTable } from "@/components/ui/ComparisonTable";
 import { FAQ } from "@/components/ui/FAQ";
 import { FadeIn } from "@/components/ui/FadeIn";
 import Priceing from "@/components/Priceing";
+import Included from "@/components/Included";
 
 export default function Pricing() {
 
@@ -25,7 +25,7 @@ export default function Pricing() {
           transition={{ duration: 1, delay: 0.2 }}
           className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-transparent"
         />
-        <div className="container relative">
+        <div className="page-container relative">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <FadeIn direction="up">
@@ -55,9 +55,10 @@ export default function Pricing() {
 
       <Priceing />
 
-      {/* Included Features Section */}
+      {/* Marketing Section */}
       <FadeIn>
-        <IncludedFeatures />
+        
+        <Included />
       </FadeIn>
 
       {/* Comparison Table */}
@@ -71,7 +72,7 @@ export default function Pricing() {
       </FadeIn>
 
       {/* CTA Section */}
-      <div className="container py-24">
+      <div className="w-full py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <motion.div

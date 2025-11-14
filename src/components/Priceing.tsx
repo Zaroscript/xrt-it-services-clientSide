@@ -3,12 +3,13 @@
 import { FadeIn } from "@/components/ui/FadeIn";
 import { PricingToggle } from "@/components/ui/PricingToggle";
 import { PricingCard } from "@/components/ui/PricingCard";
+import { PricingSkeleton } from "@/components/ui/PricingSkeleton";
 import { getPlans, getFeaturedPlans, requestPlan } from "@/lib/api/plans";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader } from "@/components/ui/Loader";
 
 interface PlanDisplay {
   _id: string;
@@ -77,41 +78,80 @@ const Priceing = () => {
         return;
       }
 
-      await requestPlan(planId);
-      toast.success('Plan request submitted successfully!');
-      router.push('/dashboard');
+      // Add a small delay for better UX
+      await Promise.all([
+        requestPlan(planId),
+        new Promise(resolve => setTimeout(resolve, 800)) // Minimum loading time for better UX
+      ]);
+      
+      toast.success('Plan request submitted successfully!', {
+        position: 'top-center',
+        duration: 2000,
+      });
+      
+      // Add a small delay before redirecting
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
     } catch (error) {
       console.error('Error requesting plan:', error);
-      toast.error('Failed to request plan. Please try again.');
+      toast.error('Failed to request plan. Please try again.', {
+        position: 'top-center',
+        duration: 3000,
+      });
     } finally {
       setIsRequesting(prev => ({ ...prev, [planId]: false }));
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-gray-600 dark:text-gray-400">Loading plans...</p>
-        </div>
-      </div>
-    );
+    return <PricingSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="page-container py-12 text-center">
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative py-16 bg-background"
+      >
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg inline-block">
           {error}
         </div>
-      </div>
+      </motion.section>
     );
   }
 
   return (
-    <div className="w-full px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl w-full">
+    <motion.section 
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={{
+        initial: { opacity: 0 },
+        animate: { 
+          opacity: 1,
+          transition: { 
+            staggerChildren: 0.1,
+            when: "beforeChildren"
+          } 
+        },
+        exit: { opacity: 0 }
+      }}
+      className="relative py-16 bg-background"
+    >
+      <motion.div 
+        className="page-container"
+        variants={{
+          initial: { opacity: 0, y: 20 },
+          animate: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.6 }
+          }
+        }}
+      >
         <div className="mb-12 text-center">
           <motion.span
             initial={{ opacity: 0, y: 20 }}
@@ -148,32 +188,49 @@ const Priceing = () => {
           />
         </FadeIn>
 
-        {plans.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-24">
-            {plans.map((plan, index) => (
-              <FadeIn key={plan._id} delay={0.2 * (index + 1)}>
-                <PricingCard
-                  title={plan.name}
-                  description={plan.description}
-                  price={`$${plan.discountedPrice || plan.price}${isYearly ? '/yr' : '/mo'}`}
-                  originalPrice={plan.discount?.isActive ? `$${plan.price}${isYearly ? '/yr' : '/mo'}` : undefined}
-                  discount={plan.discount?.isActive ? `${plan.discount.amount}%` : undefined}
-                  features={plan.features.map(feature => ({ text: feature, included: true }))}
-                  isPopular={plan.isFeatured}
-                  onSelect={() => handlePlanSelect(plan._id)}
-                  isSubmitting={!!isRequesting[plan._id]}
-                  buttonText="Get Started"
-                />
-              </FadeIn>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No plans available at the moment.</p>
-          </div>
-        )}
-      </div>
-    </div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="mt-16"
+        >
+          {plans.length > 0 ? (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-24">
+              {plans.map((plan, index) => (
+                <motion.div
+                  key={plan._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.6,
+                    delay: 0.1 * index,
+                    ease: [0.2, 0.65, 0.3, 0.9]
+                  }}
+                  className="h-full"
+                >
+                  <PricingCard
+                    title={plan.name}
+                    description={plan.description}
+                    price={`$${plan.discountedPrice || plan.price}${isYearly ? '/yr' : '/mo'}`}
+                    originalPrice={plan.discount?.isActive ? `$${plan.price}${isYearly ? '/yr' : '/mo'}` : undefined}
+                    discount={plan.discount?.isActive ? `${plan.discount.amount}%` : undefined}
+                    features={plan.features.map(feature => ({ text: feature, included: true }))}
+                    isPopular={plan.isFeatured}
+                    onSelect={() => handlePlanSelect(plan._id)}
+                    isSubmitting={!!isRequesting[plan._id]}
+                    buttonText="Get Started"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No plans available at the moment.</p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 };
 

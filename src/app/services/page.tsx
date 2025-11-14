@@ -7,6 +7,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { services, howItWorks, faqs } from "@/config/constants";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -120,7 +126,11 @@ export default function ServicesPage() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="h-full"
                 >
-                  <Link href={`/services/${service.id}`}>
+                  <Link
+                    href={service.id === 'online-ordering-systems' ? '/pricing' : `/services/${service.id}`}
+                    key={service.id}
+                    className="h-full"
+                  >
                     <div className="group h-full flex flex-col bg-card/50 backdrop-blur-sm rounded-2xl border border-border/20 overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-2">
                       <div
                         className={`h-1.5 w-full bg-gradient-to-r ${service.color}`}
@@ -132,9 +142,10 @@ export default function ServicesPage() {
                           <Image
                             src={service.icon}
                             alt={service.title}
-                            className="w-full h-full object-contain"
-                            width={28}
-                            height={28}
+                            width={64}
+                            height={64}
+                            className="object-contain w-14 h-14"
+                            priority
                           />
                         </div>
                         <h3 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
@@ -198,40 +209,126 @@ export default function ServicesPage() {
           <div className="relative">
             {/* Process Steps */}
             <div className="relative z-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {howItWorks.map((step, index) => {
-                  const colors = [
-                    "from-blue-500/10 to-blue-600/10",
-                    "from-purple-500/10 to-purple-600/10",
-                    "from-pink-500/10 to-pink-600/10",
-                    "from-cyan-500/10 to-cyan-600/10",
-                  ];
+                  const variant = {
+                    bg: 'from-primary/5 to-primary/10',
+                    border: 'border-primary/20',
+                    text: 'text-primary'
+                  };
 
                   return (
                     <motion.div
                       key={step.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-30px" }}
-                      transition={{
-                        duration: 0.4,
-                        delay: index * 0.08,
+                      initial={{ opacity: 0, y: 30, rotateX: 5 }}
+                      whileInView={{ 
+                        opacity: 1, 
+                        y: 0, 
+                        rotateX: 0,
+                        transition: {
+                          duration: 0.6,
+                          delay: index * 0.1,
+                          ease: [0.16, 1, 0.3, 1]
+                        }
                       }}
-                      className="relative"
+                      whileHover={{ 
+                        y: -8,
+                        transition: { 
+                          type: 'spring',
+                          stiffness: 300,
+                          damping: 15
+                        } 
+                      }}
+                      viewport={{ once: true, margin: "-30px 0px -50px 0px" }}
+                      className="group relative h-full"
                     >
-                      <div className="relative h-full bg-card/80 backdrop-blur-sm rounded-2xl p-8 border border-border/20 transition-all duration-300">
-                        <div className="relative z-10 text-center">
-                          <div className="w-16 h-16 mx-auto mb-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-border/20 flex items-center justify-center text-3xl text-primary">
-                            {step.icon}
-                          </div>
-                          <h3 className="text-xl font-semibold mb-3 text-foreground">
+                      <motion.div 
+                        className={`absolute inset-0.5 bg-gradient-to-br ${variant.bg} rounded-2xl opacity-0 group-hover:opacity-100`}
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        whileHover={{ 
+                          scale: 1, 
+                          opacity: 1,
+                          transition: { duration: 0.3 }
+                        }}
+                      />
+                      <motion.div 
+                        className={`relative h-full bg-card/90 backdrop-blur-sm rounded-2xl p-6 border ${variant.border} overflow-hidden`}
+                        whileHover={{ 
+                          boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.1)',
+                          transition: { duration: 0.3 }
+                        }}
+                      >
+                        <div className="relative z-10 flex flex-col h-full">
+                          <motion.div 
+                            className={`w-14 h-14 mx-auto mb-6 rounded-xl bg-background ${variant.border} border flex items-center justify-center text-3xl ${variant.text}`}
+                            whileHover={{ 
+                              scale: 1.1,
+                              rotate: 5,
+                              backgroundColor: 'rgba(var(--primary)/0.05)'
+                            }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                          >
+                            <motion.div
+                              whileHover={{ scale: 1.2 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                            >
+                              <step.icon className="w-6 h-6" />
+                            </motion.div>
+                          </motion.div>
+                          <motion.h3 
+                            className="text-lg font-semibold mb-3 text-foreground group-hover:text-primary"
+                            whileHover={{ 
+                              x: 2,
+                              transition: { duration: 0.2 }
+                            }}
+                          >
                             {step.title}
-                          </h3>
-                          <p className="text-muted-foreground">
+                          </motion.h3>
+                          <motion.p 
+                            className="text-muted-foreground text-sm leading-relaxed"
+                            initial={{ opacity: 0.9 }}
+                            whileHover={{ 
+                              opacity: 1,
+                              x: 1,
+                              transition: { duration: 0.2 }
+                            }}
+                          >
                             {step.description}
-                          </p>
+                          </motion.p>
+                          <motion.div 
+                            className="mt-auto pt-4"
+                            whileHover={{ 
+                              x: 2,
+                              transition: { duration: 0.2 }
+                            }}
+                          >
+                            <span className="inline-flex items-center text-sm font-medium text-primary/80 group-hover:text-primary transition-colors">
+                              Learn more
+                              <motion.span
+                                animate={{
+                                  x: [0, 4, 0],
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  repeatType: 'loop',
+                                }}
+                                className="inline-block ml-1"
+                              >
+                                <ArrowRight className="w-4 h-4" />
+                              </motion.span>
+                            </span>
+                          </motion.div>
                         </div>
-                      </div>
+                        <motion.div 
+                          className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-primary/5"
+                          whileHover={{ 
+                            scale: 1.2,
+                            backgroundColor: 'rgba(var(--primary)/0.1)'
+                          }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+                        ></motion.div>
+                      </motion.div>
                     </motion.div>
                   );
                 })}
@@ -284,26 +381,32 @@ export default function ServicesPage() {
             </FadeIn>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="group"
-              >
-                <div className="bg-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/20 hover:border-primary/30 transition-colors group-hover:shadow-lg">
-                  <h3 className="text-lg font-semibold mb-2 text-left">
-                    {faq.question}
-                  </h3>
-                  <p className="text-muted-foreground text-left">
-                    {faq.answer}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <AccordionItem
+                    value={`item-${index}`}
+                    className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/20 hover:border-primary/30 transition-colors overflow-hidden"
+                  >
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/30">
+                      <span className="text-lg font-semibold text-left">
+                        {faq.question}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-4 pt-0 text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
           </div>
         </div>
       </section>

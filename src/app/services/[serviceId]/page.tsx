@@ -22,14 +22,16 @@ export default function ServicePage({ params }: ServicePageProps) {
     notFound();
   }
 
-  // Create a new object with only the properties we want to pass to the client component
+  // Create a new object with the properties we want to pass to the client component
   const enhancedService = {
     ...service,
     id: service.id,
     longDescription: getServiceDescription(service.title),
     process: getServiceProcess(service.title),
     // Use the service ID as the icon name
-    iconName: service.id
+    iconName: service.id,
+    // Ensure the img prop is included
+    img: service.img
   };
   
   // Remove the icon property to avoid serialization issues

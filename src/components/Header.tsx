@@ -14,7 +14,7 @@ import lightLogo from "../assets/images/logo-light.png";
 import darkLogo from "../assets/images/logo-dark.png";
 import { useThemeDetector } from "@/hooks/useThemeDetector";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/store/useAuthStore";
 
 const Header = () => {
   const [isClient, setIsClient] = useState(false);

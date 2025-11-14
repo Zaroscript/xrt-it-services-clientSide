@@ -21,12 +21,12 @@ import partner6 from "../assets/images/partner6.webp";
 import heroSection from "../../public/assets/hero-section.jpg";
 import webIcon from "../assets/images/icons/001-deployment.png";
 import cloudIcon from "../assets/images/icons/002-upload.png";
-import onlineOrderingIcon from "../assets/images/icons/004-order.png"
-import digitalIcon from "../assets/images/icons/006-content-strategy.png"
-import itIcon from "../assets/images/icons/008-technical-support.png"
+import onlineOrderingIcon from "../assets/images/icons/004-order.png";
+import digitalIcon from "../assets/images/icons/006-content-strategy.png";
+import itIcon from "../assets/images/icons/008-technical-support.png";
 import seoIcon from "../assets/images/icons/010-seo.png";
-import missionIcon from "../assets/images/icons/012-environment.png"
-import vission from "../assets/images/icons/013-company-vision.png"
+import missionIcon from "../assets/images/icons/012-environment.png";
+import vission from "../assets/images/icons/013-company-vision.png";
 import whoWeAre from "../assets/images/who-we-are.jpg";
 import aboutImg from "../assets/images/about.jpg";
 import webImg from "../assets/images/web-development.jpg";
@@ -35,16 +35,11 @@ import cloud from "../assets/images/cloud.jpg";
 import digital from "../assets/images/digital.jpg";
 import seoImg from "../assets/images/seo.jpg";
 import it from "../assets/images/it.jpg";
+import Commissions from "../assets/images/Commissions.jpg";
+import increase from "../assets/images/increase.jpg";
+import screens from "../assets/images/screens.jpg";
 
-
-import {
-  CloudCog,
-  Code2,
-  Palette,
-  Rocket,
-  Settings,
-  ShoppingCart,
-} from "lucide-react";
+import { Paintbrush, Rocket, Search, TestTube2 } from "lucide-react";
 
 // src/config/constants.ts
 export const NAV_LINKS = [
@@ -65,24 +60,24 @@ export const heroContent = [
     title:
       "Turn Clicks into Customers with an Easy-to-Use Online Ordering System",
     description:
-      " Take your business online with a simple, user-friendly ordering platform built for sales, speed, and customer satisfaction. No complexity — just seamless ordering that works.",
+      "Take your business online with a simple, user-friendly ordering platform built for sales, speed, and customer satisfaction. No complexity, just seamless ordering that works",
     primBtn: {
       text: "Free Consultation",
-      path: "/contact",
+      path: "/contact/#contactForm",
     },
     secBtn: {
       text: "How It Works",
-      path: "/about",
+      path: "/pricing",
     },
   },
   {
     title:
       "Tailored Websites and Apps Built to Achieve Your Business GoalsDevelopment",
     description:
-      "We don’t just design — we strategize. Every website and app we create is customized to your industry, crafted to meet your goals, and optimized to turn visitors into results.",
+      "We don’t just design, we strategize. Every website and app we create is customized to your industry, crafted to meet your goals, and optimized to turn visitors into results.",
     primBtn: {
       text: "Free Consultation",
-      path: "/contact",
+      path: "/contact/#contactForm",
     },
     secBtn: {
       text: "Recent Projects",
@@ -95,7 +90,7 @@ export const heroContent = [
       "We handle the tech so you can focus on your business. From setup to support, XRT Tech delivers smart, dependable IT services built around your goals.",
     primBtn: {
       text: "Talk to an IT Expert",
-      path: "/contact",
+      path: "/contact/#contactForm",
     },
     secBtn: {
       text: "Explore Our Services",
@@ -234,7 +229,7 @@ export const services = [
     img: webImg,
     title: "Web Design, Development & Maintenance",
     description:
-      "Your website is the heart of your online presence. We design, build, host, and maintain fast, modern sites that work flawlessly on every device — so your business looks professional and runs smoothly, 24/7",
+      "Your website is the heart of your online presence. We design, build, host, and maintain fast, modern sites that work flawlessly on every device so your business looks professional and runs smoothly 24/7.",
     color: "from-blue-500 to-cyan-400",
     features: [
       "Responsive Design",
@@ -266,7 +261,7 @@ export const services = [
     img: onlineImg,
     title: "Online Ordering Systems",
     description:
-      "Bring your store or restaurant online with a custom ordering system that’s easy to use and built for results. Accept orders, manage menus, and track performance — all from one simple dashboard.",
+      "Bring your store or restaurant online with a custom ordering system that’s easy to use and built for results. Accept orders, manage menus, and track performance all from one simple dashboard.",
     color: "from-green-500 to-emerald-400",
     features: [
       "Custom Ordering System",
@@ -282,7 +277,7 @@ export const services = [
     img: digital,
     title: "Digital Marketing",
     description:
-      "Make your first impression count. We craft logos, digital materials, and visuals that reflect your brand’s personality and help you stand out in a crowded market.",
+      "Make your first impression count. We craft logos, visuals, social media ads, and digital designs that reflect your brand’s personality and help you stand out in a crowded market.",
     color: "from-amber-500 to-yellow-400",
     features: [
       "Logo Design",
@@ -299,7 +294,7 @@ export const services = [
     img: it,
     title: "IT Setup & Support",
     description:
-      "We handle the technical side so you don’t have to. From email systems and cloud setup to troubleshooting and maintenance — we keep your business connected and running without downtime.",
+      "We handle the technical side so you don’t have to. From email systems and cloud setup to troubleshooting and maintenance, we keep your business connected and running without downtime.",
     color: "from-red-500 to-orange-400",
     features: ["Email Setup", "Cloud Setup", "Troubleshooting", "Maintenance"],
   },
@@ -327,28 +322,28 @@ export const howItWorks = [
     title: "Discovery & Planning",
     description:
       "We start by understanding your business needs and defining project requirements.",
-    icon: "🔍",
+    icon: Search,
   },
   {
     id: 2,
     title: "Design & Development",
     description:
       "Our team creates custom solutions tailored to your specific requirements.",
-    icon: "🎨",
+    icon: Paintbrush,
   },
   {
     id: 3,
     title: "Testing & Quality Assurance",
     description:
       "Rigorous testing ensures your solution is reliable and performs as expected.",
-    icon: "🧪",
+    icon: TestTube2,
   },
   {
     id: 4,
     title: "Deployment & Support",
     description:
       "We handle the deployment and provide ongoing support and maintenance.",
-    icon: "🚀",
+    icon: Rocket,
   },
 ];
 
@@ -413,6 +408,47 @@ export const faqs = [
   },
 ];
 
+export const pricingFaq = [
+  {
+    question: " Do you charge any commission fees per order?",
+    answer:
+      "No. All XRT Tech plans include unlimited orders with zero commissions. You keep 100% of your revenue.",
+  },
+
+  {
+    question: "Can I manage my menu and prices myself?",
+    answer:
+      "Yes. You can update items, categories, prices, and modifiers anytime through your dashboard with Premium Plan.",
+  },
+  {
+    question: "Do you support delivery zones and fees?",
+    answer:
+      "Yes. You can set delivery zones, distances, and custom fees based on your business needs.",
+  },
+  {
+    question: "How do digital screen updates work?",
+    answer:
+      "Premium Plan includes up to 3 screen content update per year.\n Pro includes unlimited remote screen updates",
+  },
+
+  {
+    question: "If I choose the Pro plan, can I customize what features I want?",
+    answer:
+      "Yes. Pro is a build-your-own bundle where you choose the features you need and only pay for what you use.",
+  },
+  {
+    question:
+      "Do you offer marketing services like email, SMS, or social media?",
+    answer:
+      "Yes. \nStarter includes 500 email sends per month. \nGrowth includes 1,500 email sends and SMS. \nPro includes custom email and SMS campaigns, with optional social media and ads add ons",
+  },
+  {
+    question: "Can you update my menu or website for me?",
+    answer:
+      "Yes. \nPremium  includes one website/menu update per year. \nPro offers unlimited updates based on your needs.",
+  },
+];
+
 export const values = [
   {
     title: "Innovation",
@@ -446,6 +482,32 @@ export const partners = [
   { name: "TechX", logo: techX },
 ];
 
+export const marketing = [
+  {
+    id: 1,
+    title: "Free TV Screen for 1 Year",
+    description:
+      "Get 1 year of digital menu screen hosting included with your plan. Turn any TV into a smart digital menu instantly.",
+    highlight: "Free Screens",
+    image: screens,
+  },
+  {
+    id: 2,
+    title: "No Commissions — Save $6,000 to $30,000 a Year",
+    description:
+      "Keep 100% of every order. Most restaurants switching from delivery apps save between $500–$2,500 per month in commission fees.",
+    highlight: "No Commissions",
+    image: Commissions,
+  },
+  {
+    id: 3,
+    title: "Increase Sales with Targeted Marketing",
+    description:
+      "Boost your revenue through smart, data-driven marketing integrated directly into your online ordering system. Reach the right customers with personalized promotions, push notifications, and audience targeting that increases repeat orders and drives consistent growth.",
+    highlight: "Increase Sales",
+    image: increase,
+  },
+];
 
 // Export images
 export {
@@ -475,5 +537,9 @@ export {
   cloud,
   onlineImg,
   digital,
-  seoImg
+  seoImg,
+  it,
+  Commissions,
+  increase,
+  screens,
 };

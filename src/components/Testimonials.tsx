@@ -54,7 +54,7 @@ const Testimonials = () => {
           {testimonials.map((t, idx) => (
             <SwiperSlide key={idx}>
               <div
-                className="group relative h-full bg-background/50 backdrop-blur-sm rounded-2xl rounded-b-none p-8 transition-all duration-300 shadow-lg hover:shadow-gold/5"
+                className="group relative h-full flex flex-col bg-background/50 backdrop-blur-sm rounded-2xl rounded-b-none p-8 transition-all duration-300 shadow-lg hover:shadow-gold/5 min-h-[400px]"
               >
                 {/* Decorative quote icon */}
                 <Quote className="absolute top-6 right-6 w-12 h-12 text-gold/10 group-hover:text-gold/20 transition-colors" />
@@ -74,16 +74,20 @@ const Testimonials = () => {
                 </div>
 
                 {/* Testimonial text */}
-                <p className="text-foreground/90 text-lg leading-relaxed mb-8 relative z-10">
-                  {t.text}
-                </p>
+                <div className="flex-1 flex flex-col">
+                  <p className="text-foreground/90 text-lg leading-relaxed mb-8 relative z-10 flex-1">
+                    {t.text}
+                  </p>
+
+                </div>
 
                 {/* Author info */}
-                <div className="flex items-center mt-auto">
+                <div className="flex items-center pt-4 border-t border-border/50 mt-auto">
                   <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-gold/30 group-hover:border-gold/50 transition-colors">
                     <Image
                       src={t.avatar.src}
                       fill
+                      sizes="(max-width: 768px) 56px, 56px"
                       alt={t.name}
                       className="object-cover"
                     />

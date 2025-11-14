@@ -24,7 +24,6 @@ export default function Home() {
     <>
       <Hero />
       {/* <Services /> */}
-      <Partners />
       <CompanySection />
       <ServicesShowcase />
       <Success />
@@ -36,6 +35,7 @@ export default function Home() {
       <Priceing />
 
       <Testimonials />
+      <Partners />
       <ContactSection />
     </>
   );

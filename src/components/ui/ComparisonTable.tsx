@@ -4,137 +4,218 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 
 const features = [
   {
-    category: "Learning Resources",
+    category: "Ordering Features",
     items: [
       {
-        name: "Standard Courses",
-        description:
-          "Access to all standard courses covering fundamental topics in cloud computing and DevOps.",
-        standard: true,
+        name: "Zero Commission",
+        description: "No commission on orders, keep 100% of your revenue",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Hands-on Labs",
-        description:
-          "Interactive, real-world labs to practice your skills in a safe, sandboxed environment.",
-        standard: true,
+        name: "Online Ordering Website",
+        description: "Custom branded online ordering website for your business",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "PRO Courses",
-        description:
-          "Advanced courses with in-depth coverage of complex topics and emerging technologies.",
-        standard: false,
+        name: "Unlimited Orders",
+        description: "No limit on the number of orders you can receive",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Certification Preparation",
-        description:
-          "Focused training and practice exams to help you pass major cloud and DevOps certifications.",
-        standard: false,
+        name: "Menu Items",
+        description: "Unlimited menu items with categories and descriptions",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Industry Project Cases",
-        description:
-          "Real-world project scenarios that simulate actual work environments and challenges.",
-        standard: false,
+        name: "Order Modifiers",
+        description: "Customize orders with various options and add-ons",
+        starter: "Limited",
+        premium: "Advanced",
+        pro: "Full Custom",
+      },
+      {
+        name: "Delivery Zones and Fees",
+        description: "Set up delivery areas and corresponding fees",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
+      },
+      {
+        name: "Secure Online Payments",
+        description: "Process payments securely with multiple payment gateways",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Real-time Order Alerts",
+        description: "Instant notifications for new orders",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Mobile-Friendly Design",
+        description: "Fully responsive design that works on all devices",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "POS and Delivery App Integrations",
+        description: "Connect with popular POS systems and delivery apps",
+        starter: false,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Loyalty Rewards",
+        description: "Customer loyalty program with points and rewards",
+        starter: false,
+        premium: false,
+        pro: true,
+      },
+      {
+        name: "Coupons and Discounts",
+        description: "Create and manage discount codes and promotions",
+        starter: false,
+        premium: true,
+        pro: true,
       },
     ],
   },
   {
-    category: "Platform Features",
+    category: "Marketing Features",
     items: [
       {
-        name: "Cloud Playgrounds",
-        description:
-          "Temporary cloud environments to practice without needing your own cloud account.",
-        standard: false,
-        pro: true,
-        enterprise: true,
+        name: "Analytics",
+        description: "Track and analyze your business performance",
+        starter: "Basic",
+        premium: "Advanced",
+        pro: "Customized",
       },
       {
-        name: "DevOps Environment",
-        description:
-          "Pre-configured CI/CD pipelines and infrastructure as code templates.",
-        standard: false,
-        pro: true,
-        enterprise: true,
+        name: "Email Marketing",
+        description: "Send marketing emails to your customers",
+        starter: "Up to 500 emails/month",
+        premium: "Up to 1,500 emails/month",
+        pro: "Custom email marketing",
       },
       {
-        name: "AI-Assisted Labs",
-        description:
-          "Get real-time hints and solutions as you work through hands-on exercises.",
-        standard: false,
-        pro: true,
-        enterprise: true,
+        name: "SMS Marketing",
+        description: "Send text message promotions to customers",
+        starter: false,
+        premium: "Included (limited monthly quota)",
+        pro: "Custom SMS marketing",
       },
       {
-        name: "Personal AI Tutor",
-        description:
-          "AI-powered assistant that adapts to your learning style and answers questions.",
-        standard: false,
+        name: "Business Website Setup",
+        description: "Professional website setup for your business",
+        starter: false,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Offline Access",
-        description:
-          "Download courses and labs to learn without an internet connection.",
-        standard: false,
-        pro: true,
-        enterprise: true,
+        name: "Digital Screens Software",
+        description: "Manage digital menu boards and displays",
+        starter: false,
+        premium: "1 year Free (1 update/year)",
+        pro: "Custom frequency",
+      },
+      {
+        name: "Website or Menu Updates",
+        description: "Regular updates to your website or menu",
+        starter: false,
+        premium: "1 update/year",
+        pro: "Custom updates",
+      },
+      {
+        name: "SEO Optimization",
+        description: "Improve search engine visibility",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
+      },
+      {
+        name: "Social Media Content",
+        description: "Professional content for your social media channels",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
+      },
+      {
+        name: "Social Media Ads",
+        description: "Managed social media advertising campaigns",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
       },
     ],
   },
   {
-    category: "Team & Support",
+    category: "Support and Service",
     items: [
       {
-        name: "Email Support",
-        description:
-          "Email support with 48-hour response time during business hours.",
-        standard: true,
+        name: "System Hosting and Maintenance",
+        description: "We handle all technical aspects of running your system",
+        starter: true,
+        premium: true,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Priority Support",
-        description:
-          "24/7 priority email support with 4-hour response time and live chat.",
-        standard: false,
+        name: "Customer Support",
+        description: "Get help when you need it",
+        starter: "Standard",
+        premium: "Priority",
+        pro: "Priority (24/7)",
+      },
+    ],
+  },
+  {
+    category: "System & Management Features",
+    items: [
+      {
+        name: "Order Management Dashboard",
+        description: "Manage all your orders in one place",
+        starter: "Basic",
+        premium: "Advanced",
+        pro: "Full Access",
+      },
+      {
+        name: "Cloud Backup and Secure Storage",
+        description: "Automatic backups of your data",
+        starter: false,
+        premium: "Two Years",
+        pro: "Two Years",
+      },
+      {
+        name: "Multi-location Support",
+        description: "Manage multiple locations from one account",
+        starter: false,
+        premium: false,
         pro: true,
-        enterprise: true,
       },
       {
-        name: "Team Dashboard",
-        description:
-          "Centralized dashboard to manage team members, track progress, and assign training.",
-        standard: false,
-        pro: false,
-        enterprise: true,
+        name: "Staff Permissions",
+        description: "Control what your staff can access",
+        starter: false,
+        premium: true,
+        pro: true,
       },
       {
-        name: "Progress Tracking",
-        description:
-          "Detailed analytics and reporting on team learning progress and skill development.",
-        standard: false,
-        pro: false,
-        enterprise: true,
-      },
-      {
-        name: "Custom Learning Paths",
-        description:
-          "Create tailored learning journeys based on team roles and objectives.",
-        standard: false,
-        pro: false,
-        enterprise: true,
+        name: "Reporting",
+        description: "Detailed reports on your business performance",
+        starter: "Basic reporting",
+        premium: "Advanced reporting",
+        pro: "Custom reports",
       },
     ],
   },
@@ -183,7 +264,7 @@ const FeatureTooltip = ({
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content
-          className="TooltipContent bg-card text-white text-sm px-3 py-2 rounded-md shadow-lg max-w-xs border border-gray-700 z-50"
+          className="TooltipContent bg-card text-primary dark:text-white  text-sm px-3 py-2 rounded-md shadow-lg max-w-xs border border-gray-700 z-50"
           sideOffset={5}
           side="top"
         >
@@ -220,13 +301,13 @@ export function ComparisonTable() {
                     Features
                   </th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-primary dark:text-white">
-                    Standard
+                    Starter
                   </th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-secondary">
-                    Pro
+                    Premium
                   </th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-primary dark:text-white">
-                    Enterprise
+                    Pro
                   </th>
                 </tr>
               </thead>
@@ -256,25 +337,37 @@ export function ComparisonTable() {
                             <FeatureTooltip content={item.description} />
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          {item.standard ? (
-                            <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                        <td className="px-6 py-4 text-center text-sm">
+                          {typeof item.starter === "boolean" ? (
+                            item.starter ? (
+                              <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                            ) : (
+                              <X className="mx-auto h-5 w-5 text-red-500" />
+                            )
                           ) : (
-                            <X className="mx-auto h-5 w-5 text-red-500" />
+                            <span>{item.starter}</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          {item.pro ? (
-                            <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                        <td className="px-6 py-4 text-center text-sm">
+                          {typeof item.premium === "boolean" ? (
+                            item.premium ? (
+                              <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                            ) : (
+                              <X className="mx-auto h-5 w-5 text-red-500" />
+                            )
                           ) : (
-                            <X className="mx-auto h-5 w-5 text-red-500" />
+                            <span>{item.premium}</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          {item.enterprise ? (
-                            <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                        <td className="px-6 py-4 text-center text-sm">
+                          {typeof item.pro === "boolean" ? (
+                            item.pro ? (
+                              <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                            ) : (
+                              <X className="mx-auto h-5 w-5 text-red-500" />
+                            )
                           ) : (
-                            <X className="mx-auto h-5 w-5 text-red-500" />
+                            <span>{item.pro}</span>
                           )}
                         </td>
                       </tr>

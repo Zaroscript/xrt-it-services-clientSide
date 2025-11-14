@@ -2,38 +2,35 @@
 
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { useForm } from "react-hook-form";
-
-type FormData = {
-  name: string;
-  email: string;
-  phone: string;
-  service: string;
-  message: string;
-};
-
-const services = [
-  "Web Development",
-  "Mobile App Development",
-  "UI/UX Design",
-  "Digital Marketing",
-  "IT Consulting",
-  "Other",
-];
+import { useContactForm } from '@/hooks/useContactForm';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const ContactSection = () => {
+  const [businessType, setBusinessType] = useState<"personal" | "business">("personal");
+  const { form, onSubmit, isSubmitting } = useContactForm();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormData>();
+    setValue,
+    clearErrors,
+  } = form;
 
-  const onSubmit = (data: FormData) => {
-    // Handle form submission (e.g., send email, API call, etc.)
-    console.log(data);
-    // Reset form after submission
-    reset();
+  const handleFormSubmit = async (data: any) => {
+    try {
+      data.type = businessType;
+      
+      await onSubmit(data);
+      toast.success('Thank you for your message! We will get back to you soon.');
+      reset();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.';
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -46,70 +43,162 @@ const ContactSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="bg-card p-8 rounded-2xl shadow-lg"
+            className="bg-card p-8 rounded-2xl shadow-lg w-full"
           >
-            <div className="mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-primary  mb-2">
-                Get A Quote
-              </h2>
-              <p className="text-secondary dark:text-white">
-                We're here to help! Fill out the form and our team will get back to
-                you as soon as possible.
-              </p>
-            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Get a Free Quote</h2>
+            <p className="text-muted-foreground mb-8">
+              Fill out the form and we'll get back to you within 24 hours
+            </p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  Full Name <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  {...register("name", { required: "Name is required" })}
-                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                  placeholder="John Doe"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {/* Name Field */}
+                <div>
+                  <label 
+                    htmlFor="name" 
+                    className="block text-sm font-medium text-foreground mb-1"
+                  >
+                    Full Name <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    {...register('name')}
+                    className={`w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                      errors.name ? 'border-destructive' : 'border-input'
+                    }`}
+                    disabled={isSubmitting}
+                    placeholder="John Doe"
+                  />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
+                  )}
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label 
+                    htmlFor="email" 
+                    className="block text-sm font-medium text-foreground mb-1"
+                  >
+                    Email <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    {...register('email')}
+                    className={`w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                      errors.email ? 'border-destructive' : 'border-input'
+                    }`}
+                    disabled={isSubmitting}
+                    placeholder="you@example.com"
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-foreground mb-1"
+              {/* Business Type Toggle */}
+              <div className="flex space-x-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setBusinessType("personal")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    businessType === "personal"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
                 >
-                  Email Address <span className="text-destructive">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  className="w-full px-4 py-3 rounded-lg  bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                  placeholder="you@example.com"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
+                  Personal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBusinessType("business")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    businessType === "business"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  Business
+                </button>
               </div>
 
+              {businessType === "business" && (
+                <>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    {/* Business Name */}
+                    <div>
+                      <label 
+                        htmlFor="businessName" 
+                        className="block text-sm font-medium text-foreground mb-1"
+                      >
+                        Business Name
+                      </label>
+                      <input
+                        type="text"
+                        id="businessName"
+                        {...register('businessName')}
+                        className="w-full px-4 py-3 rounded-lg bg-background text-foreground border border-input focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        disabled={isSubmitting}
+                        placeholder="Your Business Name"
+                      />
+                    </div>
+
+                    {/* Website */}
+                    <div>
+                      <label 
+                        htmlFor="website" 
+                        className="block text-sm font-medium text-foreground mb-1"
+                      >
+                        Website
+                      </label>
+                      <input
+                        type="url"
+                        id="website"
+                        {...register('website')}
+                        placeholder="https://"
+                        className={`w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                          errors.website ? 'border-destructive' : 'border-input'
+                        }`}
+                        disabled={isSubmitting}
+                      />
+                      {errors.website && (
+                        <p className="mt-1 text-sm text-destructive">{errors.website.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Service Selection */}
+                  <div>
+                    <label 
+                      htmlFor="service" 
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Service Needed
+                    </label>
+                    <select
+                      id="service"
+                      {...register('service')}
+                      className="w-full px-4 py-3 rounded-lg bg-background text-foreground border border-input focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      disabled={isSubmitting}
+                    >
+                      <option value="">Select a service</option>
+                      <option value="web">Web Development</option>
+                      <option value="mobile">Mobile App Development</option>
+                      <option value="design">UI/UX Design</option>
+                      <option value="marketing">Digital Marketing</option>
+                      <option value="consulting">IT Consulting</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Phone Number */}
               <div>
-                <label
-                  htmlFor="phone"
+                <label 
+                  htmlFor="phone" 
                   className="block text-sm font-medium text-foreground mb-1"
                 >
                   Phone Number <span className="text-muted-foreground">(optional)</span>
@@ -117,68 +206,58 @@ const ContactSection = () => {
                 <input
                   type="tel"
                   id="phone"
-                  {...register("phone")}
-                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                  {...register('phone')}
+                  className={`w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+                    errors.phone ? 'border-destructive' : 'border-input'
+                  }`}
+                  disabled={isSubmitting}
                   placeholder="+1 (234) 567-8900"
                 />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="service"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  How can we help you? <span className="text-destructive">*</span>
-                </label>
-                <select
-                  id="service"
-                  {...register("service", { required: "Please select a service" })}
-                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all appearance-none"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Select a service
-                  </option>
-                  {services.map((service) => (
-                    <option key={service} value={service}>
-                      {service}
-                    </option>
-                  ))}
-                </select>
-                {errors.service && (
-                  <p className="mt-1 text-sm text-destructive">
-                    {errors.service.message}
-                  </p>
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-destructive">{errors.phone.message}</p>
                 )}
               </div>
 
+              {/* Message */}
               <div>
-                <label
-                  htmlFor="message"
+                <label 
+                  htmlFor="message" 
                   className="block text-sm font-medium text-foreground mb-1"
                 >
-                  Your Message <span className="text-destructive">*</span>
+                  Message <span className="text-destructive">*</span>
                 </label>
                 <textarea
                   id="message"
                   rows={4}
-                  {...register("message", { required: "Message is required" })}
-                  className="w-full px-4 py-3 rounded-lg bg-background text-foreground focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                  placeholder="Tell us more about your project..."
+                  {...register('message')}
+                  className={`w-full px-4 py-3 rounded-lg bg-background text-foreground border ${
+                    errors.message ? 'border-destructive' : 'border-input'
+                  } focus:ring-2 focus:ring-primary focus:border-transparent transition-all`}
+                  disabled={isSubmitting}
+                  placeholder="Tell us about your project..."
                 ></textarea>
                 {errors.message && (
-                  <p className="mt-1 text-sm text-destructive">
-                    {errors.message.message}
-                  </p>
+                  <p className="mt-1 text-sm text-destructive">{errors.message.message}</p>
                 )}
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-gold hover:bg-gold/90 text-gold-foreground font-medium py-3 px-6 rounded-lg transition-colors"
-              >
-                Send Message
-              </button>
+              {/* Submit Button */}
+              <div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </button>
+              </div>
             </form>
           </motion.div>
 
@@ -190,63 +269,48 @@ const ContactSection = () => {
             viewport={{ once: true }}
             className="space-y-8"
           >
-            <div>
-              <h3 className="text-2xl font-bold text-foreground mb-6">
-                Get in Touch
-              </h3>
-              <p className="text-muted-foreground mb-8">
-                Have questions or want to discuss your project? We'd love to hear
-                from you. Reach out to us using the contact information below or
-                fill out the form.
+            <div className="space-y-4">
+              <h2 className="text-3xl font-bold text-foreground">Contact Information</h2>
+              <p className="text-muted-foreground">
+                Have questions or want to discuss your project? Reach out to us!
               </p>
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 bg-gold/10 p-3 rounded-full text-gold">
-                  <Mail className="w-6 h-6" />
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                  <MapPin className="h-6 w-6 text-primary" />
                 </div>
-                <div className="ml-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Email Us
-                  </h4>
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">Our Office</h3>
+                  <p className="text-muted-foreground">123 Tech Street, San Francisco, CA 94107</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                  <Mail className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">Email Us</h3>
                   <a
                     href="mailto:support@xrttech.com"
-                    className="text-foreground hover:text-gold transition-colors"
+                    className="text-primary hover:underline"
                   >
                     support@xrttech.com
                   </a>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="flex-shrink-0 bg-gold/10 p-3 rounded-full text-gold">
-                  <Phone className="w-6 h-6" />
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                  <Phone className="h-6 w-6 text-primary" />
                 </div>
-                <div className="ml-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Call Us
-                  </h4>
-                  <a
-                    href="tel:+1234567890"
-                    className="text-foreground hover:text-gold transition-colors"
-                  >
-                    +1 (234) 567-890
+                <div>
+                  <h3 className="text-lg font-medium text-foreground">Call Us</h3>
+                  <a href="tel:+15085070922" className="text-primary hover:underline">
+                    +1 (508) 507-0922
                   </a>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex-shrink-0 bg-gold/10 p-3 rounded-full text-gold">
-                  <MapPin className="w-6 h-6" />
-                </div>
-                <div className="ml-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Location
-                  </h4>
-                  <p className="text-foreground">
-                    Franklin, MA 02038
-                  </p>
                 </div>
               </div>
             </div>

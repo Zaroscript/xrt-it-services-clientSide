@@ -60,8 +60,8 @@ export function CompanySection() {
                 className="text-gray-400"
               >
                 We started XRT Tech with one mission: to make modern technology
-                accessible to every business. Whether it's a custom website, an
-                app, or IT support, we're here to simplify digital
+                accessible to every business. Whether it’s a custom website, an
+                app, or IT support, we’re here to simplify digital
                 transformation and make success easy to reach.
               </motion.p>
 
@@ -84,7 +84,7 @@ export function CompanySection() {
               <div className="relative mx-auto w-[250px] sm:w-[500px] rounded-sm lg:w-[400px]">
                 {/* Main Video Thumbnail */}
 
-                <div className="relative z-10 rounded-sm shadow-2xl">
+                <div className="relative z-10 rounded-sm overflow-hidden shadow-2xl">
                   <Image
                     src={company_1}
                     alt="Company middle image"

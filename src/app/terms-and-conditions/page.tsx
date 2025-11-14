@@ -1,29 +1,26 @@
-import React from 'react';
-import { Metadata } from 'next';
+import React from "react";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions | XRT Tech',
-  description: 'Read the terms and conditions for using XRT Tech services.',
+  title: "Terms & Conditions | XRT Tech",
+  description: "Full terms and conditions updated November 2025."
 };
 
 export default function TermsAndConditions() {
   return (
-    <div className="container mx-auto px-4 py-20 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">🧾 XRT Tech – Terms & Conditions</h1>
-      <p className="text-gray-600 text-center mb-12">Effective Date: October 2025</p>
+    <div className="max-w-4xl mx-auto px-4 py-20">
+      <h1 className="text-3xl font-bold mb-6">XRT TECH — TERMS & CONDITIONS</h1>
+      <p className="text-gray-600 mb-8">Last Updated: November 2025</p>
       
       <div className="prose max-w-none">
-        <p className="mb-4">
-          <strong>Company:</strong> XRT Tech LLC ("XRT Tech," "we," "our," or "us")<br />
-          <strong>Website:</strong> xrt-tech.com
-        </p>
-        <p className="mb-8">By using this website or engaging our services, you ("Client") agree to the following legally binding terms.</p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Authorization & Access</h2>
         <p className="mb-6">
-          The Client authorizes XRT Tech to access hosting accounts, domains, and related services necessary to design, develop, deploy, or maintain digital assets. The Client also authorizes XRT Tech to submit the website to search engines unless otherwise requested in writing.
+          These Terms & Conditions ("Terms") govern your use of all XRT Tech services, including the website, 
+          online ordering system, SaaS dashboard, hosting tools, digital signage services, APIs, communication tools, 
+          and all related features (the "Services"). By accessing or using XRT Tech, you agree to these Terms. 
+          If you do not agree, you must stop using the Services.
         </p>
 
+        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Definitions</h2>
         <h2 className="text-2xl font-semibold mt-8 mb-4">2. Scope of Services</h2>
         <p className="mb-6">
           XRT Tech provides website design, hosting, maintenance, online-ordering systems, IT support, cloud setup, and other digital solutions as detailed in each written proposal, service plan, or invoice. Services outside that scope require a separate written agreement.

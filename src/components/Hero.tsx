@@ -82,10 +82,11 @@ export default function Hero() {
               src={currentBackground}
               alt="Technology Background"
               fill
+              sizes="100vw"
               className="object-cover opacity-80 blur-xs"
               priority
-              quality={100}
-             />
+              quality={85}
+            />
           </motion.div>
         </AnimatePresence>
       </div>

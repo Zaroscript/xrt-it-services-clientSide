@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Check } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { useRouter } from "next/navigation";
@@ -9,15 +10,12 @@ import Image from "next/image";
 import { Code2, CloudCog, Cpu, HardDrive, ShieldCheck, Smartphone } from "lucide-react";
 import { StaticImageData } from "next/image";
 
+// We'll use the image directly from the service prop
+
 // Map of icon names to their corresponding components
 const iconMap = {
   'web-development': Code2,
-  'mobile-apps': Smartphone,
   'cloud-solutions': CloudCog,
-  'database-management': HardDrive,
-  'cybersecurity': ShieldCheck,
-  'ai-ml-solutions': Cpu,
-  'default': Cpu,
   'online-ordering-systems': Smartphone,
   'digital-marketing': Code2,
   'it-setup-support': Cpu,
@@ -39,10 +37,13 @@ type ServiceDetailProps = {
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
   const router = useRouter();
-  const IconComponent = iconMap[service.iconName as keyof typeof iconMap] || iconMap.default;
+  const IconComponent = iconMap[service.iconName as keyof typeof iconMap];
   
   // Generate gradient class based on service color
   const gradientClass = service.color || 'from-primary to-secondary';
+  
+  // Use the image from the service prop
+  const serviceImage = service.img;
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,18 +151,16 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                   </div>
                 </div>
                 <div className="lg:w-1/2">
-                  {service.img ? (
+                  {serviceImage ? (
                     <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
                       <Image 
-                        src={service.img} 
+                        src={serviceImage}
                         alt={service.title}
-                        fill
-                        className="object-cover"
+                        width={800}
+                        height={450}
+                        className="object-cover w-full h-full"
                         sizes="(max-width: 1024px) 100vw, 50vw"
-                        quality={300}
                         priority
-                        placeholder="blur"
-                        blurDataURL={typeof service.img === 'string' ? service.img : service.img.src}
                       />
                     </div>
                   ) : (
@@ -177,33 +176,45 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20">
         <div className="wide-container px-4">
           <FadeIn>
-            <div className="max-w-3xl mx-auto text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                What's Included
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Our comprehensive {service.title.toLowerCase()} services include everything you need to succeed
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {service.features.map((feature, i) => (
-                <div 
-                  key={i}
-                  className="group bg-card p-6 rounded-xl border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg"
-                >
-                  <div className={`w-12 h-12 rounded-lg ${gradientClass} bg-opacity-10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <Check className="w-6 h-6 text-primary" />
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/20 shadow-lg overflow-hidden">
+                <div className="p-8 md:p-10">
+                  <div className="text-center mb-10">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                      What's Included
+                    </h2>
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                      Our comprehensive {service.title.toLowerCase()} services include everything you need to succeed
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature}</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Expertly implemented {feature.toLowerCase()} as part of our comprehensive service package.
-                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {service.features.map((feature, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors"
+                      >
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${gradientClass} bg-opacity-10 flex items-center justify-center mt-1`}>
+                          <Check className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-foreground">{feature}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Expertly implemented {feature.toLowerCase()} as part of our comprehensive service package.
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           </FadeIn>
         </div>

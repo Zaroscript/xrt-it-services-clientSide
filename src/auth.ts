@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        type: { label: 'Type', type: 'text' }, // 'login' or 'register'
+        type: { label: 'Type', type: 'text' }, 
         fName: { label: 'First Name', type: 'text', required: false },
         lName: { label: 'Last Name', type: 'text', required: false },
         phone: { label: 'Phone', type: 'text', required: false }

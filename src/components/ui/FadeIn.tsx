@@ -1,13 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps, Variants } from "framer-motion";
 
-interface FadeInProps {
+interface FadeInProps extends Omit<HTMLMotionProps<"div">, "children" | "onAnimationStart" | "onDragStart" | "onDragEnd" | "onDrag" | "style"> {
   children: React.ReactNode;
   delay?: number;
   duration?: number;
   className?: string;
   direction?: "up" | "down" | "left" | "right";
+  whileHover?: any; // Allow whileHover prop for hover animations
 }
 
 const directionVariants = {
@@ -22,11 +23,12 @@ export function FadeIn({
   delay = 0,
   duration = 0.5,
   className = "",
-  direction
+  direction,
+  ...rest
 }: FadeInProps) {
   const initial = {
     opacity: 0,
-    ...(direction && directionVariants[direction])
+    ...(direction && directionVariants[direction]),
   };
 
   return (
@@ -40,9 +42,10 @@ export function FadeIn({
       transition={{
         duration,
         delay,
-        ease: [0.21, 1.02, 0.73, 0.99],
+        ease: [0.16, 1, 0.3, 1],
       }}
       className={className}
+      {...rest as any}
     >
       {children}
     </motion.div>

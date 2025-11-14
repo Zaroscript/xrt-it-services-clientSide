@@ -3,19 +3,14 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | XRT Tech',
-  description: 'Read our privacy policy to understand how we collect, use, and protect your information.',
+  description: 'Updated privacy policy effective November 2025.'
 };
 
 export default function PrivacyPolicy() {
   return (
-    <div className="container mx-auto px-4 py-20 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">🔒 XRT Tech – Privacy Policy</h1>
-      <p className="text-gray-600 text-center mb-12">Effective Date: October 2025</p>
-      
-      <div className="prose max-w-none">
-        <p className="mb-8">
-          At XRT Tech LLC ("XRT Tech," "we," "our," or "us"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website xrt-tech.com or use our services.
-        </p>
+    <div className="container mx-auto px-4 py-20 max-w-4xl space-y-6">
+      <h1 className="text-4xl font-bold text-center">XRT TECH — Privacy Policy</h1>
+      <p className="text-center text-muted-foreground">Last Updated: November 2025</p>
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">1. Information We Collect</h2>
         <p className="mb-4">We may collect the following types of information:</p>
@@ -95,6 +90,5 @@ export default function PrivacyPolicy() {
           <p className="text-gray-600">© 2025 XRT Tech LLC – All Rights Reserved.</p>
         </div>
       </div>
-    </div>
   );
 }

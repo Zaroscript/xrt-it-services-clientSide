@@ -3,39 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-
-const faqs = [
-  {
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers. All payments are processed securely through our payment partners.",
-  },
-  {
-    question: "Can I switch plans later?",
-    answer:
-      "Yes, you can upgrade or downgrade your plan at any time. When upgrading, you'll get immediate access to new features. If you downgrade, the changes will take effect at the start of your next billing cycle.",
-  },
-  {
-    question: "Is there a money-back guarantee?",
-    answer:
-      "Yes, we offer a 30-day money-back guarantee for all our plans. If you're not satisfied with our service, you can request a full refund within the first 30 days of your subscription.",
-  },
-  {
-    question: "Do you offer team discounts?",
-    answer:
-      "Yes, we offer special discounts for teams of 5 or more members. Contact our sales team for custom pricing and team management features.",
-  },
-  {
-    question: "How do I cancel my subscription?",
-    answer:
-      "You can cancel your subscription at any time through your account settings. Your access will continue until the end of your current billing period.",
-  },
-  {
-    question: "What happens after my subscription ends?",
-    answer:
-      "When your subscription ends, you'll lose access to premium features. Your progress and data will be saved for 90 days, giving you time to reactivate your subscription if desired.",
-  },
-];
+import { pricingFaq } from "@/config/constants";
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -54,7 +22,7 @@ export function FAQ() {
           </div>
 
           <div className="mt-12 space-y-4">
-            {faqs.map((faq, index) => (
+            {pricingFaq.map((faq, index) => (
               <div
                 key={index}
                 className="rounded-lg border border-gray-800 bg-[#232325]"
