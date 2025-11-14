@@ -9,9 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppDispatch } from "@/lib/hooks";
-import { updateUserProfile } from "@/features/auth/authSlice";
-import { UpdateProfilePayload } from "@/features/auth/types";
+import useAuthStore from "@/store/useAuthStore";
 import { toast } from "sonner";
 
 const businessInfoSchema = z.object({
@@ -44,9 +42,9 @@ type BusinessInfoFormValues = {
 
 export default function CompleteProfilePage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { updateClientProfile, isLoading } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -69,34 +67,23 @@ export default function CompleteProfilePage() {
 
   const hasExistingWebsite = watch("hasExistingWebsite");
 
-  const onSubmit = async (data: BusinessInfoFormValues) => {
+  const onSubmit: SubmitHandler<BusinessInfoFormValues> = async (data) => {
     try {
       setIsSubmitting(true);
-      setError(null);
-
-      // Prepare the profile update data
-      const profileData: UpdateProfilePayload = {
-        businessAddress: data.businessAddress,
-        businessCity: data.businessCity,
-        businessState: data.businessState,
-        businessZipCode: data.businessZipCode,
-        businessCountry: data.businessCountry,
-        hasExistingWebsite: data.hasExistingWebsite,
-        websiteUrl: data.hasExistingWebsite ? data.websiteUrl : undefined,
-        requiresBusinessInfo: false, // Mark profile as complete
-      };
-
-      const result = await dispatch(updateUserProfile(profileData));
-
-      if (updateUserProfile.fulfilled.match(result)) {
-        toast.success("Profile updated successfully!");
-        router.push("/dashboard");
-      } else {
-        throw new Error("Failed to update profile");
-      }
+      await updateClientProfile({
+        businessLocation: {
+          address: data.businessAddress,
+          city: data.businessCity,
+          state: data.businessState,
+          zipCode: data.businessZipCode,
+          country: data.businessCountry
+        },
+        oldWebsite: data.hasExistingWebsite ? data.websiteUrl : undefined
+      });
+      toast.success("Profile updated successfully!");
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Error updating profile:", error);
-      setError("Failed to update profile. Please try again.");
+      toast.error("Failed to update profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
