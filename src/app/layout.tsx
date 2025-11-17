@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/chat/ChatWidget";
 import { Toaster } from "@/components/ui/custom-toast";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 // Fonts variables
 const robotoFont = Roboto({
@@ -65,7 +66,9 @@ export default function RootLayout({
               <div className="min-h-screen flex flex-col">
                 <Header />
                 <main className="flex-1 overflow-x-hidden">
-                  <Suspense fallback={<Loading />}>{children}</Suspense>
+                  <AuthProvider>
+                    <Suspense fallback={<Loading />}>{children}</Suspense>
+                  </AuthProvider>
                 </main>
                 <Footer />
                 <ChatWidget />

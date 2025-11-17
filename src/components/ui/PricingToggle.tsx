@@ -6,9 +6,12 @@ import { cn } from "@/lib/utils";
 interface PricingToggleProps {
   isYearly: boolean;
   onToggle: () => void;
+  yearlySavings?: number;
 }
 
-export function PricingToggle({ isYearly, onToggle }: PricingToggleProps) {
+export function PricingToggle({ isYearly, onToggle, yearlySavings }: PricingToggleProps) {
+  const showSavings = yearlySavings !== undefined && yearlySavings > 0;
+  
   return (
     <div className="flex items-center justify-center gap-4">
       <span className={cn("text-sm", !isYearly && "text-secondary")}>Monthly</span>
@@ -24,9 +27,11 @@ export function PricingToggle({ isYearly, onToggle }: PricingToggleProps) {
       </button>
       <div className="flex items-center gap-2">
         <span className={cn("text-sm", isYearly && "text-secondary")}>Yearly</span>
-        <span className="rounded-full bg-secondary/10 px-2 py-1 text-xs text-secondary">
-          Save 21%
-        </span>
+        {showSavings && (
+          <span className="rounded-full bg-secondary/10 px-2 py-1 text-xs text-secondary">
+            Save {yearlySavings}%
+          </span>
+        )}
       </div>
     </div>
   );

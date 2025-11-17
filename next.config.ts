@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self' data:; img-src 'self' data: https:;",
+    // Add image qualities configuration
+    qualities: [25, 50, 75, 85, 90],
   },
   
   // Build optimizations
@@ -43,7 +45,7 @@ const nextConfig: NextConfig = {
   },
   
   // External packages for server components
-  serverExternalPackages: ['bcryptjs'],
+  serverExternalPackages: ['bcryptjs', 'nodemailer'],
   
   // Custom webpack config
   webpack: (config, { isServer }) => {

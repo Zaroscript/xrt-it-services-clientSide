@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, ShieldAlert, Mail, Clock, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import useAuthStore from '@/store/useAuthStore';
 
 export default function PendingApprovalPage() {
-  const { data: session, status } = useSession();
+  const { user, logout, isLoading } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userEmail, setUserEmail] = useState<string>('');
 
-  // Get email from session or session storage
+  // Get email from user or session storage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedEmail = sessionStorage.getItem('pendingApprovalEmail');
@@ -21,17 +21,17 @@ export default function PendingApprovalPage() {
         setUserEmail(storedEmail);
         // Clear the stored email after using it
         sessionStorage.removeItem('pendingApprovalEmail');
-      } else if (session?.user?.email) {
-        setUserEmail(session.user.email);
+      } else if (user?.email) {
+        setUserEmail(user.email);
       }
     }
-  }, [session]);
+  }, [user]);
 
   // Handle redirection based on authentication status
   useEffect(() => {
     // Only run this effect once when the component mounts
     const checkAuthStatus = () => {
-      if (status === 'unauthenticated') {
+      if (!user) {
         // If we have an email in the URL, redirect to login with the email pre-filled
         const email = searchParams.get('email') || userEmail;
         if (email) {
@@ -39,21 +39,19 @@ export default function PendingApprovalPage() {
         } else {
           router.replace('/auth/login');
         }
-      } else if (status === 'authenticated') {
+      } else if (user?.isApproved) {
         // If user is already approved, redirect to dashboard
-        if (session?.user?.isApproved) {
-          router.replace('/dashboard');
-        }
+        router.replace('/dashboard');
       }
     };
 
     // Add a small delay to prevent flash of content
     const timer = setTimeout(checkAuthStatus, 100);
     return () => clearTimeout(timer);
-  }, [status, session, router, searchParams, userEmail]);
+  }, [user, router, searchParams, userEmail]);
 
   // Show loading state until we determine the authentication status
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -63,8 +61,8 @@ export default function PendingApprovalPage() {
 
 
   const handleSignOut = async () => {
-    const { signOut } = await import('next-auth/react');
-    await signOut({ callbackUrl: '/auth/login' });
+    await logout();
+    router.push('/auth/login');
   };
 
   // If we get here, the user is authenticated but not approved

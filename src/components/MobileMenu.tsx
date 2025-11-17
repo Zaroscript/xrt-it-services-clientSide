@@ -2,11 +2,13 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, User, LogOut, Settings, Package, FileText } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { NAV_LINKS } from "@/config/constants";
-import { useState } from "react";
+import useAuthStore from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 // types
 import { MobileMenuProps } from "@/types";
@@ -15,7 +17,39 @@ import { MobileMenuProps } from "@/types";
 import { linkVariants } from "@/config/variants";
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const [isLogedin] = useState<boolean>(false);
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully', {
+        position: 'top-center',
+        duration: 2000,
+      });
+      router.push('/');
+      onClose();
+    } catch (error) {
+      toast.error('Failed to logout', {
+        position: 'top-center',
+        duration: 3000,
+      });
+    }
+  };
+
+  const getInitials = (firstName?: string, lastName?: string) => {
+    if (!firstName && !lastName) return 'U';
+    const first = firstName?.charAt(0) || '';
+    const last = lastName?.charAt(0) || '';
+    return (first + last).toUpperCase();
+  };
+
+  const userMenuItems = [
+    { icon: User, label: 'Profile', href: '/dashboard' },
+    { icon: Package, label: 'My Plans', href: '/dashboard/plans' },
+    { icon: FileText, label: 'Services', href: '/dashboard/services' },
+    { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+  ];
 
   return (
     <AnimatePresence>
@@ -49,33 +83,89 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
             <nav className="flex-1 mt-8">
               <ul className="flex flex-col space-y-2">
-                {NAV_LINKS.map((link, i) => (
-                  <motion.li
-                    key={link.name}
-                    variants={linkVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={{ delay: i * 0.05, ease: "easeInOut" }}
-                    className="w-full"
-                  >
-                    <Link
-                      href={link.path}
-                      className="flex items-center w-full px-4 py-3 text-lg font-medium text-gray-800 dark:text-foreground rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors"
-                      onClick={onClose}
+                {NAV_LINKS.map((link, i) => {
+                  return (
+                    <motion.li
+                      key={link.name}
+                      variants={linkVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ delay: i * 0.05, ease: "easeInOut" }}
+                      className="w-full"
                     >
-                      {link.name}
-                    </Link>
-                  </motion.li>
-                ))}
+                      <Link
+                        href={link.path}
+                        className="flex items-center w-full px-4 py-3 text-lg font-medium text-gray-800 dark:text-foreground rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors"
+                        onClick={onClose}
+                      >
+                        {link.name}
+                      </Link>
+                    </motion.li>
+                  );
+                })}
               </ul>
             </nav>
 
-            <div className="mt-auto pt-6 border-t border-gray-200 dark:border-border/50">
-              <Button variant="outline" className="w-full text-lg py-6">
-                <Link href="/auth/signup">Sign Up</Link>
-              </Button>
-            </div>
+            {/* User section for authenticated users */}
+            {isAuthenticated && (
+              <div className="border-t border-gray-200 dark:border-border/50 pt-6 mt-6">
+                {/* User info */}
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium">
+                    {getInitials(user?.fName, user?.lName)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {user?.fName} {user?.lName}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+
+                {/* User menu items */}
+                <div className="space-y-1 mb-4">
+                  {userMenuItems.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-muted rounded-lg transition-colors"
+                      onClick={onClose}
+                    >
+                      <item.icon className="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Logout button */}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4 mr-3" />
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {/* Auth buttons for non-authenticated users */}
+            {!isAuthenticated && (
+              <div className="border-t border-gray-200 dark:border-border/50 pt-6 mt-6">
+                <Button
+                  className="w-full px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                  onClick={() => {
+                    router.push('/auth/login');
+                    onClose();
+                  }}
+                >
+                  Login
+                </Button>
+              </div>
+            )}
           </div>
         </motion.div>
       )}

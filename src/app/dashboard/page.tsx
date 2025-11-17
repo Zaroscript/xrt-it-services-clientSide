@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
@@ -21,13 +20,12 @@ type ProfileFormData = {
 };
 
 export default function NewProfilePage() {
-  const { data: session, status } = useSession();
-  const { user, updateClientProfile, isLoading: authLoading } = useAuthStore();
-  const clientProfile = user?.clientProfile;
+  const { user, clientProfile, updateClientProfile, isLoading: authLoading, isAuthenticated, fetchClientProfile, fetchAllUserData } = useAuthStore();
   const router = useRouter();
   
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     email: '',
@@ -35,20 +33,43 @@ export default function NewProfilePage() {
     company: ''
   });
 
-  // Initialize form data when user data is loaded
+  // Fetch all user data when authenticated
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
-    } else if (status === 'authenticated' && !authLoading && user) {
+    } else if (!authLoading && isAuthenticated && user) {
+      // Fetch all user data to ensure we have the latest information
+      const fetchUserData = async () => {
+        setIsFetchingData(true);
+        try {
+          await fetchAllUserData();
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } finally {
+          setIsFetchingData(false);
+        }
+      };
+      
+      fetchUserData();
+      
+      // Initialize form data with current user info
       setFormData({
         name: user.fName ? `${user.fName} ${user.lName || ''}`.trim() : '',
         email: user.email || '',
         phone: user.phone || '',
-        company: clientProfile?.companyName || ''
+        company: clientProfile?.companyName || user.companyName || ''
       });
+      
       setIsLoading(false);
     }
-  }, [status, authLoading, user, clientProfile, router]);
+  }, [authLoading, isAuthenticated, user, clientProfile, router, fetchAllUserData]);
+
+  // Additional effect to ensure client profile is fetched for client users
+  useEffect(() => {
+    if (isAuthenticated && user && user.role === 'client' && !clientProfile) {
+      fetchClientProfile(user.id);
+    }
+  }, [isAuthenticated, user, clientProfile, fetchClientProfile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,7 +83,7 @@ export default function NewProfilePage() {
     e.preventDefault();
     try {
       // Update client profile (company name)
-      if (formData.company !== clientProfile?.companyName) {
+      if (formData.company !== (clientProfile?.companyName || user?.companyName || '')) {
         await updateClientProfile({
           companyName: formData.company
         });
@@ -79,7 +100,7 @@ export default function NewProfilePage() {
     }
   };
 
-  if (isLoading || authLoading) {
+  if (isLoading || authLoading || isFetchingData) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Skeleton className="h-12 w-1/3 mb-6" />
@@ -142,6 +163,7 @@ export default function NewProfilePage() {
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="settings" disabled>Settings</TabsTrigger>
           <TabsTrigger value="billing" disabled>Billing</TabsTrigger>
           <TabsTrigger value="security" disabled>Security</TabsTrigger>
@@ -241,6 +263,89 @@ export default function NewProfilePage() {
                 </div>
               </CardContent>
             </form>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="business">
+          <Card>
+            <CardHeader>
+              <CardTitle>Business Information</CardTitle>
+              <CardDescription>
+                Your business details and service information.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Company Name</Label>
+                  <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                    {clientProfile?.companyName || formData.company || 'Not provided'}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tax ID</Label>
+                  <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                    {clientProfile?.taxId || 'Not provided'}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Business Address</Label>
+                  <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                    {clientProfile?.businessLocation ? (
+                      <div>
+                        <div>{clientProfile.businessLocation.address || 'No street address'}</div>
+                        <div>
+                          {clientProfile.businessLocation.city && clientProfile.businessLocation.state && 
+                            `${clientProfile.businessLocation.city}, ${clientProfile.businessLocation.state}`
+                          }
+                          {clientProfile.businessLocation.zipCode && ` ${clientProfile.businessLocation.zipCode}`}
+                        </div>
+                        <div>{clientProfile.businessLocation.country || 'USA'}</div>
+                      </div>
+                    ) : (
+                      'Not provided'
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Current Website</Label>
+                  <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                    {clientProfile?.oldWebsite ? (
+                      <a 
+                        href={clientProfile.oldWebsite} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline"
+                      >
+                        {clientProfile.oldWebsite}
+                      </a>
+                    ) : (
+                      'Not provided'
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <div className="text-sm py-2 px-3 border rounded-md bg-muted/50 min-h-[60px]">
+                  {clientProfile?.notes || 'No notes available'}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Account Status</Label>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${clientProfile?.isActive !== false ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <span className="text-sm">
+                    {clientProfile?.isActive !== false ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>

@@ -19,6 +19,8 @@ interface PricingCardProps {
   onSelect?: () => void;
   isSubmitting?: boolean;
   buttonText?: string;
+  taxNote?: string;
+  guaranteeText?: string;
 }
 
 export function PricingCard({
@@ -32,7 +34,9 @@ export function PricingCard({
   className,
   onSelect,
   isSubmitting,
-  buttonText = 'Get Started'
+  buttonText = 'Get Started',
+  taxNote = 'Local taxes may apply',
+  guaranteeText = '30 Day Money-Back Guarantee'
 }: PricingCardProps) {
   return (
     <div
@@ -176,16 +180,25 @@ export function PricingCard({
               ? "bg-gradient-to-r from-secondary to-secondary/80 text-[#1a1a1a] hover:scale-[1.02] hover:shadow-lg hover:shadow-secondary/20"
               : "border-[#D3B073] text-[#D3B073] hover:bg-[#D3B073]/10"
           )}
+          onClick={onSelect}
+          disabled={isSubmitting}
         >
           {isPopular && (
             <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-secondary/0 via-white/20 to-secondary/0 transition-transform duration-700 group-hover:translate-x-full" />
           )}
-          Choose Plan
+          {isSubmitting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+              Processing...
+            </>
+          ) : (
+            buttonText
+          )}
         </Button>
 
         <div className="mt-auto pt-4 space-y-2 text-center text-sm">
           <p className="text-gray-500 dark:text-gray-400">
-            Local taxes may apply
+            {taxNote}
           </p>
           <div
             className={cn(
@@ -201,7 +214,7 @@ export function PricingCard({
             >
               <Check className="h-4 w-4" />
             </span>
-            30 Day Money-Back Guarantee
+            {guaranteeText}
           </div>
         </div>
       </div>

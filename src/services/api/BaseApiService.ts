@@ -25,7 +25,10 @@ export abstract class BaseApiService {
   private initializeRequestInterceptor() {
     this.http.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        // Get token from auth store
+        const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+        const token = authState.state?.tokens?.accessToken;
+        
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -42,9 +45,9 @@ export abstract class BaseApiService {
       (response: AxiosResponse) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          // Handle unauthorized access (e.g., redirect to login)
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          // Clear auth store data on unauthorized access
+          localStorage.removeItem('auth-storage');
+          window.location.href = '/auth/login';
         }
         return Promise.reject(this.normalizeError(error as AxiosError<ApiErrorResponse>));
       }

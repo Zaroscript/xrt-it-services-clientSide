@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import {marketing} from "@/config/constants";
+import {marketing, screens} from "@/config/constants";
 
 const Included = () => {
   const router = useRouter();
@@ -53,7 +53,7 @@ const Included = () => {
                   alt={offer.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
+                  className={` ${offer.image == screens ? "bg-top" : "bg-center"} object-cover`}
                   priority={index < 2}
                 />
               </div>

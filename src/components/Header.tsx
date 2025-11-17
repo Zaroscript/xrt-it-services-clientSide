@@ -10,6 +10,7 @@ import { NAV_LINKS } from "@/config/constants";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { Button } from "./ui/button";
 import { MobileMenu } from "./MobileMenu";
+import { UserAvatarDropdown } from "./ui/UserAvatarDropdown";
 import lightLogo from "../assets/images/logo-light.png";
 import darkLogo from "../assets/images/logo-dark.png";
 import { useThemeDetector } from "@/hooks/useThemeDetector";
@@ -67,9 +68,6 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-2">
               {NAV_LINKS.map((link) => {
-                // Skip protected routes if user is not authenticated
-                if (link.protected && !isAuthenticated) return null;
-                
                 return (
                   <Link
                     key={link.name}
@@ -90,31 +88,32 @@ const Header = () => {
             {/* Right side buttons */}
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              {isAuthenticated ? (
-                <Button
-                  variant="ghost"
-                  onClick={logout}
-                  className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
-                >
-                  Sign Out
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className="hidden md:inline-flex hover:bg-primary/5 text-foreground/80"
-                >
-                  <Link href="/auth/login">Sign In</Link>
-                </Button>
-              )}
 
-              <Button
-                className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+              {/* User Avatar Dropdown - Show when authenticated */}
+              {isAuthenticated ? (
+                <>
+                  <Button
+                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
             items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
-                onClick={() => router.push("/#quote")}
-              >
-                Get a Quote
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </Button>
+                    onClick={() => router.push("/#quote")}
+                  >
+                    Get a Quote
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                  <UserAvatarDropdown />
+                </>
+              ) : (
+                <>
+                  <Button
+                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                    onClick={() => router.push("/auth/login")}
+                  >
+                    Login
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </>
+              )}
 
               {/* Mobile menu button */}
               <Button

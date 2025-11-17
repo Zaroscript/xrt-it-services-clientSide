@@ -51,8 +51,6 @@ export const NAV_LINKS = [
   },
   { name: "Pricing", path: "/pricing" },
   { name: "Contact", path: "/contact" },
-  // Protected routes - will be conditionally rendered
-  { name: "Profile", path: "/profile", protected: true },
 ];
 
 export const heroContent = [

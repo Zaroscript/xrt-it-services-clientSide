@@ -54,35 +54,35 @@ export default function Hero() {
       <div className="absolute inset-0 opacity-30" />
 
       {/* Animated Background Images with Blur */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 h-screen">
         <AnimatePresence mode="wait">
           <motion.div
             initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ 
-              opacity: 0.7, 
+            animate={{
+              opacity: 0.7,
               scale: 1,
-              transition: { 
-                duration: 1.5, 
+              transition: {
+                duration: 1.5,
                 ease: [0.2, 0.8, 0.2, 1],
                 opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] }
               }
             }}
-            exit={{ 
+            exit={{
               opacity: 0,
               scale: 0.95,
-              transition: { 
-                duration: 1, 
+              transition: {
+                duration: 1,
                 ease: [0.4, 0, 0.2, 1],
                 opacity: { duration: 0.8 }
               }
             }}
-            className="absolute inset-0 overflow-hidden"
+            className="absolute inset-0 h-full overflow-hidden"
           >
             <Image
               src={currentBackground}
               alt="Technology Background"
               fill
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
               className="object-cover opacity-80 blur-xs"
               priority
               quality={85}
@@ -151,7 +151,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="hidden lg:flex items-center justify-center relative"
+            className="hidden lg:flex items-center justify-center relative w-full h-full min-h-[400px]"
           >
             <motion.div
               animate={{
@@ -162,27 +162,29 @@ export default function Hero() {
                 ease: "linear",
                 repeat: Infinity,
               }}
-              className="absolute inset-0 opacity-30"
+              className="absolute inset-0 opacity-30 flex items-center justify-center"
             >
               <Image
                 src="/tech-illustration.svg"
                 alt="Technology Illustration"
                 width={800}
                 height={800}
-                className="object-contain"
+                className="object-contain max-w-full max-h-full"
                 priority
                 fetchPriority="high"
               />
             </motion.div>
-            <Image
-              src="/tech-illustration.svg"
-              alt="Technology Illustration"
-              width={600}
-              height={600}
-              className="object-contain relative z-10"
-              priority
-              fetchPriority="high"
-            />
+            <div className="relative z-10 flex items-center justify-center">
+              <Image
+                src="/tech-illustration.svg"
+                alt="Technology Illustration"
+                width={600}
+                height={600}
+                className="object-contain max-w-full max-h-full"
+                priority
+                fetchPriority="high"
+              />
+            </div>
           </motion.div>
         </div>
       </div>

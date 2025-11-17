@@ -1,25 +1,34 @@
+// src/store/useAuthStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
+import { authService } from '@/services/auth/auth.service';
+import type { LoginCredentials, RegisterData, AuthResponse } from '@/services/auth/auth.service';
 
-// Types for User and Client
-export type User = {
-  _id: string;
+// Type definitions
+export interface User {
+  id: string;
   email: string;
   fName: string;
   lName: string;
   phone: string;
-  role: 'super-admin' | 'admin' | 'client' | 'subscriber';
-  isApproved: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type ClientProfile = {
-  _id: string;
-  user: string; // User ID
   companyName: string;
+  oldWebsite?: string;
+  role: string;
+  isApproved: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface ClientProfile {
+  _id?: string;
+  user?: string;
+  companyName?: string;
   businessLocation?: {
     address?: string;
     city?: string;
@@ -30,53 +39,43 @@ export type ClientProfile = {
   oldWebsite?: string;
   taxId?: string;
   notes?: string;
-  isActive: boolean;
-  services?: string[];
-  currentPlan?: string;
-  createdAt: string;
-  updatedAt: string;
-};
+  isActive?: boolean;
+  services?: Array<{
+    _id: string;
+    name: string;
+    description: string;
+  }>;
+  currentPlan?: {
+    _id: string;
+    name: string;
+    price: number;
+    features: string[];
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-type Tokens = {
-  accessToken: string;
-  refreshToken: string;
-};
-
-type AuthState = {
-  user: (User & { clientProfile?: ClientProfile }) | null;
+interface AuthState {
+  user: User | null;
   tokens: Tokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-};
+  clientProfile?: ClientProfile | null;
+}
 
-type AuthActions = {
-  // Authentication
+interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: {
-    email: string;
-    password: string;
-    fName: string;
-    lName: string;
-    phone: string;
-    companyName: string;
-    oldWebsite?: string;
-  }) => Promise<{ success: boolean; message: string }>;
+  register: (userData: RegisterData) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
-  
-  // Client Profile
   fetchClientProfile: (userId: string) => Promise<void>;
+  fetchAllUserData: () => Promise<void>;
   updateClientProfile: (profileData: Partial<ClientProfile>) => Promise<void>;
-  
-  // State Management
-  setUser: (user: User | null) => void;
-  setClientProfile: (profile: ClientProfile) => void;
-  setTokens: (tokens: Tokens | null) => void;
-  setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
-  clearError: () => void;
-};
+  setTokens: (tokens: Tokens | null) => void;
+  setLoading: (loading: boolean) => void;
+}
 
 type AuthStore = AuthState & AuthActions;
 
@@ -93,42 +92,19 @@ const useAuthStore = create<AuthStore>()(
         login: async (email: string, password: string) => {
           set({ isLoading: true, error: null });
           try {
-            const response = await fetch('/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password }),
-              credentials: 'include',
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.message || 'Login failed');
-            }
-
-            // After successful login, fetch client profile if user is a client
-            let clientProfile = null;
-            if (data.data.user.role === 'client') {
-              try {
-                const clientResponse = await fetch(`/api/clients/user/${data.data.user._id}`);
-                if (clientResponse.ok) {
-                  const clientData = await clientResponse.json();
-                  clientProfile = clientData.data;
-                }
-              } catch (error) {
-                console.error('Failed to fetch client profile:', error);
-              }
-            }
-
+            const { user, tokens, clientProfile } = await authService.login({ email, password });
             set({
-              user: { ...data.data.user, clientProfile },
-              tokens: data.data.tokens,
+              user,
+              tokens,
               isAuthenticated: true,
               isLoading: false,
             });
+            if (clientProfile) {
+              set({ clientProfile });
+            }
           } catch (error: any) {
             set({
-              error: error.message || 'An error occurred during login',
+              error: error.response?.data?.message || 'Login failed',
               isLoading: false,
             });
             throw error;
@@ -138,194 +114,94 @@ const useAuthStore = create<AuthStore>()(
         register: async (userData) => {
           set({ isLoading: true, error: null });
           try {
-            // 1. Register the user
-            console.log('Sending registration request with data:', {
-              ...userData,
-              password: '[REDACTED]', // Don't log the actual password
-              role: 'client'
-            });
-
-            const registerResponse = await fetch('/api/auth/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...userData,
-                role: 'client', // Ensure role is set to client
-              }),
-            });
-
-            let registerData;
-            try {
-              registerData = await registerResponse.json().catch(() => ({}));
-            } catch (e) {
-              registerData = { message: 'Invalid server response' };
-            }
-            
-            console.log('Registration response:', {
-              status: registerResponse.status,
-              statusText: registerResponse.statusText,
-              data: registerData,
-              headers: Object.fromEntries(registerResponse.headers.entries())
-            });
-
-            if (!registerResponse.ok) {
-              const errorMessage = registerData.message || 
-                                registerData.error || 
-                                registerResponse.statusText || 
-                                'Registration failed';
-                                
-              console.error('Registration failed:', {
-                status: registerResponse.status,
-                statusText: registerResponse.statusText,
-                error: errorMessage,
-                response: registerData,
-                requestData: {
-                  ...userData,
-                  password: userData.password ? '[REDACTED]' : undefined
-                }
-              });
-              
-              // Include validation errors if available
-              if (registerData.errors) {
-                console.error('Validation errors:', registerData.errors);
-                throw new Error(Object.values(registerData.errors).join('\n') || errorMessage);
-              }
-              
-              throw new Error(errorMessage);
-            }
-
-            // 2. Create client profile
-            const clientResponse = await fetch('/api/clients', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: userData.email,
-                fName: userData.fName,
-                lName: userData.lName,
-                phone: userData.phone,
-                companyName: userData.companyName,
-                oldWebsite: userData.oldWebsite,
-              }),
-            });
-
-            if (!clientResponse.ok) {
-              const errorData = await clientResponse.json();
-              throw new Error(errorData.message || 'Failed to create client profile');
-            }
-
+            await authService.register(userData);
             set({ isLoading: false });
-            return { 
-              success: true, 
-              message: 'Registration successful. Please wait for admin approval.' 
-            };
+            return { success: true, message: 'Registration successful. Please check your email for verification.' };
           } catch (error: any) {
-            set({
-              error: error.message || 'An error occurred during registration',
-              isLoading: false,
-            });
-            throw error;
+            const errorMessage = error.response?.data?.message || 'Registration failed';
+            set({ error: errorMessage, isLoading: false });
+            return { success: false, message: errorMessage };
           }
         },
 
         logout: async () => {
           try {
-            await fetch('/api/auth/logout', {
-              method: 'POST',
-              credentials: 'include',
-            });
+            await authService.logout();
           } catch (error) {
-            console.error('Logout error:', error);
+            // Don't throw error for logout - just clear local state
+            // This handles cases where token is expired (401) or server is unavailable
+            console.error('Error during logout:', error);
           } finally {
+            // Always clear local state regardless of API call success
             set({
               user: null,
               tokens: null,
               isAuthenticated: false,
-              isLoading: false,
+              clientProfile: undefined,
             });
           }
         },
 
         refreshToken: async () => {
+          const { tokens } = get();
+          if (!tokens?.refreshToken) return false;
+
           try {
-            const response = await fetch('/api/auth/refresh', {
-              method: 'POST',
-              credentials: 'include',
-            });
-
-            if (!response.ok) {
-              throw new Error('Failed to refresh token');
-            }
-
-            const data = await response.json();
+            const { accessToken, refreshToken } = await authService.refreshToken(tokens.refreshToken);
             set({
-              tokens: data.data.tokens,
+              tokens: { accessToken, refreshToken },
               isAuthenticated: true,
             });
             return true;
           } catch (error) {
-            get().logout();
+            set({
+              user: null,
+              tokens: null,
+              isAuthenticated: false,
+              clientProfile: undefined,
+            });
             return false;
           }
         },
 
         fetchClientProfile: async (userId: string) => {
           try {
-            const response = await fetch(`/api/clients/user/${userId}`);
-            if (!response.ok) {
-              throw new Error('Failed to fetch client profile');
+            const { clientProfile } = await authService.getMe();
+            if (clientProfile) {
+              set({ clientProfile });
             }
-            
-            const data = await response.json();
-            set(state => ({
-              user: state.user ? { ...state.user, clientProfile: data.data } : null
-            }));
           } catch (error) {
-            console.error('Error fetching client profile:', error);
-            throw error;
+            console.error('Failed to fetch client profile:', error);
           }
         },
 
-        updateClientProfile: async (profileData: Partial<ClientProfile>) => {
+        fetchAllUserData: async () => {
           try {
-            const { user } = get();
-            if (!user?.clientProfile?._id) {
-              throw new Error('No client profile found');
-            }
-
-            const response = await fetch(`/api/clients/${user.clientProfile._id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(profileData),
+            const { user, clientProfile } = await authService.getMe();
+            set({ 
+              user,
+              ...(clientProfile && { clientProfile })
             });
-
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.message || 'Failed to update profile');
-            }
-
-            const updatedProfile = await response.json();
-            set(state => ({
-              user: state.user ? { 
-                ...state.user, 
-                clientProfile: { ...state.user.clientProfile, ...updatedProfile.data } 
-              } : null
-            }));
           } catch (error) {
-            console.error('Error updating client profile:', error);
+            console.error('Failed to fetch all user data:', error);
+          }
+        },
+
+        updateClientProfile: async (profileData) => {
+          try {
+            const updatedProfile = await authService.updateProfile(profileData);
+            set({ clientProfile: updatedProfile });
+          } catch (error) {
+            console.error('Failed to update profile:', error);
             throw error;
           }
         },
 
-        // State setters
-        setUser: (user) => set({ user }),
-        setClientProfile: (clientProfile) => 
-          set(state => ({ 
-            user: state.user ? { ...state.user, clientProfile } : null 
-          })),
-        setTokens: (tokens) => set({ tokens }),
-        setLoading: (isLoading) => set({ isLoading }),
-        setError: (error) => set({ error }),
-        clearError: () => set({ error: null }),
+        setError: (error: string | null) => set({ error }),
+        
+        setTokens: (tokens: Tokens | null) => set({ tokens }),
+        
+        setLoading: (isLoading: boolean) => set({ isLoading }),
       }),
       {
         name: 'auth-storage',
@@ -334,6 +210,7 @@ const useAuthStore = create<AuthStore>()(
           user: state.user,
           tokens: state.tokens,
           isAuthenticated: state.isAuthenticated,
+          clientProfile: state.clientProfile,
         }),
       }
     )

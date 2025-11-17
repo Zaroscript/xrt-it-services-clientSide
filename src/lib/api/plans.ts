@@ -7,6 +7,10 @@ export interface Plan {
   name: string;
   description: string;
   price: number;
+  monthlyPrice?: number;
+  yearlyPrice?: number;
+  calculatedMonthlyPrice?: number;
+  calculatedYearlyPrice?: number;
   billingCycle: 'monthly' | 'yearly';
   duration: number;
   features: string[];
@@ -14,13 +18,17 @@ export interface Plan {
   isActive: boolean;
   isFeatured: boolean;
   discount?: {
-    amount: number;
+    type: 'percentage' | 'fixed';
+    value: number;
     isActive: boolean;
     code?: string;
     startDate?: string;
     endDate?: string;
   };
   discountedPrice?: number;
+  discountedMonthlyPrice?: number;
+  discountedYearlyPrice?: number;
+  isDiscountActive?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,7 +57,14 @@ export const getFeaturedPlans = async (): Promise<Plan[]> => {
 
 export const requestPlan = async (planId: string, message?: string) => {
   try {
-    const token = localStorage.getItem('token');
+    // Get token from auth store
+    const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+    const token = authState.state?.tokens?.accessToken;
+    
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
     const response = await axios.post(
       `${API_URL}/plans/request/${planId}`,
       { message },

@@ -7,6 +7,9 @@ import { CategoryFilters } from "@/components/portfolio/CategoryFilters";
 import { PortfolioCard } from "@/components/portfolio/PortfolioCard";
 import type { PortfolioCategory } from "@/types/portfolio";
 
+// Import the type declarations
+import "@/types/framer-motion";
+
 export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState<PortfolioCategory | "all">(
     "all"
@@ -26,7 +29,8 @@ export default function PortfolioPage() {
         <div className="page-container relative z-10 mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.5 }}
             className="mx-auto max-w-3xl text-center"
           >

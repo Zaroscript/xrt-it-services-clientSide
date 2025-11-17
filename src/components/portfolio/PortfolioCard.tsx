@@ -25,7 +25,7 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
       animate={{ opacity: 1, y: 0 }}
       layout
       onMouseMove={onMouseMove}
-      className="group relative h-full overflow-hidden rounded-xl bg-white dark:bg-[#1c1c1f] shadow-lg hover:shadow-xl transition-all duration-300"
+      className="group relative h-full overflow-hidden rounded-xl bg-card text-card-foreground shadow-lg hover:shadow-xl transition-all duration-300"
     >
       {/* Light Mode Gradient */}
       <motion.div
@@ -37,7 +37,7 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
               rgba(211, 176, 115, 0.1),
               transparent 70%
             )
-          `,
+          ` as unknown as string,
         }}
       />
 
@@ -51,7 +51,7 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
               rgba(var(--secondary-rgb), 0.1),
               transparent 70%
             )
-          `,
+          ` as unknown as string,
         }}
       />
 
@@ -63,34 +63,34 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
           width={600}
           height={338}
           unoptimized={item.imageUrl.startsWith('https://placehold.co')}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1c1c1f] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Content Container */}
-      <div className="p-6">
+      <div className="p-6 relative z-10">
         {/* Category Badge */}
         <div className="mb-4">
-          <span className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary">
+          <span className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary dark:text-secondary-foreground">
             {item.category}
           </span>
         </div>
 
         {/* Title and Description */}
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-secondary transition-colors">
+          <h3 className="text-xl font-bold text-foreground group-hover:text-secondary transition-colors">
             {item.title}
           </h3>
-          <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+          <p className="line-clamp-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
             {item.description}
           </p>
         </div>
 
         {/* Features Preview */}
-        <div className="mt-4 space-y-2 border-t border-gray-100 dark:border-white/5 pt-4">
+        <div className="mt-4 space-y-2 border-t border-border pt-4">
           {item.features.slice(0, 2).map((feature, index) => (
-            <div key={index} className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
               {feature}
             </div>
@@ -129,16 +129,14 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
 
           {/* Demo Link */}
           {item.demoUrl && (
-            <motion.a
-              href={item.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/link flex items-center gap-1 text-xs font-medium text-secondary hover:text-secondary/80 transition-colors"
+            <motion.span
+              className="group/link flex items-center gap-1 text-xs font-medium text-secondary hover:text-secondary/80 transition-colors cursor-pointer"
               whileHover={{ x: 3 }}
+              onClick={() => window.open(item.demoUrl, '_blank', 'noopener,noreferrer')}
             >
               View Demo
               <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-            </motion.a>
+            </motion.span>
           )}
         </div>
       </div>

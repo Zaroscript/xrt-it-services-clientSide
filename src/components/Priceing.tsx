@@ -4,6 +4,11 @@ import { FadeIn } from "@/components/ui/FadeIn";
 import { PricingToggle } from "@/components/ui/PricingToggle";
 import { PricingCard } from "@/components/ui/PricingCard";
 import { PricingSkeleton } from "@/components/ui/PricingSkeleton";
+import { ComparisonTable } from "@/components/ui/ComparisonTable";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { getPlans, getFeaturedPlans, requestPlan } from "@/lib/api/plans";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -16,19 +21,32 @@ interface PlanDisplay {
   name: string;
   description: string;
   price: number;
-  discountedPrice?: number;
+  monthlyPrice?: number;
+  yearlyPrice?: number;
+  calculatedMonthlyPrice?: number;
+  calculatedYearlyPrice?: number;
+  billingCycle: 'monthly' | 'yearly';
+  duration: number;
+  features: string[];
+  maxRestaurants: number;
+  isActive: boolean;
+  isFeatured: boolean;
   discount?: {
-    amount: number;
+    type: 'percentage' | 'fixed';
+    value: number;
     isActive: boolean;
     code?: string;
     startDate?: string;
     endDate?: string;
   };
-  features: string[];
-  isFeatured: boolean;
-  billingCycle: 'monthly' | 'yearly';
-  maxRestaurants: number;
-  isActive: boolean;
+  discountedPrice?: number;
+  discountedMonthlyPrice?: number;
+  discountedYearlyPrice?: number;
+  createdAt: string;
+  updatedAt: string;
+  buttonText?: string;
+  taxNote?: string;
+  guaranteeText?: string;
 }
 
 const Priceing = () => {
@@ -38,6 +56,29 @@ const Priceing = () => {
   const [error, setError] = useState<string | null>(null);
   const [plans, setPlans] = useState<PlanDisplay[]>([]);
   const [isRequesting, setIsRequesting] = useState<Record<string, boolean>>({});
+  const [showCustomizationModal, setShowCustomizationModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null);
+  const [customizationNote, setCustomizationNote] = useState('');
+
+  // Calculate average yearly savings from plans
+  const calculateYearlySavings = () => {
+    if (plans.length === 0) return undefined;
+    
+    const savings = plans.map(plan => {
+      const monthlyPrice = plan.discountedMonthlyPrice || plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price;
+      const yearlyPrice = plan.discountedYearlyPrice || plan.calculatedYearlyPrice || plan.yearlyPrice || (monthlyPrice * 12);
+      const monthlyTotal = monthlyPrice * 12;
+      
+      if (monthlyTotal > yearlyPrice) {
+        return Math.round(((monthlyTotal - yearlyPrice) / monthlyTotal) * 100);
+      }
+      return 0;
+    }).filter(saving => saving > 0);
+    
+    return savings.length > 0 ? Math.round(savings.reduce((a, b) => a + b, 0) / savings.length) : undefined;
+  };
+
+  const yearlySavings = calculateYearlySavings();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -66,28 +107,44 @@ const Priceing = () => {
     };
 
     fetchPlans();
-  }, [isYearly]);
+  }, []);
 
-  const handlePlanSelect = async (planId: string) => {
+  const handlePlanSelect = (plan: PlanDisplay) => {
+    // Check authentication using auth store
+    const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+    const token = authState.state?.tokens?.accessToken;
+    
+    if (!token) {
+      // Redirect to login if not authenticated
+      router.push('/auth/login?redirect=/pricing');
+      return;
+    }
+
+    // Show customization modal for authenticated users
+    setSelectedPlan(plan);
+    setShowCustomizationModal(true);
+  };
+
+  const handleCustomizationSubmit = async (customize: boolean) => {
+    if (!selectedPlan) return;
+
     try {
-      setIsRequesting(prev => ({ ...prev, [planId]: true }));
-      const token = localStorage.getItem('token');
+      setIsRequesting(prev => ({ ...prev, [selectedPlan._id]: true }));
       
-      if (!token) {
-        router.push('/auth/login?redirect=/pricing');
-        return;
-      }
-
-      // Add a small delay for better UX
-      await Promise.all([
-        requestPlan(planId),
-        new Promise(resolve => setTimeout(resolve, 800)) // Minimum loading time for better UX
-      ]);
+      const message = customize ? customizationNote : undefined;
+      await requestPlan(selectedPlan._id, message);
       
-      toast.success('Plan request submitted successfully!', {
+      toast.success(customize ? 
+        'Custom plan request submitted successfully!' : 
+        'Plan request submitted successfully!', {
         position: 'top-center',
         duration: 2000,
       });
+      
+      // Reset modal state
+      setShowCustomizationModal(false);
+      setSelectedPlan(null);
+      setCustomizationNote('');
       
       // Add a small delay before redirecting
       setTimeout(() => {
@@ -100,8 +157,14 @@ const Priceing = () => {
         duration: 3000,
       });
     } finally {
-      setIsRequesting(prev => ({ ...prev, [planId]: false }));
+      setIsRequesting(prev => ({ ...prev, [selectedPlan._id]: false }));
     }
+  };
+
+  const handleModalClose = () => {
+    setShowCustomizationModal(false);
+    setSelectedPlan(null);
+    setCustomizationNote('');
   };
 
   if (isLoading) {
@@ -185,6 +248,7 @@ const Priceing = () => {
           <PricingToggle
             isYearly={isYearly}
             onToggle={() => setIsYearly(!isYearly)}
+            yearlySavings={yearlySavings}
           />
         </FadeIn>
 
@@ -211,14 +275,39 @@ const Priceing = () => {
                   <PricingCard
                     title={plan.name}
                     description={plan.description}
-                    price={`$${plan.discountedPrice || plan.price}${isYearly ? '/yr' : '/mo'}`}
-                    originalPrice={plan.discount?.isActive ? `$${plan.price}${isYearly ? '/yr' : '/mo'}` : undefined}
-                    discount={plan.discount?.isActive ? `${plan.discount.amount}%` : undefined}
+                    price={`$${
+                      isYearly
+                        ? (
+                          plan.isDiscountActive && plan.discount?.value > 0
+                            ? plan.discountedYearlyPrice || plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
+                            : plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
+                        )
+                        : (
+                          plan.isDiscountActive && plan.discount?.value > 0
+                            ? plan.discountedMonthlyPrice || plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
+                            : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
+                        )
+                    }/${isYearly ? 'yr' : 'mo'}`}
+                    originalPrice={
+                      plan.isDiscountActive && plan.discount?.value > 0
+                        ? `$${isYearly
+                            ? plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
+                            : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
+                          }/${isYearly ? 'yr' : 'mo'}`
+                        : undefined
+                    }
+                    discount={
+                      plan.isDiscountActive && plan.discount?.value > 0
+                        ? `${plan.discount.value}%`
+                        : undefined
+                    }
                     features={plan.features.map(feature => ({ text: feature, included: true }))}
                     isPopular={plan.isFeatured}
-                    onSelect={() => handlePlanSelect(plan._id)}
+                    onSelect={() => handlePlanSelect(plan)}
                     isSubmitting={!!isRequesting[plan._id]}
-                    buttonText="Get Started"
+                    buttonText={plan.buttonText || "Get Started"}
+                    taxNote={plan.taxNote || "Local taxes may apply"}
+                    guaranteeText={plan.guaranteeText || "30 Day Money-Back Guarantee"}
                   />
                 </motion.div>
               ))}
@@ -230,6 +319,68 @@ const Priceing = () => {
           )}
         </motion.div>
       </motion.div>
+      
+      {/* Customization Modal */}
+      <Modal
+        isOpen={showCustomizationModal}
+        onClose={handleModalClose}
+        title="Customize Your Plan?"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-300">
+            Would you like to customize your <span className="font-semibold">{selectedPlan?.name}</span> plan?
+          </p>
+          
+          <div className="space-y-3">
+            <Button
+              onClick={() => handleCustomizationSubmit(false)}
+              className="w-full"
+              disabled={!!selectedPlan && isRequesting[selectedPlan._id]}
+            >
+              {selectedPlan && isRequesting[selectedPlan._id] ? (
+                <Loader className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Continue with Standard Plan
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-[#343438] px-2 text-gray-500 dark:text-gray-400">
+                  or
+                </span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="customization-note">
+                Tell us what you'd like to customize
+              </Label>
+              <Textarea
+                id="customization-note"
+                placeholder="e.g., I need additional features, custom branding, different pricing, etc."
+                value={customizationNote}
+                onChange={(e) => setCustomizationNote(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+            
+            <Button
+              onClick={() => handleCustomizationSubmit(true)}
+              variant="outline"
+              className="w-full"
+              disabled={!!selectedPlan && isRequesting[selectedPlan._id]}
+            >
+              {selectedPlan && isRequesting[selectedPlan._id] ? (
+                <Loader className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Request Custom Plan
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.section>
   );
 };

@@ -10,7 +10,7 @@ import { AuthCard } from '@/components/ui/AuthCard';
 import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/custom-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import useAuthStore from '@/store/useAuthStore';
 
 // Form schema with validation
 const loginSchema = z.object({
@@ -28,6 +28,9 @@ export default function LoginPage() {
   const callbackUrl = searchParams.get('callbackUrl') || '/';
   const errorParam = searchParams.get('error');
   const emailParam = searchParams.get('email');
+  
+  const login = useAuthStore((state) => state.login);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Initialize form with react-hook-form and zod validation
   const {
@@ -96,14 +99,10 @@ export default function LoginPage() {
 
   // Check if user is already authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: session } = await fetch('/api/auth/session').then(res => res.json());
-      if (session?.user) {
-        router.push('/dashboard');
-      }
-    };
-    checkAuth();
-  }, [router]);
+    if (isAuthenticated) {
+      router.push('/profile');
+    }
+  }, [isAuthenticated, router]);
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
@@ -116,45 +115,15 @@ export default function LoginPage() {
       if (emailParam) url.searchParams.delete('email');
       window.history.replaceState({}, '', url);
       
-      // Attempt to sign in using NextAuth
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: data.email,
-        password: data.password,
-        callbackUrl: callbackUrl || '/dashboard',
-      });
-
-      // Handle the sign in result
-      if (result?.error) {
-        // Check for pending approval error
-        if (result.error.toLowerCase().includes('pending approval')) {
-          toast.dismiss(toastId);
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('pendingApprovalEmail', data.email);
-          }
-          return router.push('/auth/pending-approval');
-        }
-        
-        // Handle rate limiting
-        if (result.error.toLowerCase().includes('too many') || result.status === 429) {
-          const errorMessage = 'Too many login attempts. Please try again in 15 minutes.';
-          toast.dismiss(toastId);
-          toast.error(errorMessage);
-          return;
-        }
-        
-        // Handle other errors
-        toast.dismiss(toastId);
-        toast.error(result.error || 'Login failed. Please check your credentials and try again.');
-        return;
-      }
+      // Attempt to sign in using custom auth
+      await login(data.email, data.password);
 
       // If no error, the login was successful
       toast.dismiss(toastId);
       toast.success('Login successful!');
       
-      // Redirect to the callback URL or dashboard
-      const redirectUrl = result?.url || '/dashboard';
+      // Redirect to the callback URL or profile
+      const redirectUrl = callbackUrl || '/profile';
       router.push(redirectUrl);
       router.refresh();
     } catch (error: any) {
@@ -165,8 +134,16 @@ export default function LoginPage() {
       if (error?.message?.toLowerCase().includes('network') || 
           error?.message?.toLowerCase().includes('fetch')) {
         toast.error('Network error. Please check your connection and try again.');
+      } else if (error?.message?.toLowerCase().includes('pending approval')) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('pendingApprovalEmail', data.email);
+        }
+        return router.push('/auth/pending-approval');
+      } else if (error?.message?.toLowerCase().includes('too many') || 
+                 error?.message?.toLowerCase().includes('rate limit')) {
+        toast.error('Too many login attempts. Please try again in 15 minutes.');
       } else {
-        toast.error(error?.message || 'An unexpected error occurred. Please try again.');
+        toast.error(error?.message || 'Login failed. Please check your credentials and try again.');
       }
     } finally {
       setIsSubmitting(false);

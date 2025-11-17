@@ -1,23 +1,46 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useAppSelector } from '@/hooks/useAppDispatch';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import useAuthStore from '@/store/useAuthStore';
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requiredRole?: 'super-admin' | 'admin' | 'client' | 'subscriber';
+  fallback?: React.ReactNode;
+}
+
+export function ProtectedRoute({ 
+  children, 
+  requiredRole,
+  fallback = <div className="flex items-center justify-center min-h-screen">Access Denied</div>
+}: ProtectedRouteProps) {
+  const { user, isAuthenticated, isLoading } = useAuthStore();
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, loading, router]);
+    if (isLoading) return;
 
-  if (loading || !isAuthenticated) {
+    if (!isAuthenticated || !user) {
+      router.push('/login');
+      return;
+    }
+
+    // Check role if required
+    if (requiredRole && user.role !== requiredRole) {
+      router.push('/unauthorized');
+      return;
+    }
+
+    setIsChecking(false);
+  }, [user, isAuthenticated, isLoading, router, requiredRole]);
+
+  if (isLoading || isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
