@@ -5,7 +5,6 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
-import { Providers } from "@/providers";
 
 // Loading
 import Loading from "./loading";
@@ -62,7 +61,6 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Suspense fallback={<Loading />}>
-            <Providers session={null}>
               <div className="min-h-screen flex flex-col">
                 <Header />
                 <main className="flex-1 overflow-x-hidden">
@@ -74,7 +72,6 @@ export default function RootLayout({
                 <ChatWidget />
                 <Toaster />
               </div>
-            </Providers>
           </Suspense>
         </ThemeProvider>
       </body>

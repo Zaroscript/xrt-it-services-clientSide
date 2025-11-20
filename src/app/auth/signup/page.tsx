@@ -180,33 +180,33 @@ export default function RegisterPage() {
               <ul className="space-y-2">
                 <li className={cn("flex items-center gap-2", passwordChecks.hasUppercase ? "text-green-500" : "text-muted-foreground")}>
                   {passwordChecks.hasUppercase ? (
-                    <Check className="h-4 w-4 flex-shrink-0" />
+                    <Check className="h-4 w-4 shrink-0" />
                   ) : (
-                    <X className="h-4 w-4 flex-shrink-0" />
+                    <X className="h-4 w-4 shrink-0" />
                   )}
                   <span>At least one uppercase letter (A-Z)</span>
                 </li>
                 <li className={cn("flex items-center gap-2", passwordChecks.hasLowercase ? "text-green-500" : "text-muted-foreground")}>
                   {passwordChecks.hasLowercase ? (
-                    <Check className="h-4 w-4 flex-shrink-0" />
+                    <Check className="h-4 w-4 shrink-0" />
                   ) : (
-                    <X className="h-4 w-4 flex-shrink-0" />
+                    <X className="h-4 w-4 shrink-0" />
                   )}
                   <span>At least one lowercase letter (a-z)</span>
                 </li>
                 <li className={cn("flex items-center gap-2", passwordChecks.hasNumber ? "text-green-500" : "text-muted-foreground")}>
                   {passwordChecks.hasNumber ? (
-                    <Check className="h-4 w-4 flex-shrink-0" />
+                    <Check className="h-4 w-4 shrink-0" />
                   ) : (
-                    <X className="h-4 w-4 flex-shrink-0" />
+                    <X className="h-4 w-4 shrink-0" />
                   )}
                   <span>At least one number (0-9)</span>
                 </li>
                 <li className={cn("flex items-center gap-2", passwordChecks.hasMinLength ? "text-green-500" : "text-muted-foreground")}>
                   {passwordChecks.hasMinLength ? (
-                    <Check className="h-4 w-4 flex-shrink-0" />
+                    <Check className="h-4 w-4 shrink-0" />
                   ) : (
-                    <X className="h-4 w-4 flex-shrink-0" />
+                    <X className="h-4 w-4 shrink-0" />
                   )}
                   <span>At least 8 characters</span>
                 </li>

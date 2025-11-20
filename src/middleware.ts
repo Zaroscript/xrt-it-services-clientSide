@@ -1,92 +1,100 @@
-import { getToken } from 'next-auth/jwt';
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-// Public routes that don't require authentication
-const publicRoutes: string[] = [
+// Public paths that don't require authentication
+const publicPaths = [
   '/',
   '/auth/login',
-  '/auth/register',
-  '/auth/forgot-password',
+  '/auth/signup',
+  '/auth/forgetpassword',
   '/auth/reset-password',
-  '/auth/pending-approval',
   '/_next',
   '/favicon.ico',
-  '/api/auth',
-  '/_error',
-  '/404'
+  '/api',
 ];
 
-// Routes that require authentication but no specific role
-const protectedRoutes: string[] = [
+// Paths that require authentication
+const protectedPaths = [
   '/dashboard',
   '/profile',
   '/settings',
-  '/billing'
+  '/billing',
+  '/account',
 ];
 
-// Admin-only routes
-const adminRoutes: string[] = [
-  '/admin',
-  '/admin/users',
-  '/admin/settings'
+// Paths that are only accessible when not authenticated
+const guestOnlyPaths = [
+  '/auth/login',
+  '/auth/signup',
+  '/auth/forgetpassword',
+  '/auth/reset-password',
 ];
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isPublicPath = publicPaths.some(path => 
+    pathname === path || pathname.startsWith(`${path}/`)
+  );
   
-  // Allow public routes
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  const isProtectedPath = protectedPaths.some(path => 
+    pathname === path || pathname.startsWith(`${path}/`)
+  );
+  
+  const isGuestOnlyPath = guestOnlyPaths.some(path =>
+    pathname === path || pathname.startsWith(`${path}/`)
+  );
+
+  // Get the token from cookies
+  const token = request.cookies.get('auth_token')?.value;
+  const isAuthenticated = !!token;
+
+  // Handle API routes
+  if (pathname.startsWith('/api/')) {
+    // Add CORS headers for API routes
+    const response = NextResponse.next();
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return response;
+  }
+
+  // Allow access to public paths and non-protected paths
+  if (isPublicPath || !isProtectedPath) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ 
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET || 'your-secret-key'
-  });
-
-  // If no token and trying to access protected route, redirect to login
-  if (!token) {
-    const loginUrl = new URL('/auth/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', encodeURI(request.url));
-    return NextResponse.redirect(loginUrl);
+  // Redirect authenticated users away from guest-only pages
+  if (isGuestOnlyPath && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Check if user is approved
-  if (!token.isApproved) {
-    // Allow access to pending approval page
-    if (pathname !== '/auth/pending-approval') {
-      const pendingApprovalUrl = new URL('/auth/pending-approval', request.url);
-      return NextResponse.redirect(pendingApprovalUrl);
+  // Handle protected paths when not authenticated
+  if (isProtectedPath && !isAuthenticated) {
+    // If already on the login page, just continue
+    if (pathname.startsWith('/auth/')) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+    
+    // Redirect to login without any 'from' parameter
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+  
+  // If authenticated and trying to access login page, redirect to dashboard
+  if (pathname.startsWith('/auth/') && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Check admin routes
-  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
-  if (isAdminRoute && token.role !== 'admin') {
-    return NextResponse.redirect(new URL('/403', request.url));
-  }
-
-  // Check protected routes (already verified token exists)
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  if (isProtectedRoute) {
-    return NextResponse.next();
-  }
-
-  // Allow all other routes for authenticated users
+  // For all other cases, continue with the request
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - auth (authentication pages)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth/).*)',
+    // Match all request paths except for the ones starting with:
+    // - _next/static (static files)
+    // - _next/image (image optimization files)
+    // - favicon.ico (favicon file)
+    // - public folder
+    '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

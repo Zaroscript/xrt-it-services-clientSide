@@ -103,7 +103,7 @@ export default function Hero() {
               className="space-y-6"
             >
               <h1 className="text-2xl md:text-4xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-gold">
+                <span className="bg-linear-gradient-to-r from-primary to-primary/80 bg-clip-text text-gold">
                   {heroContent[currentSlide].title}
                 </span>
               </h1>

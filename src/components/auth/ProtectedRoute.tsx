@@ -1,48 +1,58 @@
+// src/components/ProtectedRoute.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import useAuthStore from '@/store/useAuthStore';
+import { Loader } from '@/components/ui/Loader';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'super-admin' | 'admin' | 'client' | 'subscriber';
-  fallback?: React.ReactNode;
 }
 
-export function ProtectedRoute({ 
-  children, 
-  requiredRole,
-  fallback = <div className="flex items-center justify-center min-h-screen">Access Denied</div>
-}: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
+  const {
+    isAuthenticated,
+    tokens,
+    isLoading,
+    user,
+  } = useAuthStore();
+
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (isLoading) return;
+    const checkAuth = async () => {
+      // If we already know user is authenticated with access token -> done
+      if (tokens?.accessToken && isAuthenticated) {
+        setChecking(false);
+        return;
+      }
 
-    if (!isAuthenticated || !user) {
-      router.push('/login');
-      return;
-    }
+      // If we have a refresh token but no access token -> try refresh
+      if (!tokens?.accessToken) {
+        router.replace('/auth/login');
+        return;
+      }
 
-    // Check role if required
-    if (requiredRole && user.role !== requiredRole) {
-      router.push('/unauthorized');
-      return;
-    }
+      // No tokens -> force login
+      if (!tokens?.accessToken && !isAuthenticated) {
+        router.replace('/auth/login');
+        return;
+      }
 
-    setIsChecking(false);
-  }, [user, isAuthenticated, isLoading, router, requiredRole]);
+      setChecking(false);
+    };
 
-  if (isLoading || isChecking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    checkAuth();
+  }, [tokens?.accessToken, isAuthenticated, router]);
+
+  if (isLoading || checking) {
+    return <Loader />;
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
   }
 
   return <>{children}</>;

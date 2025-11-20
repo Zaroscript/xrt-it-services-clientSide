@@ -1,96 +1,111 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import useAuthStore from '@/store/useAuthStore';
+// src/lib/api.ts
+import axios, { AxiosError, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
+import { toast } from '@/components/ui/custom-toast';
+import { getToken, setToken, clearAuthData } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-
-class ApiClient {
-  private instance: AxiosInstance;
-
-  constructor() {
-    this.instance = axios.create({
-      baseURL: API_URL,
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    // Request interceptor
-    this.instance.interceptors.request.use(
-      (config) => {
-        const { tokens } = useAuthStore.getState();
-        if (tokens?.accessToken) {
-          config.headers.Authorization = `Bearer ${tokens.accessToken}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    // Response interceptor
-    this.instance.interceptors.response.use(
-      (response: AxiosResponse) => response,
-      async (error: AxiosError) => {
-        const originalRequest = error.config as any;
-        
-        // If error is 401 and we haven't tried to refresh yet
-        // Skip token refresh for logout requests to prevent infinite loop
-        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/logout')) {
-          originalRequest._retry = true;
-          
-          try {
-            const { tokens } = useAuthStore.getState();
-            if (tokens?.refreshToken) {
-              const { data } = await axios.post(
-                `${API_URL}/auth/refresh`,
-                { refreshToken: tokens.refreshToken },
-                { withCredentials: true }
-              );
-              
-              useAuthStore.getState().setTokens({
-                accessToken: data.accessToken,
-                refreshToken: data.refreshToken,
-              });
-              
-              // Retry the original request with new token
-              originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-              return this.instance(originalRequest);
-            }
-          } catch (error) {
-            // If refresh fails, log the user out
-            useAuthStore.getState().logout();
-            return Promise.reject(error);
-          }
-        }
-        
-        return Promise.reject(error);
-      }
-    );
-  }
-
-  public async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<T>(url, config);
-    return response.data;
-  }
-
-  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.post<T>(url, data, config);
-    return response.data;
-  }
-
-  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.put<T>(url, data, config);
-    return response.data;
-  }
-
-  public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.delete<T>(url, config);
-    return response.data;
+// Extend the AxiosRequestConfig type to include our custom property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
   }
 }
 
-export const api = new ApiClient();
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  withCredentials: true, // Important for cookies
+  timeout: 10000, // 10 seconds
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+// Request interceptor to add auth token to requests
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Skip adding token for auth routes or if skipAuthRefresh is true
+    const isAuthRoute = config.url?.startsWith('/auth/');
+    
+    if (!isAuthRoute && !config.skipAuthRefresh) {
+      const token = getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle token refresh and errors
+api.interceptors.response.use(
+  (response) => {
+    // If the response contains a new access token, store it
+    const newToken = response.data?.data?.accessToken;
+    if (newToken) {
+      setToken(newToken);
+    }
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized errors
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // If this is a login request or already a retry, just reject
+      if (originalRequest.url?.includes('/auth/') || originalRequest._retry) {
+        return Promise.reject(error);
+      }
+      
+      originalRequest._retry = true;
+      
+      try {
+        // Attempt to refresh the token
+        const refreshResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/auth/refresh-token`,
+          {},
+          { 
+            withCredentials: true,
+            // Don't use the interceptor for the refresh token request
+            skipAuthRefresh: true
+          }
+        );
+        
+        const { accessToken } = refreshResponse.data.data;
+        if (accessToken) {
+          // Use our auth utility to store the token
+          setToken(accessToken);
+          
+          // Update the original request with the new token
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          
+          // Retry the original request with the new token
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Failed to refresh token:', refreshError);
+        
+        // Clear all auth data on refresh failure
+        clearAuthData();
+        
+        // Only redirect if we're not already on the login page and we're in a browser context
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          const loginUrl = new URL('/auth/login', window.location.origin);
+          loginUrl.searchParams.set('session_expired', 'true');
+          window.location.href = loginUrl.toString();
+        }
+        
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    // For other errors, just pass them through
+    return Promise.reject(error);
+  }
+);
+
+export default api;

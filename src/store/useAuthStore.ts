@@ -1,9 +1,12 @@
 // src/store/useAuthStore.ts
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { devtools } from 'zustand/middleware';
-import { authService } from '@/services/auth/auth.service';
-import type { LoginCredentials, RegisterData, AuthResponse } from '@/services/auth/auth.service';
+import { create } from "zustand";
+import { devtools, persist, createJSONStorage } from "zustand/middleware";
+import { authService } from "@/services/auth/auth.service";
+import type {
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+} from "@/services/auth/auth.service";
 
 // Type definitions
 export interface User {
@@ -22,7 +25,6 @@ export interface User {
 
 export interface Tokens {
   accessToken: string;
-  refreshToken: string;
 }
 
 export interface ClientProfile {
@@ -61,15 +63,16 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  clientProfile?: ClientProfile | null;
+  clientProfile: ClientProfile | null;
 }
 
 interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<{ success: boolean; message: string }>;
+  register: (
+    userData: RegisterData
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<boolean>;
-  fetchClientProfile: (userId: string) => Promise<void>;
+  fetchClientProfile: () => Promise<void>;
   fetchAllUserData: () => Promise<void>;
   updateClientProfile: (profileData: Partial<ClientProfile>) => Promise<void>;
   setError: (error: string | null) => void;
@@ -82,43 +85,81 @@ type AuthStore = AuthState & AuthActions;
 const useAuthStore = create<AuthStore>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         user: null,
         tokens: null,
         isAuthenticated: false,
         isLoading: false,
         error: null,
+        clientProfile: null,
 
         login: async (email: string, password: string) => {
           set({ isLoading: true, error: null });
+
           try {
-            const { user, tokens, clientProfile } = await authService.login({ email, password });
+            // Clear any existing auth data first
+            localStorage.removeItem('accessToken');
+            
+            // Make the login request
+            const { user, accessToken, clientProfile } = await authService.login({
+              email: email.trim(),
+              password,
+            } as LoginCredentials);
+
+            // Update the state with the new auth data
             set({
               user,
-              tokens,
+              tokens: { accessToken },
+              clientProfile: clientProfile ?? null,
               isAuthenticated: true,
               isLoading: false,
+              error: null,
             });
-            if (clientProfile) {
-              set({ clientProfile });
+
+            // Store the token in localStorage for persistence
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('accessToken', accessToken);
             }
           } catch (error: any) {
+            console.error('Login error in store:', error);
+            
+            // Clear any partial auth data
+            localStorage.removeItem('accessToken');
+            
+            const message =
+              error?.response?.data?.message ||
+              error?.message ||
+              "Login failed. Please try again.";
+
             set({
-              error: error.response?.data?.message || 'Login failed',
+              user: null,
+              tokens: null,
+              isAuthenticated: false,
               isLoading: false,
+              error: message,
+              clientProfile: null,
             });
-            throw error;
+
+            throw new Error(message);
           }
         },
 
         register: async (userData) => {
           set({ isLoading: true, error: null });
           try {
-            await authService.register(userData);
+            const res = await authService.register(userData);
             set({ isLoading: false });
-            return { success: true, message: 'Registration successful. Please check your email for verification.' };
+            return {
+              success: true,
+              message:
+                res.message ||
+                "Registration successful. Please check your email for verification.",
+            };
           } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Registration failed';
+            const errorMessage =
+              error?.response?.data?.message ||
+              error?.message ||
+              "Registration failed";
             set({ error: errorMessage, isLoading: false });
             return { success: false, message: errorMessage };
           }
@@ -126,85 +167,89 @@ const useAuthStore = create<AuthStore>()(
 
         logout: async () => {
           try {
+            // Call the API first (which will handle the token removal)
             await authService.logout();
           } catch (error) {
-            // Don't throw error for logout - just clear local state
-            // This handles cases where token is expired (401) or server is unavailable
             console.error('Error during logout:', error);
+            // Even if there's an error, we want to clear the local state
           } finally {
-            // Always clear local state regardless of API call success
+            // Clear local state regardless of API call success
             set({
               user: null,
               tokens: null,
               isAuthenticated: false,
-              clientProfile: undefined,
+              clientProfile: null,
+              error: null,
+              isLoading: false,
             });
           }
         },
 
-        refreshToken: async () => {
-          const { tokens } = get();
-          if (!tokens?.refreshToken) return false;
-
-          try {
-            const { accessToken, refreshToken } = await authService.refreshToken(tokens.refreshToken);
-            set({
-              tokens: { accessToken, refreshToken },
-              isAuthenticated: true,
-            });
-            return true;
-          } catch (error) {
-            set({
-              user: null,
-              tokens: null,
-              isAuthenticated: false,
-              clientProfile: undefined,
-            });
-            return false;
-          }
-        },
-
-        fetchClientProfile: async (userId: string) => {
+        fetchClientProfile: async () => {
           try {
             const { clientProfile } = await authService.getMe();
             if (clientProfile) {
               set({ clientProfile });
             }
           } catch (error) {
-            console.error('Failed to fetch client profile:', error);
+            console.error("Failed to fetch client profile:", error);
           }
         },
 
         fetchAllUserData: async () => {
           try {
             const { user, clientProfile } = await authService.getMe();
-            set({ 
+            set({
               user,
-              ...(clientProfile && { clientProfile })
+              clientProfile: clientProfile ?? null,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
             });
-          } catch (error) {
-            console.error('Failed to fetch all user data:', error);
+          } catch (error: any) {
+            // If it's an auth error, clear the auth state
+            if (error?.name === 'AuthError') {
+              set({
+                user: null,
+                tokens: null,
+                isAuthenticated: false,
+                clientProfile: null,
+                isLoading: false,
+                error: error.message,
+              });
+              return;
+            }
+            // For other errors, just log them
+            console.error("Failed to fetch all user data:", error);
+            set({ 
+              isLoading: false,
+              error: error?.message || 'Failed to fetch user data'
+            });
           }
         },
 
-        updateClientProfile: async (profileData) => {
+        updateClientProfile: async (profileData: Partial<ClientProfile>) => {
           try {
             const updatedProfile = await authService.updateProfile(profileData);
             set({ clientProfile: updatedProfile });
           } catch (error) {
-            console.error('Failed to update profile:', error);
+            console.error("Failed to update profile:", error);
             throw error;
           }
         },
 
         setError: (error: string | null) => set({ error }),
-        
-        setTokens: (tokens: Tokens | null) => set({ tokens }),
-        
-        setLoading: (isLoading: boolean) => set({ isLoading }),
+
+        setTokens: (tokens: Tokens | null) =>
+          set((state) => ({
+            tokens,
+            isAuthenticated: !!tokens && !!state.user,
+          })),
+
+        setLoading: (loading: boolean) => set({ isLoading: loading }),
       }),
       {
-        name: 'auth-storage',
+        name: "auth-storage",
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
           user: state.user,

@@ -185,15 +185,15 @@ export const useSignup = () => {
       });
 
       const registrationData = {
-      email: data.email.trim().toLowerCase(),
-      password: data.password,
-      fName: data.firstName.trim(),
-      lName: data.lastName.trim(),
-      phone: formatPhoneNumber(data.phoneNumber),
-      companyName: data.businessName.trim(),
-      oldWebsite: data.websiteUrl?.trim() || "",
-      hasWebsite: data.hasExistingWebsite || false,
-    };
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+        fName: data.firstName.trim(),
+        lName: data.lastName.trim(),
+        phone: data.phoneNumber.replace(/\D/g, ""),
+        companyName: data.businessName.trim(),
+        websiteUrl: data.websiteUrl?.trim() || "",
+        hasExistingWebsite: data.hasExistingWebsite || false,
+      };
 
       console.log('Sending registration data:', {
         ...registrationData,

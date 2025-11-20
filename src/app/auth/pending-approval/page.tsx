@@ -97,7 +97,7 @@ export default function PendingApprovalPage() {
         
         <CardContent className="space-y-4 pt-6">
           <div className="flex items-start space-x-3">
-            <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
             <div>
               <h4 className="font-medium">What's happening now?</h4>
               <p className="text-sm text-muted-foreground">
@@ -107,7 +107,7 @@ export default function PendingApprovalPage() {
           </div>
           
           <div className="flex items-start space-x-3 pt-2">
-            <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
             <div>
               <h4 className="font-medium">Need help?</h4>
               <p className="text-sm text-muted-foreground">

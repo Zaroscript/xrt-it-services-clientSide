@@ -41,7 +41,7 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 h-16 ${
+      className={`fixed top-0 left-0 right-0 z-9999 transition-all duration-300 h-16 ${
         isScrolled
           ? "bg-background/90 backdrop-blur-lg border-b border-slate-200/30 shadow-md"
           : "bg-background/80 backdrop-blur-sm border-b border-transparent"
@@ -104,6 +104,14 @@ const Header = () => {
                 </>
               ) : (
                 <>
+                  <Button
+                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                    onClick={() => router.push("/#quote")}
+                  >
+                    Get a Quote
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
                   <Button
                     className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
             items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
