@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Core features
   reactStrictMode: true,
   
@@ -13,15 +12,12 @@ const nextConfig: NextConfig = {
         hostname: '**',
       },
     ],
-    // Image optimization
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self' data:; img-src 'self' data: https:;",
-    // Add image qualities configuration
-    qualities: [25, 50, 75, 85, 90],
   },
   
   // Build optimizations
@@ -41,11 +37,9 @@ const nextConfig: NextConfig = {
     turbo: process.env.TURBO ? {} : undefined,
     serverActions: {
       allowedOrigins: ['localhost:3000']
-    },
+    }
+    // Removed serverExternalPackages as it's not supported in this version
   },
-  
-  // External packages for server components
-  serverExternalPackages: ['bcryptjs', 'nodemailer'],
   
   // Custom webpack config
   webpack: (config, { isServer }) => {
@@ -72,4 +66,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
