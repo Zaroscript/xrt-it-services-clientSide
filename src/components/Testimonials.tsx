@@ -92,7 +92,7 @@ const Testimonials = () => {
 
                 {/* Testimonial text */}
                 <div className="flex-1 flex flex-col">
-                  <p className="text-foreground/90 text-lg leading-relaxed mb-8 relative z-10 flex-1">
+                  <p className="text-foreground/90 text-justify text-lg leading-relaxed mb-8 relative z-10 flex-1">
                     {t.text}
                   </p>
 

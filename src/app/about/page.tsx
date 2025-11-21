@@ -73,7 +73,7 @@ export default function AboutPage() {
                 </AnimatedGradientText>
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-lg text-justify md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
                 We turn business goals into simple, scalable
                 technology delivering powerful websites, seamless online
                 systems, and reliable IT support that help you grow smarter and
@@ -132,7 +132,7 @@ export default function AboutPage() {
                   <div className="h-1 w-20 bg-gradient-to-r from-secondary/80 to-background/80 rounded-full" />
                 </div>
 
-                <div className="space-y-6 text-gray-400 dark:text-muted-foreground/90">
+                <div className="space-y-6 text-justify text-gray-400 dark:text-muted-foreground/90">
                   <p className="text-lg text-primary dark:text-white leading-relaxed">
                     XRT Tech was founded with a single belief great technology
                     shouldn’t be complicated or overpriced.
@@ -286,7 +286,7 @@ export default function AboutPage() {
                     <h3 className="text-xl font-semibold mb-3 text-foreground group-hover:text-primary transition-colors duration-300">
                       {value.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground text-justify leading-relaxed">
                       {value.description}
                     </p>
                     

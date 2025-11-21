@@ -65,7 +65,7 @@ const Included = () => {
                       {offer.title}
                     </h3>
                   </div>
-                  <p className="text-muted-foreground mb-6 leading-relaxed text-sm md:text-base">
+                  <p className="text-muted-foreground text-justify mb-6 leading-relaxed text-sm md:text-base">
                     {offer.description}
                   </p>
                 </div>

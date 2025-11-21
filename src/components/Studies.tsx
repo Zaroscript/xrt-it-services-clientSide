@@ -22,7 +22,7 @@ export default function Studies() {
             <h5 className="text-[#d3b073] font-semiboldmb-3">
               Conversion-Focused Web Experience
             </h5>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-gray-400 text-justify leading-relaxed">
               XRT Tech rebuilt ACAF Systems’ website from the ground up to
               modernize their online presence, increase quote and project
               inquiries, and make system selection easier. The new site delivers

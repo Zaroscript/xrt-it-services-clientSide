@@ -151,7 +151,7 @@ export default function ServicesPage() {
                         <h3 className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
                           {service.title}
                         </h3>
-                        <p className="text-muted-foreground mb-6 flex-1">
+                        <p className="text-muted-foreground text-justify mb-6 flex-1">
                           {service.description}
                         </p>
                         <div className="flex items-center text-primary font-medium group-hover:text-primary/80 transition-colors">
@@ -285,7 +285,7 @@ export default function ServicesPage() {
                             {step.title}
                           </motion.h3>
                           <motion.p 
-                            className="text-muted-foreground text-sm leading-relaxed"
+                            className="text-muted-foreground text-justify text-sm leading-relaxed"
                             initial={{ opacity: 0.9 }}
                             whileHover={{ 
                               opacity: 1,
