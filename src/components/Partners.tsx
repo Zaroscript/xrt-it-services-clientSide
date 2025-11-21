@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo, useCallback, memo } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  memo,
+} from "react";
 import Image, { StaticImageData } from "next/image";
 
 // Custom debounce utility to replace lodash/debounce
@@ -24,12 +31,12 @@ interface PartnerLogoProps {
 }
 
 const PartnerLogo = memo(({ logo, name }: PartnerLogoProps) => (
-  <div className="w-40 h-24 relative opacity-50 hover:opacity-100 transition-opacity duration-300 mx-8">
+  <div className={`${name == "TechX" ? "w-48"  : "w-40"} h-24 relative opacity-50 hover:opacity-100 transition-opacity duration-300 mx-8`}>
     <Image
       src={logo}
       alt={name}
       fill
-      className="object-contain p-2"
+      className={`${name == "TechX" ? "object-cover" : "object-contain"} p-2`}
       sizes="200px"
       loading="lazy"
     />
@@ -100,7 +107,8 @@ const Partners = () => {
   // Handle mouse leave
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    startTimeRef.current = performance.now() - (progressRef.current * duration * 1000);
+    startTimeRef.current =
+      performance.now() - progressRef.current * duration * 1000;
     animateSlider();
   }, [animateSlider]);
 
@@ -125,7 +133,8 @@ const Partners = () => {
         const isVisible = entry.isIntersecting;
         setIsInView(isVisible);
         if (isVisible && !isHovered) {
-          startTimeRef.current = performance.now() - (progressRef.current * duration * 1000);
+          startTimeRef.current =
+            performance.now() - progressRef.current * duration * 1000;
           animateSlider();
         } else if (!isVisible && animationRef.current) {
           cancelAnimationFrame(animationRef.current);
@@ -207,7 +216,8 @@ const Partners = () => {
 
           {/* Screen reader only content for accessibility */}
           <div className="sr-only">
-            Our trusted partners include: {partners.map((p) => p.name).join(", ")}
+            Our trusted partners include:{" "}
+            {partners.map((p) => p.name).join(", ")}
           </div>
         </div>
       </div>
