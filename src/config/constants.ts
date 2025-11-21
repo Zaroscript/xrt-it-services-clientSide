@@ -1,6 +1,6 @@
 // Images
 
-import case_study from "../assets/images/case-study.png";
+import case_study from "../assets/images/acaf.jpg";
 import company_1 from "../assets/images/chess.png";
 import company_2 from "../assets/images/company2.jpg";
 import company_3 from "../assets/images/company3.jpg";
@@ -172,6 +172,249 @@ export const plans = [
   },
 ];
 
+export const features = [
+  {
+    category: "Ordering Features",
+    items: [
+      {
+        name: "Zero Commission",
+        description: "No commission on orders, keep 100% of your revenue",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Online Ordering Website",
+        description: "Custom branded online ordering website for your business",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Unlimited Orders",
+        description: "No limit on the number of orders you can receive",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Menu Items",
+        description: "Unlimited menu items with categories and descriptions",
+        starter: "Unlimited",
+        premium: "Unlimited",
+        pro: "Unlimited",
+      },
+      {
+        name: "Order Modifiers",
+        description: "Customize orders with various options and add-ons",
+        starter: "Limited",
+        premium: "Advanced",
+        pro: "Full Custom",
+      },
+      {
+        name: "Delivery Zones and Fees",
+        description: "Set up delivery areas and corresponding fees",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Secure Online Payments",
+        description: "Process payments securely with multiple payment gateways",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Real-time Order Alerts",
+        description: "Instant notifications for new orders",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Mobile-Friendly Design",
+        description: "Fully responsive design that works on all devices",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "POS and Delivery App Integrations",
+        description: "Connect with popular POS systems and delivery apps",
+        starter: false,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Loyalty Rewards",
+        description: "Customer loyalty program with points and rewards",
+        starter: false,
+        premium: false,
+        pro: true,
+      },
+      {
+        name: "Coupons and Discounts",
+        description: "Create and manage discount codes and promotions",
+        starter: false,
+        premium: true,
+        pro: true,
+      },
+    ],
+  },
+  {
+    category: "Marketing Features",
+    items: [
+      {
+        name: "Analytics",
+        description: "Track and analyze your business performance",
+        starter: "Basic",
+        premium: "Advanced",
+        pro: "Customized",
+      },
+      {
+        name: "Email Marketing",
+        description: "Send marketing emails to your customers",
+        starter: "Up to 500 emails/month",
+        premium: "Up to 1,500 emails/month",
+        pro: "Custom email marketing",
+      },
+      {
+        name: "SMS Marketing",
+        description: "Send text message promotions to customers",
+        starter: false,
+        premium: "Included (limited monthly quota)",
+        pro: "Custom SMS marketing",
+      },
+      {
+        name: "Business Website Setup",
+        description: "Professional website setup for your business",
+        starter: false,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Digital Screens Software",
+        description: "Manage digital menu boards and displays",
+        starter: false,
+        premium: "1 year Free (1 update/year)",
+        pro: "Custom frequency",
+      },
+      {
+        name: "Website or Menu Updates",
+        description: "Regular updates to your website or menu",
+        starter: false,
+        premium: "1 update/year",
+        pro: "Custom updates",
+      },
+      {
+        name: "SEO Optimization",
+        description: "Improve search engine visibility",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
+      },
+      {
+        name: "Social Media Content",
+        description: "Professional content for your social media channels",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
+      },
+      {
+        name: "Social Media Ads",
+        description: "Managed social media advertising campaigns",
+        starter: false,
+        premium: false,
+        pro: "Optional add-on",
+      },
+    ],
+  },
+  {
+    category: "Support and Service",
+    items: [
+      {
+        name: "System Hosting and Maintenance",
+        description: "We handle all technical aspects of running your system",
+        starter: true,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Customer Support",
+        description: "Get help when you need it",
+        starter: "Standard",
+        premium: "Priority",
+        pro: "Priority (24/7)",
+      },
+    ],
+  },
+  {
+    category: "System & Management Features",
+    items: [
+      {
+        name: "Order Management Dashboard",
+        description: "Manage all your orders in one place",
+        starter: "Basic",
+        premium: "Advanced",
+        pro: "Full Access",
+      },
+      {
+        name: "Cloud Backup and Secure Storage",
+        description: "Automatic backups of your data",
+        starter: false,
+        premium: "Two Years",
+        pro: "Two Years",
+      },
+      {
+        name: "Multi-location Support",
+        description: "Manage multiple locations from one account",
+        starter: false,
+        premium: false,
+        pro: true,
+      },
+      {
+        name: "Staff Permissions",
+        description: "Control what your staff can access",
+        starter: false,
+        premium: true,
+        pro: true,
+      },
+      {
+        name: "Reporting",
+        description: "Detailed reports on your business performance",
+        starter: "Basic reporting",
+        premium: "Advanced reporting",
+        pro: "Custom reports",
+      },
+    ],
+  },
+];
+
+// Add CSS for the tooltip animation
+export const tooltipStyles = `
+  @keyframes slideUpAndFade {
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .TooltipContent {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+  .TooltipContent[data-state='delayed-open'][data-side='top'] {
+    animation-name: slideUpAndFade;
+  }
+`;
+
+
 export const steps = [
   {
     id: 1,
@@ -186,12 +429,12 @@ export const steps = [
   {
     id: 3,
     title: "03. Development & Testing",
-    text: "We bring your project to life — building, testing, and refining every detail to ensure it performs flawlessly across all devices and platforms.",
+    text: "We bring your project to life building, testing, and refining every detail to ensure it performs flawlessly across all devices and platforms.",
   },
   {
     id: 4,
     title: "04. Launch & Ongoing Support",
-    text: "After final approval, we launch your project with confidence. But our job doesn’t end there — we stay by your side with maintenance, updates, and continuous support.",
+    text: "After final approval, we launch your project with confidence. But our job doesn’t end there we stay by your side with maintenance, updates, and continuous support.",
   },
 ];
 
@@ -230,11 +473,20 @@ export const services = [
       "Your website is the heart of your online presence. We design, build, host, and maintain fast, modern sites that work flawlessly on every device so your business looks professional and runs smoothly 24/7.",
     color: "from-blue-500 to-cyan-400",
     features: [
-      "Responsive Design",
-      "E-commerce Integration",
-      "Content Management",
-      "Performance Optimization",
-      "SEO Optimization",
+      "Custom website design tailored to your brand",
+      "Full website development using modern frameworks",
+      "Mobile responsive layouts optimized for all devices",
+      "Mobile app development for Android and iOS",
+      "E commerce and online ordering system setup",
+      "Complete hosting and domain management",
+      "Website speed optimization and performance tuning",
+      "Security hardening and continuous monitoring",
+      "Regular updates and maintenance",
+      "Bug fixes and technical support",
+      "Custom dashboards and admin panels",
+      "Integration with payment gateways and third party tools",
+      "SEO setup and basic on page optimization",
+      "Conversion focused design for better customer engagement",
     ],
   },
   {
@@ -246,11 +498,14 @@ export const services = [
       "Protect your data and access it anywhere. We provide secure cloud storage and automated backups to ensure your files and systems are always safe, synced, and accessible.",
     color: "from-purple-500 to-pink-500",
     features: [
-      "Cloud Migration",
-      "Serverless Architecture",
-      "Cloud Security",
-      "Cost Optimization",
-      "24/7 Monitoring",
+      "Cloud storage setup and migration",
+      "Secure file sharing and team access",
+      "Automated backup systems",
+      "Disaster recovery planning",
+      "Real time data sync across devices",
+      "Encrypted storage and security monitoring",
+      "Email hosting and workspace setup",
+      "Support for Google Workspace and Microsoft 365",
     ],
   },
   {
@@ -278,12 +533,24 @@ export const services = [
       "Make your first impression count. We craft logos, visuals, social media ads, and digital designs that reflect your brand’s personality and help you stand out in a crowded market.",
     color: "from-amber-500 to-yellow-400",
     features: [
-      "Logo Design",
-      "Digital Materials",
-      "Visual Identity",
-      "Brand Identity",
-      "Social Media Management",
-      "Content Creation",
+      "Logo design and full brand identity",
+      "Menu design for restaurants and cafes",
+      "Brochures catalogs and company profiles",
+      "Flyers posters and print ready materials",
+      "Business cards letterheads and stationery",
+      "Digital signage content for TV screens",
+      "Social media graphics and ad creatives",
+      "Packaging design and product labels",
+      "Social media content creation",
+      "Social media management and scheduling",
+      "Paid advertising creatives",
+      "Marketing strategy and campaign planning",
+      "SEO basics for better visibility",
+      "Website content writing and optimization",
+      "High quality print ready files",
+      "Custom animations and short promo videos",
+      "Consistent branding across all platforms",
+      "Fast revisions and ongoing support",
     ],
   },
   {
@@ -294,7 +561,16 @@ export const services = [
     description:
       "We handle the technical side so you don’t have to. From email systems and cloud setup to troubleshooting and maintenance, we keep your business connected and running without downtime.",
     color: "from-red-500 to-orange-400",
-    features: ["Email Setup", "Cloud Setup", "Troubleshooting", "Maintenance"],
+    features: [
+      "Complete office IT setup",
+      "Network installation and configuration",
+      "Router WiFi and firewall setup",
+      "POS and device installation",
+      "Troubleshooting and technical support",
+      "Software installation and updates",
+      "Printer and device configuration",
+      "Ongoing maintenance and monitoring"
+    ],
   },
   {
     id: "seo-performance-optimization",
@@ -483,7 +759,7 @@ export const partners = [
 export const marketing = [
   {
     id: 1,
-    title: "Free TV Screen for 1 Year",
+    title: "Free TV Screen for 1 Year (sign age)",
     description:
       "Get 1 year of digital menu screen hosting included with your plan. Turn any TV into a smart digital menu instantly.",
     highlight: "Free Screens",

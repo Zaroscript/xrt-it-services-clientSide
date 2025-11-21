@@ -29,7 +29,7 @@ const Footer = () => {
               Smart IT and web solutions made simple for every business.
             </p>
             <div className="flex gap-4 mt-6">
-              {[Twitter, Facebook, Instagram, Linkedin].map((Icon, index) => (
+              {[ Facebook, Instagram, Linkedin].map((Icon, index) => (
                 <a
                   key={index}
                   href="#"

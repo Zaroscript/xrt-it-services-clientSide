@@ -282,8 +282,8 @@ const ContactSection = () => {
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-foreground">Our Office</h3>
-                  <p className="text-muted-foreground">123 Tech Street, San Francisco, CA 94107</p>
+                  <h3 className="text-lg font-medium text-foreground">Address</h3>
+                  <p className="text-muted-foreground">Franklin, MA 02038</p>
                 </div>
               </div>
 

@@ -82,9 +82,13 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
               {/* Main Heading */}
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
                 {service.title.split(' ').map((word, i) => (
+                  <>
                   <span key={i} className="inline-block transition-colors hover:text-primary">
-                    {word}{' '}
+                    {word}
                   </span>
+                  {" "}
+                  </>
+                  
                 ))}
               </h1>
               
@@ -107,10 +111,10 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                   variant="outline"
                   size="lg"
                   className="px-8 h-12 text-base font-medium border-2 border-border/50 hover:border-primary/50 hover:bg-background/50 transition-all duration-300"
-                  onClick={() => router.push('/#contact')}
+                  onClick={() => router.push('/contact')}
                 >
                   <span>Contact Us</span>
-                  <ArrowRight className="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
+                  <ArrowRight className="w-4 h-4 ml-2  group-hover:opacity-100 translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
                 </Button>
               </div>
               
@@ -191,7 +195,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {service.features.map((feature, i) => (
                       <motion.div
                         key={i}
@@ -199,16 +203,13 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                         viewport={{ once: true, margin: "-50px" }}
-                        className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors"
+                        className="flex items-center gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors"
                       >
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg ${gradientClass} bg-opacity-10 flex items-center justify-center mt-1`}>
+                        <div className={`shrink-0 w-10 h-10 rounded-lg ${gradientClass} bg-opacity-10 flex items-center justify-center mt-1`}>
                           <Check className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-foreground">{feature}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Expertly implemented {feature.toLowerCase()} as part of our comprehensive service package.
-                          </p>
+                          <h3 className="font-medium text-foreground text-base">{feature}</h3>
                         </div>
                       </motion.div>
                     ))}

@@ -47,7 +47,7 @@ export function ServicesShowcase() {
           {services.map((service, index) => (
             <motion.div
               key={service.title}
-              className="group relative bg-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
+              className="group relative bg-card rounded-2xl p-4 text-justify hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}

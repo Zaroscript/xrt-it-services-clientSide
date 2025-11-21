@@ -2,7 +2,7 @@ import { Star, Quote } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import Image from "next/image";
 
 import { testimonials } from "../config/constants";
@@ -40,11 +40,28 @@ const Testimonials = () => {
 
       <div className="relative page-container mx-auto">
         <Swiper
-          modules={[Pagination]}
+          modules={[Pagination, Autoplay]}
           spaceBetween={32}
           slidesPerView={1}
           observer
+          loop
           observeParents
+          autoplay={{
+            delay: 2000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          onSwiper={(swiper) => {
+            // Only add event listeners if autoplay is available
+            if (swiper.autoplay) {
+              swiper.el.addEventListener('mouseenter', () => {
+                swiper.autoplay?.stop();
+              });
+              swiper.el.addEventListener('mouseleave', () => {
+                swiper.autoplay?.start();
+              });
+            }
+          }}
           breakpoints={{
             640: { slidesPerView: 1 },
             1024: { slidesPerView: 2 },

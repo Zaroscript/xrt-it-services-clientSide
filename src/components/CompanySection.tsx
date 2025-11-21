@@ -27,7 +27,7 @@ export function CompanySection() {
   return (
     <section className="py-24">
       <div className="page-container">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid items-end gap-12 lg:grid-cols-2">
             {/* About Content */}
             <div className="space-y-6">
@@ -80,15 +80,15 @@ export function CompanySection() {
             </div>
 
             {/* Video and Images */}
-            <div className="relative mt-16 lg:mt-0 max-sm:hidden">
-              <div className="relative mx-auto w-[250px] sm:w-[500px] rounded-sm lg:w-[400px]">
+            <div className="relative mt-20 lg:mt-0 max-sm:hidden">
+              <div className="relative mx-auto w-[250px] sm:w-[500px] rounded-sm lg:w-[350px]">
                 {/* Main Video Thumbnail */}
 
                 <div className="relative z-10 rounded-sm overflow-hidden shadow-2xl">
                   <Image
                     src={company_1}
                     alt="Company middle image"
-                    width={700}
+                    width={500}
                     height={400}
                     className="w-full h-auto"
                   />
@@ -97,7 +97,7 @@ export function CompanySection() {
                 {/* Floating Images */}
                 <motion.div
                   animate={floatingAnimation}
-                  className="absolute -left-10 -top-14 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
+                  className="absolute -left-10 -top-24 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_2}
@@ -113,7 +113,7 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 0.5 },
                   }}
-                  className="absolute -right-4 -top-16 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
+                  className="absolute -right-4 -top-24 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_3}
@@ -129,7 +129,7 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 1 },
                   }}
-                  className="absolute -bottom-20 left-2 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
+                  className="absolute -bottom-30 -left-10 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_4}
@@ -145,7 +145,7 @@ export function CompanySection() {
                     ...floatingAnimation,
                     transition: { ...floatingAnimation.transition, delay: 1.5 },
                   }}
-                  className="absolute -bottom-20 -right-10 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
+                  className="absolute -bottom-30 -right-10 w-[120px] h-[120px] rounded-sm overflow-hidden shadow-lg"
                 >
                   <Image
                     src={company_5}

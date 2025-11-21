@@ -162,7 +162,7 @@
     @apply text-[#FFD700] dark:text-[#d3b073];
   }
   p {
-    @apply text-base dark:text-[#d3b073];
+    @apply  dark:text-[#d3b073];
   }
   a {
     @apply text-[#d3b073];

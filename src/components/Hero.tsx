@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import heroImage from "../../public/tech-bg.png";
 import { heroContent, heroSection } from "../config/constants";
@@ -12,6 +12,9 @@ import { useRouter } from "next/navigation";
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentBackground, setCurrentBackground] = useState(heroImage);
+  const [isPaused, setIsPaused] = useState(false);
+  const slideInterval = useRef<NodeJS.Timeout | null>(null);
+  const backgroundInterval = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   // Handle background image change
@@ -19,36 +22,73 @@ export default function Hero() {
     const backgrounds = [heroImage, heroSection];
     let currentIndex = 0;
     
-
-    
     const changeBackground = () => {
+      if (isPaused) return;
       currentIndex = (currentIndex + 1) % backgrounds.length;
       setCurrentBackground(backgrounds[currentIndex]);
     };
 
     // Start with a delay for the first transition
     const initialTimer = setTimeout(() => {
-      changeBackground();
+      if (!isPaused) {
+        changeBackground();
+      }
       // Then set up the regular interval
-      const timer = setInterval(changeBackground, 10000); 
-      return () => clearInterval(timer);
-    });
+      backgroundInterval.current = setInterval(changeBackground, 10000);
+    }, 5000);
     
     return () => {
       clearTimeout(initialTimer);
+      if (backgroundInterval.current) {
+        clearInterval(backgroundInterval.current);
+      }
     };
-  }, []);
+  }, [isPaused]);
 
   // Handle content slide change
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroContent.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!isPaused) {
+      slideInterval.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % heroContent.length);
+      }, 5000);
+    }
+    return () => {
+      if (slideInterval.current) {
+        clearInterval(slideInterval.current);
+      }
+    };
+  }, [isPaused]);
+
+  const handleIndicatorClick = (index: number) => {
+    // Pause auto-slide when manually changing slides
+    setIsPaused(true);
+    setCurrentSlide(index);
+    
+    // Resume auto-slide after a delay
+    setTimeout(() => {
+      setIsPaused(false);
+    }, 10000); // Resume after 10 seconds
+  };
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  const handleMouseLeave = () => {
+    // Only resume if not already paused by indicator click
+    if (!isPaused) return;
+    const timer = setTimeout(() => {
+      setIsPaused(false);
+    }, 2000); // Short delay before resuming
+    return () => clearTimeout(timer);
+  };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div 
+      className="relative min-h-screen w-full overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-primary/90 dark:bg-background/90" />
       <div className="absolute inset-0 opacity-30" />
@@ -107,7 +147,7 @@ export default function Hero() {
                   {heroContent[currentSlide].title}
                 </span>
               </h1>
-              <p className="text-md text-background dark:text-slate-300 max-w-xl">
+              <p className="text-md text-justify text-background dark:text-slate-300 max-w-xl">
                 {heroContent[currentSlide].description}
               </p>
             </motion.div>
@@ -138,10 +178,13 @@ export default function Hero() {
               {heroContent.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-12 h-1 rounded-full transition-colors ${
-                    currentSlide === index ? "bg-gold" : "bg-background"
+                  onClick={() => handleIndicatorClick(index)}
+                  className={`w-12 h-2 rounded-full transition-all cursor-pointer duration-300 ${
+                    currentSlide === index 
+                      ? "bg-gold scale-110" 
+                      : "bg-background/50 dark:bg-white/50 hover:bg-background/80"
                   }`}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
