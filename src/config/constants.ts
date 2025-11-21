@@ -759,7 +759,7 @@ export const partners = [
 export const marketing = [
   {
     id: 1,
-    title: "Free TV Screen for 1 Year (sign age)",
+    title: "Free TV Screen for 1 Year (Signage)",
     description:
       "Get 1 year of digital menu screen hosting included with your plan. Turn any TV into a smart digital menu instantly.",
     highlight: "Free Screens",
