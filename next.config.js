@@ -19,9 +19,7 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self' data:; img-src 'self' data: https:;",
   },
-  
-  // Build optimizations
-  output: 'standalone',
+
   
   // Development tools
   eslint: {
