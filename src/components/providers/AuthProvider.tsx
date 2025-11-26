@@ -1,11 +1,10 @@
-// src/components/providers/AuthProvider.tsx
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import useAuthStore from '@/store/useAuthStore';
 import { Loader } from '../ui/Loader';
+import { getToken, clearAuthData } from '@/lib/auth';
 
 // List of public routes that don't require authentication
 const publicRoutes = [
@@ -39,72 +38,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
+  // Initial auth check - only runs once on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          // If we have a token, try to fetch user data
-          try {
-            await fetchAllUserData();
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-            // If fetching user data fails, clear the token and mark as not authenticated
-            localStorage.removeItem('accessToken');
-            setTokens(null);
-            setError('Session expired. Please log in again.');
-            
-            // Only redirect if not already on a public route
-            const isPublicRoute = publicRoutes.some(route => 
-              pathname === route || pathname.startsWith(`${route}/`)
-            );
-            
-            if (!isPublicRoute && !pathname.startsWith('/auth/')) {
-              const callbackUrl = pathname === '/' ? '' : `?callbackUrl=${encodeURIComponent(pathname)}`;
-              router.push(`/auth/login${callbackUrl}`);
-            }
-          }
-        } else {
-          // No token, ensure we're not marked as authenticated
+        const token = getToken();
+        
+        if (!token) {
+          // No token, mark as not authenticated
           setTokens(null);
-          
-          // Only redirect if not already on a public route
-          const isPublicRoute = publicRoutes.some(route => 
-            pathname === route || pathname.startsWith(`${route}/`)
-          );
-          
-          if (!isPublicRoute && !pathname.startsWith('/auth/')) {
-            const callbackUrl = pathname === '/' ? '' : `?callbackUrl=${encodeURIComponent(pathname)}`;
-            router.push(`/auth/login${callbackUrl}`);
-          }
+          setIsCheckingAuth(false);
+          return;
+        }
+
+        // We have a token, try to fetch user data
+        try {
+          await fetchAllUserData();
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          // If fetching user data fails, clear the token
+          clearAuthData();
+          setTokens(null);
+          setError('Session expired. Please log in again.');
         }
       } catch (error: any) {
         console.error('Error checking auth status:', error);
-        // If there's an auth error, clear the auth state
-        if (error?.name === 'AuthError') {
-          // Clear auth state on auth error
-          setTokens(null);
-          setError('Session expired. Please log in again.');
-          
-          // Only redirect if not already on a public route
-          const isPublicRoute = publicRoutes.some(route => 
-            pathname === route || pathname.startsWith(`${route}/`)
-          );
-          
-          if (!isPublicRoute) {
-            // Preserve the current URL for redirect after login
-            const callbackUrl = pathname === '/' ? '' : `?callbackUrl=${encodeURIComponent(pathname)}`;
-            router.push(`/auth/login${callbackUrl}`);
-          }
-        }
+        setTokens(null);
+        setError('Session expired. Please log in again.');
       } finally {
         setIsCheckingAuth(false);
       }
     };
 
     checkAuth();
-  }, [isAuthenticated, fetchAllUserData, pathname, router]);
+    // Remove isAuthenticated from dependencies to prevent loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
+  // Handle redirects based on auth state
   useEffect(() => {
     if (isCheckingAuth || isLoading) return;
 
@@ -116,15 +87,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       pathname === route || pathname.startsWith(`${route}/`)
     );
 
-    // Only check authentication for protected routes
+    // Redirect to login if accessing protected route while not authenticated
     if (isProtectedRoute && !isAuthenticated) {
-      // If trying to access a protected route and not authenticated, redirect to login
       const callbackUrl = pathname === '/' ? '' : `?callbackUrl=${encodeURIComponent(pathname)}`;
       router.push(`/auth/login${callbackUrl}`);
       return;
     }
 
-    // If authenticated and trying to access auth pages, redirect to dashboard
+    // Redirect to dashboard if authenticated and trying to access auth pages
     if (isAuthenticated && pathname.startsWith('/auth/')) {
       router.push('/dashboard');
     }

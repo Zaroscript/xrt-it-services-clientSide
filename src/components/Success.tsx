@@ -14,9 +14,11 @@ export default function Succeed() {
           viewport={{ once: true }}
           className="mb-12 text-center"
         >
-          <h4 className="uppercase text-sm tracking-widest opacity-60">How we work</h4>
+          <p className="uppercase text-sm tracking-widest opacity-60 font-semibold mb-2">
+            How we work
+          </p>
           <h2 className="text-3xl md:text-4xl font-semibold">
-            Turning Your Vision into {" "}
+            Turning Your Vision into{" "}
             <span className="text-[#d3b073]">Digital Success</span>
           </h2>
         </motion.div>
@@ -35,8 +37,9 @@ export default function Succeed() {
                 {step.id}
               </div>
               <h3 className="text-lg font-semibold">{step.title}</h3>
-              <p className="mt-2 text-justify text-gray-600 dark:text-gray-400 text-sm">{step.text}</p>  
-              
+              <p className="mt-2 text-justify text-gray-600 dark:text-gray-400 text-sm">
+                {step.text}
+              </p>
             </motion.div>
           ))}
         </div>

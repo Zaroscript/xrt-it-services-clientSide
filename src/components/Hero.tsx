@@ -21,7 +21,7 @@ export default function Hero() {
   useEffect(() => {
     const backgrounds = [heroImage, heroSection];
     let currentIndex = 0;
-    
+
     const changeBackground = () => {
       if (isPaused) return;
       currentIndex = (currentIndex + 1) % backgrounds.length;
@@ -36,7 +36,7 @@ export default function Hero() {
       // Then set up the regular interval
       backgroundInterval.current = setInterval(changeBackground, 10000);
     }, 5000);
-    
+
     return () => {
       clearTimeout(initialTimer);
       if (backgroundInterval.current) {
@@ -63,7 +63,7 @@ export default function Hero() {
     // Pause auto-slide when manually changing slides
     setIsPaused(true);
     setCurrentSlide(index);
-    
+
     // Resume auto-slide after a delay
     setTimeout(() => {
       setIsPaused(false);
@@ -84,7 +84,7 @@ export default function Hero() {
   };
 
   return (
-    <div 
+    <div
       className="relative min-h-screen w-full overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -104,8 +104,8 @@ export default function Hero() {
               transition: {
                 duration: 1.5,
                 ease: [0.2, 0.8, 0.2, 1],
-                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] }
-              }
+                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] },
+              },
             }}
             exit={{
               opacity: 0,
@@ -113,8 +113,8 @@ export default function Hero() {
               transition: {
                 duration: 1,
                 ease: [0.4, 0, 0.2, 1],
-                opacity: { duration: 0.8 }
-              }
+                opacity: { duration: 0.8 },
+              },
             }}
             className="absolute inset-0 h-full overflow-hidden"
           >
@@ -156,7 +156,9 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(heroContent[currentSlide].primBtn.path)}
+                onClick={() =>
+                  router.push(heroContent[currentSlide].primBtn.path)
+                }
                 className="px-8 py-3 rounded-lg bg-primary text-card cursor-pointer font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
               >
                 {heroContent[currentSlide].primBtn.text}
@@ -165,7 +167,9 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(heroContent[currentSlide].secBtn.path)}
+                onClick={() =>
+                  router.push(heroContent[currentSlide].secBtn.path)
+                }
                 className="px-8 py-3 rounded-lg border border-gold text-secondary dark:text-primary cursor-pointer 
                 font-medium hover:text-primary hover:bg-gold/80 transition-colors"
               >
@@ -180,8 +184,8 @@ export default function Hero() {
                   key={index}
                   onClick={() => handleIndicatorClick(index)}
                   className={`w-12 h-2 rounded-full transition-all cursor-pointer duration-300 ${
-                    currentSlide === index 
-                      ? "bg-gold scale-110" 
+                    currentSlide === index
+                      ? "bg-gold scale-110"
                       : "bg-background/50 dark:bg-white/50 hover:bg-background/80"
                   }`}
                   aria-label={`Go to slide ${index + 1}`}

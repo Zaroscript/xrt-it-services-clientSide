@@ -2,12 +2,11 @@
 "use client";
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import ProfileContent from "@/components/profile/ProfileContent";
 
-export default function ProfilePage() {
+export default function ProfilePage({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
-      <ProfileContent />
+      {children}
     </ProtectedRoute>
   );
 }

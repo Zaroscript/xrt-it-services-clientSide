@@ -129,9 +129,9 @@ const Header = () => {
                 size="icon"
                 className="lg:hidden hover:bg-primary/5"
                 onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open main menu"
               >
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
               </Button>
             </div>
           </div>

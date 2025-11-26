@@ -2,43 +2,49 @@
 const nextConfig = {
   // Core features
   reactStrictMode: true,
-  
+
+  // Performance optimizations
+  compress: true, // Enable gzip compression
+  poweredByHeader: false, // Remove X-Powered-By header
+
+  // SWC minification (faster than Terser)
+  swcMinify: true,
+
   // Image optimization
   images: {
-    domains: ['localhost'],
+    domains: ["localhost"],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 3600, // 1 hour cache
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self' data:; img-src 'self' data: https:;",
+    contentSecurityPolicy:
+      "default-src 'self' data:; img-src 'self' data: https:;",
   },
 
-  
   // Development tools
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   typescript: {
     ignoreBuildErrors: true,
   },
-  
+
   // Configure experimental features
   experimental: {
     turbo: process.env.TURBO ? {} : undefined,
     serverActions: {
-      allowedOrigins: ['localhost:3000']
-    }
-    // Removed serverExternalPackages as it's not supported in this version
+      allowedOrigins: ["localhost:5000"],
+    },
   },
-  
+
   // Custom webpack config
   webpack: (config, { isServer }) => {
     // Add polyfills for Node.js modules
@@ -52,13 +58,6 @@ const nextConfig = {
         child_process: false,
       };
     }
-
-    // Add support for ES modules
-    config.experiments = {
-      ...config.experiments,
-      topLevelAwait: true,
-      layers: true,
-    };
 
     return config;
   },

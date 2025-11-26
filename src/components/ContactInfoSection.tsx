@@ -9,14 +9,14 @@ const contactInfo = [
     title: "Email Us",
     description: "We'll respond quickly",
     value: "support@xrttech.com",
-    link: "mailto:support@xrttech.com"
+    link: "mailto:support@xrttech.com",
   },
   {
     icon: <Phone className="h-6 w-6 text-secondary" />,
     title: "Call Us",
     description: "Mon-Fri 10am-10pm, Sat 8am-8pm",
     value: "+1 508-507-0922",
-    link: "tel:+15085070922"
+    link: "tel:+15085070922",
   },
   // {
   //   icon: <MapPin className="h-6 w-6 text-secondary" />,
@@ -28,12 +28,16 @@ const contactInfo = [
     icon: <Clock className="h-6 w-6 text-secondary" />,
     title: "Working Hours",
     description: "We're here for you",
-    value: <>
-      Monday to Friday: 10 AM to 10 PM<br />
-      Saturday: 8 AM to 8 PM<br />
-      Sunday: Closed
-    </>
-  }
+    value: (
+      <>
+        Monday to Friday: 10 AM to 10 PM
+        <br />
+        Saturday: 8 AM to 8 PM
+        <br />
+        Sunday: Closed
+      </>
+    ),
+  },
 ];
 
 export function ContactInfoSection() {
@@ -41,7 +45,7 @@ export function ContactInfoSection() {
     <section className="bg-gray-50 dark:bg-[#1e1e20] py-16 transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -50,14 +54,15 @@ export function ContactInfoSection() {
           >
             Our <span className="text-secondary">Contact</span> Information
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
           >
-            Have questions or need assistance? We're here to help! Reach out to us through any of the following channels.
+            Have questions or need assistance? We're here to help! Reach out to
+            us through any of the following channels.
           </motion.p>
         </div>
 
@@ -72,21 +77,25 @@ export function ContactInfoSection() {
               className="bg-white dark:bg-[#2a2a2d] rounded-xl p-6 hover:bg-gray-50 dark:hover:bg-[#343438] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-secondary/10 dark:shadow-gray-900/20"
             >
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  {item.icon}
-                </div>
+                <div className="flex-shrink-0">{item.icon}</div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {item.description}
+                  </p>
                   {item.link ? (
-                    <a 
-                      href={item.link} 
+                    <a
+                      href={item.link}
                       className="mt-2 text-secondary hover:text-secondary/80 transition-colors block"
                     >
                       {item.value}
                     </a>
                   ) : (
-                    <p className="mt-2 text-gray-700 dark:text-gray-300">{item.value}</p>
+                    <p className="mt-2 text-gray-700 dark:text-gray-300">
+                      {item.value}
+                    </p>
                   )}
                 </div>
               </div>
@@ -103,7 +112,7 @@ export function LocationSection() {
     <section className="py-16 bg-white dark:bg-[#232325] transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -112,7 +121,7 @@ export function LocationSection() {
           >
             Find Us on the <span className="text-secondary">Map</span>
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -123,7 +132,7 @@ export function LocationSection() {
           </motion.p>
         </div>
 
-        <motion.div 
+        <motion.div
           className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -131,27 +140,26 @@ export function LocationSection() {
           transition={{ duration: 0.7 }}
         >
           <div className="aspect-w-16 aspect-h-9 w-full h-[400px] md:h-[500px] lg:h-[600px]">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2966.0906008!2d-71.42676432344565!3d42.09021737130051!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e4835b9e0a9f8f%3A0x5f5e5e5e5e5e5e5e!2sFranklin%2C%20MA%2002038%2C%20USA!5e0!3m2!1sen!2s!4v1620000000000!5m2!1sen!2s"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              className="w-full h-full"
-              title="XRT Tech Office Location"
-            ></iframe>
+            <img
+              src="/map-placeholder.svg"
+              alt="Map placeholder"
+              className="w-full h-full object-cover"
+            />
           </div>
-          
+
           <div className="bg-white dark:bg-[#2a2a2d] p-6 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">XRT Tech Headquarters</h3>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">Franklin, MA 02038</p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  XRT Tech Headquarters
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Franklin, MA 02038
+                </p>
               </div>
-              <a 
-                href="https://maps.google.com?q=Franklin+MA+02038" 
-                target="_blank" 
+              <a
+                href="https://maps.google.com?q=Franklin+MA+02038"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors"
               >

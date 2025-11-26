@@ -97,9 +97,6 @@ const useAuthStore = create<AuthStore>()(
           set({ isLoading: true, error: null });
 
           try {
-            // Clear any existing auth data first
-            localStorage.removeItem('accessToken');
-            
             // Make the login request
             const { user, accessToken, clientProfile } = await authService.login({
               email: email.trim(),
@@ -115,16 +112,8 @@ const useAuthStore = create<AuthStore>()(
               isLoading: false,
               error: null,
             });
-
-            // Store the token in localStorage for persistence
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('accessToken', accessToken);
-            }
           } catch (error: any) {
             console.error('Login error in store:', error);
-            
-            // Clear any partial auth data
-            localStorage.removeItem('accessToken');
             
             const message =
               error?.response?.data?.message ||

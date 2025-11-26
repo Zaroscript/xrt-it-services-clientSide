@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Check, X, HelpCircle, CheckCircle2 } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";

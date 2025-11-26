@@ -43,7 +43,7 @@ export function CompanySection() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-2 font-bold text-primary dark:text-slate-200 sm:text-3xl"
+                className="text-2xl font-bold text-primary dark:text-slate-200 sm:text-3xl"
               >
                 From Small Ideas to Big Impact
                 <br />

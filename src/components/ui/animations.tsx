@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, MotionProps } from "framer-motion";
 import { ReactNode } from "react";
 
-interface AnimationProps {
+interface AnimationProps extends Omit<MotionProps, "children"> {
   children: ReactNode;
   delay?: number;
   duration?: number;
@@ -15,6 +15,7 @@ export function FadeIn({
   delay = 0,
   duration = 0.5,
   className = "",
+  ...motionProps
 }: AnimationProps) {
   return (
     <motion.div
@@ -26,6 +27,7 @@ export function FadeIn({
         ease: [0.21, 1.02, 0.73, 0.99],
       }}
       className={className}
+      {...motionProps}
     >
       {children}
     </motion.div>
@@ -37,6 +39,7 @@ export function FadeUp({
   delay = 0,
   duration = 0.5,
   className = "",
+  ...motionProps
 }: AnimationProps) {
   return (
     <motion.div
@@ -48,6 +51,7 @@ export function FadeUp({
         ease: [0.21, 1.02, 0.73, 0.99],
       }}
       className={className}
+      {...motionProps}
     >
       {children}
     </motion.div>

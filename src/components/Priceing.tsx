@@ -177,7 +177,7 @@ const Priceing = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative py-16 bg-background"
+        className="relative py-16 bg-background text-center"
       >
         <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg inline-block">
           {error}
@@ -278,26 +278,26 @@ const Priceing = () => {
                     price={`$${
                       isYearly
                         ? (
-                          plan.isDiscountActive && plan.discount?.value > 0
+                          plan.discount?.isActive && plan.discount?.value > 0
                             ? plan.discountedYearlyPrice || plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
                             : plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
                         )
                         : (
-                          plan.isDiscountActive && plan.discount?.value > 0
+                          plan.discount?.isActive && plan.discount?.value > 0
                             ? plan.discountedMonthlyPrice || plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
                             : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
                         )
                     }/${isYearly ? 'yr' : 'mo'}`}
                     originalPrice={
-                      plan.isDiscountActive && plan.discount?.value > 0
-                        ? `$${isYearly
+                      plan.discount?.isActive && plan.discount?.value > 0
+                        ? `${isYearly
                             ? plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
                             : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
                           }/${isYearly ? 'yr' : 'mo'}`
                         : undefined
                     }
                     discount={
-                      plan.isDiscountActive && plan.discount?.value > 0
+                      plan.discount?.isActive && plan.discount?.value > 0
                         ? `${plan.discount.value}%`
                         : undefined
                     }

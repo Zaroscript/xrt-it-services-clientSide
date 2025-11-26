@@ -12,7 +12,7 @@ declare module 'axios' {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1',
   withCredentials: true, // Important for cookies
   timeout: 10000, // 10 seconds
   headers: {
@@ -24,10 +24,11 @@ const api = axios.create({
 // Request interceptor to add auth token to requests
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Skip adding token for auth routes or if skipAuthRefresh is true
-    const isAuthRoute = config.url?.startsWith('/auth/');
+    // Skip adding token for public auth routes (login/register)
+    // We DO want to add token for /auth/me and other protected auth routes
+    const isPublicAuthRoute = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
     
-    if (!isAuthRoute && !config.skipAuthRefresh) {
+    if (!isPublicAuthRoute && !config.skipAuthRefresh) {
       const token = getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -56,8 +57,11 @@ api.interceptors.response.use(
     
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // If this is a login request or already a retry, just reject
-      if (originalRequest.url?.includes('/auth/') || originalRequest._retry) {
+      // If this is a login/register request or already a retry, just reject
+      // Allow retry for /auth/me
+      const isPublicAuthRoute = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/register');
+      
+      if (isPublicAuthRoute || originalRequest._retry) {
         return Promise.reject(error);
       }
       
@@ -66,7 +70,7 @@ api.interceptors.response.use(
       try {
         // Attempt to refresh the token
         const refreshResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/auth/refresh-token`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/auth/refresh-token`,
           {},
           { 
             withCredentials: true,

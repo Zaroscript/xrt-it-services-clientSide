@@ -56,15 +56,15 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: User,
       label: 'Profile',
       onClick: () => {
-        router.push('/dashboard');
+        router.push('/dashboard/#profile');
         setIsOpen(false);
       },
     },
     {
       icon: Package,
-      label: 'My Plans',
+      label: 'My Plan',
       onClick: () => {
-        router.push('/dashboard/plans');
+        router.push('/dashboard/#plan');
         setIsOpen(false);
       },
     },
@@ -72,7 +72,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: FileText,
       label: 'Services',
       onClick: () => {
-        router.push('/dashboard/services');
+        router.push('/dashboard/#services');
         setIsOpen(false);
       },
     },
@@ -80,7 +80,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: Settings,
       label: 'Settings',
       onClick: () => {
-        router.push('/dashboard/settings');
+        router.push('/dashboard/#settings');
         setIsOpen(false);
       },
     },

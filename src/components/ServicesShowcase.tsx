@@ -79,8 +79,12 @@ export function ServicesShowcase() {
                     variant="outline"
                     className="w-full bg-transparent border-primary/20 hover:bg-primary/10 text-primary hover:text-primary transition-colors group"
                   >
-                    <Link href="/services" className="flex items-center justify-center gap-1">
-                      Learn more
+                    <Link
+                      href="/services"
+                      className="flex items-center justify-center gap-1"
+                    >
+                      Learn more{" "}
+                      <span className="sr-only">about {service.title}</span>
                       <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </Button>

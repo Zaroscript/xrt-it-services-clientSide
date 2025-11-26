@@ -1,13 +1,25 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Paintbrush, Rocket, Settings, TestTube2 } from "lucide-react";
+import {
+  ArrowRight,
+  Paintbrush,
+  Rocket,
+  Settings,
+  TestTube2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FadeIn, FadeUp } from "@/components/ui/animations";
 import AnimatedGradientText from "@/components/ui/AnimatedGradientText";
-import { values, missionIcon, vission, whoWeAre, aboutImg } from "@/config/constants";
+import {
+  values,
+  missionIcon,
+  vission,
+  whoWeAre,
+  aboutImg,
+} from "@/config/constants";
 import { useRouter } from "next/navigation";
 
 export default function AboutPage() {
@@ -74,10 +86,9 @@ export default function AboutPage() {
               </h1>
 
               <p className="text-lg text-justify md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                We turn business goals into simple, scalable
-                technology delivering powerful websites, seamless online
-                systems, and reliable IT support that help you grow smarter and
-                faster.
+                We turn business goals into simple, scalable technology
+                delivering powerful websites, seamless online systems, and
+                reliable IT support that help you grow smarter and faster.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
@@ -102,7 +113,13 @@ export default function AboutPage() {
 
             <FadeUp delay={0.6} className="mt-16">
               <div className="relative w-full max-w-4xl h-[400px] mx-auto rounded-2xl overflow-hidden border border-border/20 dark:border-border/30 bg-gradient-to-br from-background to-muted/20 dark:from-muted/10 dark:to-background/50">
-                <Image src={aboutImg} alt="About us image" width={700} height={400} className="w-full h-full object-cover" />
+                <Image
+                  src={aboutImg}
+                  alt="About us image"
+                  width={700}
+                  height={400}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </FadeUp>
           </div>
@@ -253,7 +270,8 @@ export default function AboutPage() {
               Guiding Principles
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              The foundation of our company culture and the driving force behind every decision we make.
+              The foundation of our company culture and the driving force behind
+              every decision we make.
             </p>
           </FadeIn>
 
@@ -264,9 +282,9 @@ export default function AboutPage() {
                 <Rocket className="w-6 h-6 text-primary" />,
                 <TestTube2 className="w-6 h-6 text-primary" />,
                 <Settings className="w-6 h-6 text-primary" />,
-                <Paintbrush className="w-6 h-6 text-primary" />
+                <Paintbrush className="w-6 h-6 text-primary" />,
               ];
-              
+
               return (
                 <FadeIn
                   key={value.title}
@@ -277,19 +295,19 @@ export default function AboutPage() {
                   <div className="h-full bg-card/50 backdrop-blur-sm border border-border/20 dark:border-border/30 rounded-2xl p-6 group hover:bg-card hover:shadow-lg transition-all duration-300 overflow-hidden relative">
                     {/* Decorative element */}
                     <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-primary/5 dark:bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300" />
-                    
+
                     {/* Icon */}
                     <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors duration-300">
                       {icons[index % icons.length]}
                     </div>
-                    
+
                     <h3 className="text-xl font-semibold mb-3 text-foreground group-hover:text-primary transition-colors duration-300">
                       {value.title}
                     </h3>
                     <p className="text-muted-foreground text-justify leading-relaxed">
                       {value.description}
                     </p>
-                    
+
                     {/* Hover effect line */}
                     <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-primary/0 transition-all duration-300 group-hover:w-full" />
                   </div>

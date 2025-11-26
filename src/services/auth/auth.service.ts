@@ -149,33 +149,47 @@ export const authService = {
   },
 
   async getMe(): Promise<AuthResponse> {
-  try {
-    const response = await api.get<ApiResponse<MeResponse>>('/auth/me');
-    
-    if (!response.data?.data?.user) {
-      const error = new Error('Invalid response from server');
-      error.name = 'AuthError';
+    try {
+      const token = getToken();
+      if (!token) {
+        const error = new Error('No authentication token found');
+        error.name = 'AuthError';
+        throw error;
+      }
+
+      const response = await api.get<ApiResponse<MeResponse>>('/auth/me');
+      
+      if (!response.data?.data?.user) {
+        const error = new Error('Invalid response from server');
+        error.name = 'AuthError';
+        throw error;
+      }
+
+      return {
+        user: mapUser(response.data.data.user),
+        accessToken: token,
+        clientProfile: mapClientProfile(response.data.data.clientProfile),
+      };
+    } catch (error: any) {
+      // Clear token on auth errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        clearAuthData();
+        const authError = new Error(
+          error.response.status === 401 
+            ? 'Your session has expired. Please log in again.'
+            : 'You do not have permission to access this resource.'
+        );
+        authError.name = 'AuthError';
+        throw authError;
+      }
+      // Re-throw AuthError
+      if (error.name === 'AuthError') {
+        throw error;
+      }
       throw error;
     }
+  },
 
-    return {
-      user: response.data.data.user,
-      accessToken: response.data.data.accessToken || '',
-      clientProfile: response.data.data.clientProfile,
-    };
-  } catch (error: any) {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      const authError = new Error(
-        error.response.status === 401 
-          ? 'Your session has expired. Please log in again.'
-          : 'You do not have permission to access this resource.'
-      );
-      authError.name = 'AuthError';
-      throw authError;
-    }
-    throw error;
-  }
-},
   async updateProfile(profileData: Partial<ClientProfile>): Promise<ClientProfile | null> {
     const res = await api.patch<ApiResponse<ClientProfile>>(
       '/client/profile',

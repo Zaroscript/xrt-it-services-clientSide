@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import  useAuthStore  from '@/store/useAuthStore';
+import { clientService, type ClientProfile as ClientProfileType, type Service, type Plan } from '@/services/client/client.service';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,7 +24,11 @@ import {
 } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { Package, CreditCard, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { RequestServiceModal } from '../modals/RequestServiceModal';
+import { RequestPlanModal } from '../modals/RequestPlanModal';
 
 type ProfileFormData = {
   name: string;
@@ -48,12 +53,31 @@ export default function ProfileContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [clientData, setClientData] = useState<ClientProfileType | null>(null);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     email: '',
     phone: '',
     company: '',
   });
+
+  // Fetch client profile data
+  useEffect(() => {
+    const fetchClientData = async () => {
+      if (user?.role === 'client' && isAuthenticated) {
+        try {
+          const data = await clientService.getClientProfile();
+          setClientData(data);
+        } catch (error) {
+          console.error('Error fetching client data:', error);
+        }
+      }
+    };
+
+    fetchClientData();
+  }, [user, isAuthenticated]);
 
   // Initial data load
   useEffect(() => {
@@ -79,7 +103,7 @@ export default function ProfileContent() {
             : '',
           email: user.email || '',
           phone: user.phone || '',
-          company: clientProfile?.companyName || user.companyName || '',
+          company: clientData?.companyName || clientProfile?.companyName || user.companyName || '',
         });
 
         setIsLoading(false);
@@ -92,6 +116,7 @@ export default function ProfileContent() {
     isAuthenticated,
     user,
     clientProfile,
+    clientData,
     router,
     fetchAllUserData,
   ]);
@@ -199,6 +224,8 @@ export default function ProfileContent() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="business">Business</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="plan">Current Plan</TabsTrigger>
           <TabsTrigger value="settings" disabled>
             Settings
           </TabsTrigger>
@@ -221,30 +248,6 @@ export default function ProfileContent() {
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>
-                Update your account&apos;s profile information and email
-                address.
-              </CardDescription>
-            </CardHeader>
-            <form id="profile-form" onSubmit={handleSubmit}>
-              <CardContent className="space-y-6">
-                <div className="flex items-center space-x-6">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src="" alt={user.fName || 'User'} />
-                    <AvatarFallback>
-                      {user.fName?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Button type="button" variant="outline">
-                      Change Photo
-                    </Button>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      JPG, GIF or PNG. Max size of 2MB
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
                     {isEditing ? (
@@ -410,7 +413,207 @@ export default function ProfileContent() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="services">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    My Services
+                  </CardTitle>
+                  <CardDescription>
+                    Services purchased and currently active on your account.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {clientData?.services && clientData.services.length > 0 ? (
+                <div className="space-y-4">
+                  {clientData.services.map((service) => (
+                    <div
+                      key={service._id}
+                      className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-lg">
+                            {service.service.name}
+                          </h3>
+                          <Badge
+                            variant={
+                              service.status === 'active'
+                                ? 'default'
+                                : service.status === 'paused'
+                                ? 'secondary'
+                                : service.status === 'completed'
+                                ? 'outline'
+                                : 'destructive'
+                            }
+                            className="flex items-center gap-1"
+                          >
+                            {service.status === 'active' && (
+                              <CheckCircle2 className="h-3 w-3" />
+                            )}
+                            {service.status === 'paused' && (
+                              <Clock className="h-3 w-3" />
+                            )}
+                            {service.status === 'cancelled' && (
+                              <XCircle className="h-3 w-3" />
+                            )}
+                            {service.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {service.service.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Price: </span>
+                            <span className="font-medium">
+                              ${service.customPrice}/mo
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Started: </span>
+                            <span>
+                              {new Date(service.startDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {service.endDate && (
+                            <div>
+                              <span className="text-muted-foreground">Ends: </span>
+                              <span>
+                                {new Date(service.endDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {service.notes && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            <span className="font-medium">Notes:</span> {service.notes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Services Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You haven't purchased any services yet.
+                  </p>
+                  <Button onClick={() => setIsServiceModalOpen(true)}>
+                    Request a Service
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="plan">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Current Subscription Plan
+                  </CardTitle>
+                  <CardDescription>
+                    Your active subscription plan and billing details.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {clientData?.currentPlan ? (
+                <div className="space-y-6">
+                  <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-2xl font-bold mb-2">
+                          {clientData.currentPlan.name}
+                        </h3>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold">
+                            ${clientData.currentPlan.price}
+                          </span>
+                          <span className="text-muted-foreground">
+                            /{clientData.currentPlan.billingCycle}
+                          </span>
+                        </div>
+                      </div>
+                      <Badge variant="default" className="text-sm px-3 py-1">
+                        Active
+                      </Badge>
+                    </div>
+
+                    <p className="text-muted-foreground mb-4">
+                      {clientData.currentPlan.description}
+                    </p>
+
+                    <div className="space-y-2">
+                      <h4 className="font-semibold mb-3">Plan Features:</h4>
+                      <div className="grid gap-2">
+                        {clientData.currentPlan.features.map((feature, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-sm">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="outline" className="flex-1" onClick={() => setIsPlanModalOpen(true)}>
+                      Request Plan Change
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      View Billing History
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Active Plan</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You don't have an active subscription plan.
+                  </p>
+                  <Button onClick={() => setIsPlanModalOpen(true)}>
+                    Request a Plan
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Request Modals */}
+      <RequestServiceModal
+        isOpen={isServiceModalOpen}
+        onClose={() => setIsServiceModalOpen(false)}
+        onSuccess={() => {
+          toast.success('Your request has been submitted to our team!');
+          // Optionally refresh client data
+        }}
+      />
+      <RequestPlanModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSuccess={() => {
+          toast.success('Your plan change request has been submitted!');
+          // Optionally refresh client data
+        }}
+      />
     </div>
   );
 }
