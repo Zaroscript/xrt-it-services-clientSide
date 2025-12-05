@@ -1,17 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, Download, Eye, Loader2 } from 'lucide-react';
-import invoiceService, { type Invoice } from '@/services/invoiceService';
-import { companySettingsService, type CompanySettings } from '@/services/companySettingsService';
-import { toast } from '@/components/ui/custom-toast';
-import { InvoiceDetailModal } from '@/components/modals/InvoiceDetailModal';
+import { useState, useEffect } from "react";
+import invoiceService, { Invoice } from "@/services/invoiceService";
+import { companySettingsService, type CompanySettings } from "@/services/companySettingsService";
+import { format } from "date-fns";
+import {
+  FileText,
+  Download,
+  Eye,
+  Calendar,
+  DollarSign,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { InvoiceDetailModal } from "../modals/InvoiceDetailModal";
 
-export default function InvoicesTab() {
+export function InvoicesList() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,46 +26,22 @@ export default function InvoicesTab() {
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Get only sent and paid invoices
-        const invoiceData = await invoiceService.getSentAndPaidInvoices();
-        setInvoices(invoiceData);
-      } catch (error) {
-        console.error('Error fetching invoices:', error);
-        setError('Failed to load invoices. Please try again later.');
-        toast.error('Failed to load invoices');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInvoices();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'default';
-      case 'sent':
-        return 'secondary';
-      case 'overdue':
-        return 'destructive';
-      case 'draft':
-        return 'outline';
-      default:
-        return 'secondary';
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      // Get only sent and paid invoices
+      const data = await invoiceService.getSentAndPaidInvoices();
+      setInvoices(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching invoices:", err);
+      setError("Failed to load invoices");
+      toast.error("Failed to load invoices");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -355,152 +337,159 @@ export default function InvoicesTab() {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      case "sent":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      case "overdue":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      case "cancelled":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
   if (loading) {
     return (
-      <div id='invoices' className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-32 mb-2" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-8 w-8" />
-                    <div>
-                      <Skeleton className="h-4 w-24 mb-2" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <Skeleton className="h-4 w-16 mb-2" />
-                      <Skeleton className="h-6 w-16" />
-                    </div>
-                    <div className="flex gap-2">
-                      <Skeleton className="h-8 w-16" />
-                      <Skeleton className="h-8 w-20" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <button
+          onClick={fetchInvoices}
+          className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (invoices.length === 0) {
+    return (
+      <div className="text-center p-8">
+        <FileText className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+          No invoices yet
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400">
+          Your invoices will appear here once they are generated.
+        </p>
       </div>
     );
   }
 
   return (
-    <div id='invoices' className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Invoices</h2>
-        <p className="text-muted-foreground mt-2">
-          View and download your invoices
-        </p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          My Invoices
+        </h3>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {invoices.length} invoice{invoices.length !== 1 ? "s" : ""}
+        </span>
       </div>
 
-      {error ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error Loading Invoices</h3>
-            <p className="text-muted-foreground text-center max-w-sm mb-4">
-              {error}
-            </p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      ) : invoices.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Invoices Yet</h3>
-            <p className="text-muted-foreground text-center max-w-sm">
-              Your invoices will appear here once you have active services or subscriptions.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Invoice History</CardTitle>
-            <CardDescription>All your past and current invoices</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {invoices.map((invoice) => (
-                <div key={invoice._id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
-                    <div>
-                      <p className="font-semibold">Invoice #{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(invoice.issueDate)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Due: {formatDate(invoice.dueDate)}
-                      </p>
-                    </div>
+      <div className="grid gap-4">
+        {invoices.map((invoice) => (
+          <div
+            key={invoice._id}
+            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                    {invoice.invoiceNumber}
+                  </h4>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                      invoice.status
+                    )}`}
+                  >
+                    {invoice.status.charAt(0).toUpperCase() +
+                      invoice.status.slice(1)}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400 mt-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      Issued:{" "}
+                      {format(new Date(invoice.issueDate), "MMM dd, yyyy")}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="font-semibold">${invoice.total.toFixed(2)}</p>
-                      <Badge variant={getStatusVariant(invoice.status)}>
-                        {invoice.status}
-                      </Badge>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewInvoice(invoice)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadPdf(invoice)}
-                        disabled={isDownloading === invoice._id}
-                      >
-                        {isDownloading === invoice._id ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4 mr-2" />
-                        )}
-                        Download
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      Due: {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Invoice Detail Modal */}
-      {selectedInvoice && (
-        <InvoiceDetailModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedInvoice(null);
-          }}
-          invoice={selectedInvoice}
-        />
-      )}
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-primary" />
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      {formatCurrency(invoice.total)}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => handleViewInvoice(invoice)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => handleDownloadPdf(invoice)}
+                      disabled={isDownloading === invoice._id}
+                    >
+                      {isDownloading === invoice._id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <InvoiceDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        invoice={selectedInvoice}
+      />
     </div>
   );
 }

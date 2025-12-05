@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 export const useContactForm = () => {
-  const { isSubmitting, setError, setSuccess, setIsSubmitting } = useContactStore();
+  const { isSubmitting, error, success, setError, setSuccess, setIsSubmitting } = useContactStore();
   const router = useRouter();
 
   const form = useForm<ContactFormData>({
@@ -27,7 +27,7 @@ export const useContactForm = () => {
       try {
         setIsSubmitting(true);
         
-        const response = await fetch('http://localhost:5000/api/v1/contact', {
+        const response = await fetch('/api/contact', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -59,5 +59,7 @@ export const useContactForm = () => {
     form,
     onSubmit: form.handleSubmit(onSubmit),
     isSubmitting,
+    success,
+    error,
   };
 };

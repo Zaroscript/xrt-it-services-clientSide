@@ -1,11 +1,16 @@
 // src/app/profile/ProfileContent.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import  useAuthStore  from '@/store/useAuthStore';
-import { clientService, type ClientProfile as ClientProfileType, type Service, type Plan } from '@/services/client/client.service';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/store/useAuthStore";
+import {
+  clientService,
+  type ClientProfile as ClientProfileType,
+  type Service,
+  type Plan,
+} from "@/services/client/client.service";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -13,22 +18,25 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { Package, CreditCard, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { RequestServiceModal } from '../modals/RequestServiceModal';
-import { RequestPlanModal } from '../modals/RequestPlanModal';
+  Package,
+  CreditCard,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  FileText,
+} from "lucide-react";
+import { RequestServiceModal } from "../modals/RequestServiceModal";
+import { RequestPlanModal } from "../modals/RequestPlanModal";
+import { InvoicesList } from "./InvoicesList";
 
 type ProfileFormData = {
   name: string;
@@ -57,21 +65,21 @@ export default function ProfileContent() {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
   });
 
   // Fetch client profile data
   useEffect(() => {
     const fetchClientData = async () => {
-      if (user?.role === 'client' && isAuthenticated) {
+      if (user?.role === "client" && isAuthenticated) {
         try {
           const data = await clientService.getClientProfile();
           setClientData(data);
         } catch (error) {
-          console.error('Error fetching client data:', error);
+          console.error("Error fetching client data:", error);
         }
       }
     };
@@ -83,7 +91,7 @@ export default function ProfileContent() {
   useEffect(() => {
     const init = async () => {
       if (!authLoading && !isAuthenticated) {
-        router.push('/auth/login');
+        router.push("/auth/login");
         return;
       }
 
@@ -92,18 +100,20 @@ export default function ProfileContent() {
         try {
           await fetchAllUserData();
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          console.error("Error fetching user data:", error);
         } finally {
           setIsFetchingData(false);
         }
 
         setFormData({
-          name: user.fName
-            ? `${user.fName} ${user.lName || ''}`.trim()
-            : '',
-          email: user.email || '',
-          phone: user.phone || '',
-          company: clientData?.companyName || clientProfile?.companyName || user.companyName || '',
+          name: user.fName ? `${user.fName} ${user.lName || ""}`.trim() : "",
+          email: user.email || "",
+          phone: user.phone || "",
+          company:
+            clientData?.companyName ||
+            clientProfile?.companyName ||
+            user.companyName ||
+            "",
         });
 
         setIsLoading(false);
@@ -123,7 +133,7 @@ export default function ProfileContent() {
 
   // Ensure client profile is fetched for client users
   useEffect(() => {
-    if (isAuthenticated && user && user.role === 'client' && !clientProfile) {
+    if (isAuthenticated && user && user.role === "client" && !clientProfile) {
       fetchClientProfile();
     }
   }, [isAuthenticated, user, clientProfile, fetchClientProfile]);
@@ -141,18 +151,18 @@ export default function ProfileContent() {
     try {
       if (
         formData.company !==
-        (clientProfile?.companyName || user?.companyName || '')
+        (clientProfile?.companyName || user?.companyName || "")
       ) {
         await updateClientProfile({
           companyName: formData.company,
         });
       }
 
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     }
   };
 
@@ -195,7 +205,7 @@ export default function ProfileContent() {
             <p>Unable to load user profile. Please try again later.</p>
           </CardContent>
           <CardFooter>
-            <Button onClick={() => router.push('/')}>Back to Home</Button>
+            <Button onClick={() => router.push("/")}>Back to Home</Button>
           </CardFooter>
         </Card>
       </div>
@@ -226,6 +236,7 @@ export default function ProfileContent() {
           <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="plan">Current Plan</TabsTrigger>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
           <TabsTrigger value="settings" disabled>
             Settings
           </TabsTrigger>
@@ -248,67 +259,71 @@ export default function ProfileContent() {
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    {isEditing ? (
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                      />
-                    ) : (
-                      <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
-                        {formData.name || 'Not provided'}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                Update your personal information and contact details.
+              </CardDescription>
+            </CardHeader>
+            <form id="profile-form" onSubmit={handleSubmit}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  {isEditing ? (
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                  ) : (
                     <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
-                      {user.email}
+                      {formData.name || "Not provided"}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Email addresses cannot be changed.
-                    </p>
-                  </div>
+                  )}
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    {isEditing ? (
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                      />
-                    ) : (
-                      <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
-                        {formData.phone || 'Not provided'}
-                      </div>
-                    )}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                    {user.email}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Email addresses cannot be changed.
+                  </p>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Company</Label>
-                    {isEditing ? (
-                      <Input
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                      />
-                    ) : (
-                      <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
-                        {formData.company || 'Not provided'}
-                      </div>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  {isEditing ? (
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                  ) : (
+                    <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                      {formData.phone || "Not provided"}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company</Label>
+                  {isEditing ? (
+                    <Input
+                      id="company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                  ) : (
+                    <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
+                      {formData.company || "Not provided"}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </form>
@@ -330,14 +345,14 @@ export default function ProfileContent() {
                   <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
                     {clientProfile?.companyName ||
                       formData.company ||
-                      'Not provided'}
+                      "Not provided"}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Tax ID</Label>
                   <div className="text-sm py-2 px-3 border rounded-md bg-muted/50">
-                    {clientProfile?.taxId || 'Not provided'}
+                    {clientProfile?.taxId || "Not provided"}
                   </div>
                 </div>
 
@@ -348,7 +363,7 @@ export default function ProfileContent() {
                       <div>
                         <div>
                           {clientProfile.businessLocation.address ||
-                            'No street address'}
+                            "No street address"}
                         </div>
                         <div>
                           {clientProfile.businessLocation.city &&
@@ -358,11 +373,11 @@ export default function ProfileContent() {
                             ` ${clientProfile.businessLocation.zipCode}`}
                         </div>
                         <div>
-                          {clientProfile.businessLocation.country || 'USA'}
+                          {clientProfile.businessLocation.country || "USA"}
                         </div>
                       </div>
                     ) : (
-                      'Not provided'
+                      "Not provided"
                     )}
                   </div>
                 </div>
@@ -380,7 +395,7 @@ export default function ProfileContent() {
                         {clientProfile.oldWebsite}
                       </a>
                     ) : (
-                      'Not provided'
+                      "Not provided"
                     )}
                   </div>
                 </div>
@@ -389,7 +404,7 @@ export default function ProfileContent() {
               <div className="space-y-2">
                 <Label>Notes</Label>
                 <div className="text-sm py-2 px-3 border rounded-md bg-muted/50 min-h-[60px]">
-                  {clientProfile?.notes || 'No notes available'}
+                  {clientProfile?.notes || "No notes available"}
                 </div>
               </div>
 
@@ -399,14 +414,12 @@ export default function ProfileContent() {
                   <div
                     className={`w-3 h-3 rounded-full ${
                       clientProfile?.isActive !== false
-                        ? 'bg-green-500'
-                        : 'bg-red-500'
+                        ? "bg-green-500"
+                        : "bg-red-500"
                     }`}
                   ></div>
                   <span className="text-sm">
-                    {clientProfile?.isActive !== false
-                      ? 'Active'
-                      : 'Inactive'}
+                    {clientProfile?.isActive !== false ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
@@ -444,23 +457,23 @@ export default function ProfileContent() {
                           </h3>
                           <Badge
                             variant={
-                              service.status === 'active'
-                                ? 'default'
-                                : service.status === 'paused'
-                                ? 'secondary'
-                                : service.status === 'completed'
-                                ? 'outline'
-                                : 'destructive'
+                              service.status === "active"
+                                ? "default"
+                                : service.status === "paused"
+                                ? "secondary"
+                                : service.status === "completed"
+                                ? "outline"
+                                : "destructive"
                             }
                             className="flex items-center gap-1"
                           >
-                            {service.status === 'active' && (
+                            {service.status === "active" && (
                               <CheckCircle2 className="h-3 w-3" />
                             )}
-                            {service.status === 'paused' && (
+                            {service.status === "paused" && (
                               <Clock className="h-3 w-3" />
                             )}
-                            {service.status === 'cancelled' && (
+                            {service.status === "cancelled" && (
                               <XCircle className="h-3 w-3" />
                             )}
                             {service.status}
@@ -471,20 +484,26 @@ export default function ProfileContent() {
                         </p>
                         <div className="flex items-center gap-4 text-sm">
                           <div>
-                            <span className="text-muted-foreground">Price: </span>
+                            <span className="text-muted-foreground">
+                              Price:{" "}
+                            </span>
                             <span className="font-medium">
                               ${service.customPrice}/mo
                             </span>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Started: </span>
+                            <span className="text-muted-foreground">
+                              Started:{" "}
+                            </span>
                             <span>
                               {new Date(service.startDate).toLocaleDateString()}
                             </span>
                           </div>
                           {service.endDate && (
                             <div>
-                              <span className="text-muted-foreground">Ends: </span>
+                              <span className="text-muted-foreground">
+                                Ends:{" "}
+                              </span>
                               <span>
                                 {new Date(service.endDate).toLocaleDateString()}
                               </span>
@@ -493,7 +512,8 @@ export default function ProfileContent() {
                         </div>
                         {service.notes && (
                           <p className="text-sm text-muted-foreground mt-2">
-                            <span className="font-medium">Notes:</span> {service.notes}
+                            <span className="font-medium">Notes:</span>{" "}
+                            {service.notes}
                           </p>
                         )}
                       </div>
@@ -503,7 +523,9 @@ export default function ProfileContent() {
               ) : (
                 <div className="text-center py-12">
                   <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Services Yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No Services Yet
+                  </h3>
                   <p className="text-muted-foreground mb-4">
                     You haven't purchased any services yet.
                   </p>
@@ -561,18 +583,27 @@ export default function ProfileContent() {
                     <div className="space-y-2">
                       <h4 className="font-semibold mb-3">Plan Features:</h4>
                       <div className="grid gap-2">
-                        {clientData.currentPlan.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-sm">{feature}</span>
-                          </div>
-                        ))}
+                        {clientData.currentPlan.features.map(
+                          (feature, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                              <span className="text-sm">{feature}</span>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
 
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1" onClick={() => setIsPlanModalOpen(true)}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setIsPlanModalOpen(true)}
+                    >
                       Request Plan Change
                     </Button>
                     <Button variant="outline" className="flex-1">
@@ -595,6 +626,21 @@ export default function ProfileContent() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="invoices">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                My Invoices
+              </CardTitle>
+              <CardDescription>View and manage your invoices.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InvoicesList />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Request Modals */}
@@ -602,7 +648,7 @@ export default function ProfileContent() {
         isOpen={isServiceModalOpen}
         onClose={() => setIsServiceModalOpen(false)}
         onSuccess={() => {
-          toast.success('Your request has been submitted to our team!');
+          toast.success("Your request has been submitted to our team!");
           // Optionally refresh client data
         }}
       />
@@ -610,7 +656,7 @@ export default function ProfileContent() {
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}
         onSuccess={() => {
-          toast.success('Your plan change request has been submitted!');
+          toast.success("Your plan change request has been submitted!");
           // Optionally refresh client data
         }}
       />

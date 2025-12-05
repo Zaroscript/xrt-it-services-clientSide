@@ -21,18 +21,31 @@ interface ToastOptions {
   };
 }
 
-// Premium toast styles with glassmorphism
+// Premium toast styles with glassmorphism and theme matching
 const getToastStyles = (type: ToastType) => {
   const baseStyles = {
-    background: "rgba(255, 255, 255, 0.95)",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
     borderRadius: "12px",
     padding: "16px 20px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
     fontSize: "0.875rem",
     lineHeight: "1.5",
     fontWeight: "500",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
+  };
+
+  // Light theme styles
+  const lightStyles = {
+    background: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(12px)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    color: "#0f172a",
+  };
+
+  // Dark theme styles
+  const darkStyles = {
+    background: "rgba(30, 30, 32, 0.95)",
+    backdropFilter: "blur(12px)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#f8fafc",
   };
 
   const borderColors = {
@@ -44,6 +57,7 @@ const getToastStyles = (type: ToastType) => {
 
   return {
     ...baseStyles,
+    ...lightStyles,
     borderLeft: "4px solid transparent",
     borderImage: borderColors[type],
     borderImageSlice: 1,
@@ -151,24 +165,25 @@ export const toast = Object.assign(createToast, {
 
 export const Toaster = () => (
   <SonnerToaster
-    position="top-center"
+    position="top-right"
     expand={true}
     richColors={false}
     closeButton={true}
     toastOptions={{
       style: {
-        background: "rgba(255, 255, 255, 0.95)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
         borderRadius: "12px",
         padding: "16px 20px",
-        boxShadow:
-          "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
         fontSize: "0.875rem",
         lineHeight: "1.5",
         fontWeight: "500",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
+        // Light theme
+        background: "rgba(255, 255, 255, 0.95)",
+        backdropFilter: "blur(12px)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        color: "#0f172a",
       },
-      className: "toast-premium",
+      className: "toast-premium dark:toast-dark",
     }}
   />
 );

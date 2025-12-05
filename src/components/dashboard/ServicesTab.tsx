@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { clientService, type ClientProfile } from '@/services/client/client.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Package, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { RequestServiceModal } from '../modals/RequestServiceModal';
+import { useState, useEffect } from "react";
+import {
+  clientService,
+  type ClientProfile,
+} from "@/services/client/client.service";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Package, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { RequestServiceModal } from "../modals/RequestServiceModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServicesTab() {
   const [clientData, setClientData] = useState<ClientProfile | null>(null);
@@ -20,16 +24,17 @@ export default function ServicesTab() {
   const fetchClientData = async () => {
     try {
       const data = await clientService.getClientProfile();
+      console.log("Fetched Client Data:", data);
       setClientData(data);
     } catch (error) {
-      console.error('Error fetching client data:', error);
+      console.error("Error fetching client data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div id='services' className="space-y-6">
+    <div id="services" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">My Services</h2>
@@ -44,7 +49,28 @@ export default function ServicesTab() {
 
       <Card>
         <CardContent className="pt-6">
-          {clientData?.services && clientData.services.length > 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-start justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-5 w-20" />
+                    </div>
+                    <Skeleton className="h-4 w-full" />
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : clientData?.services && clientData.services.length > 0 ? (
             <div className="space-y-4">
               {clientData.services.map((service) => (
                 <div
@@ -53,35 +79,36 @@ export default function ServicesTab() {
                 >
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-lg">
-                        {service.service.name}
+                      <h3 className="font-semibold">
+                        {service.service?.name || "Unknown Service"}
                       </h3>
                       <Badge
                         variant={
-                          service.status === 'active'
-                            ? 'default'
-                            : service.status === 'paused'
-                            ? 'secondary'
-                            : service.status === 'completed'
-                            ? 'outline'
-                            : 'destructive'
+                          service.status === "active"
+                            ? "default"
+                            : service.status === "paused"
+                            ? "secondary"
+                            : service.status === "completed"
+                            ? "outline"
+                            : "destructive"
                         }
                         className="flex items-center gap-1"
                       >
-                        {service.status === 'active' && (
+                        {service.status === "active" && (
                           <CheckCircle2 className="h-3 w-3" />
                         )}
-                        {service.status === 'paused' && (
+                        {service.status === "paused" && (
                           <Clock className="h-3 w-3" />
                         )}
-                        {service.status === 'cancelled' && (
+                        {service.status === "cancelled" && (
                           <XCircle className="h-3 w-3" />
                         )}
                         {service.status}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {service.service.description}
+                      {service.service?.description ||
+                        "No description available"}
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                       <div>
@@ -101,7 +128,8 @@ export default function ServicesTab() {
                     </div>
                     {service.notes && (
                       <p className="text-sm text-muted-foreground mt-2">
-                        <span className="font-medium">Notes:</span> {service.notes}
+                        <span className="font-medium">Notes:</span>{" "}
+                        {service.notes}
                       </p>
                     )}
                   </div>

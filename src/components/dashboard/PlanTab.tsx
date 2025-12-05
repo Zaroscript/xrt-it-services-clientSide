@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { clientService, type ClientProfile } from '@/services/client/client.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CreditCard, CheckCircle2 } from 'lucide-react';
-import { RequestPlanModal } from '@/components/modals/RequestPlanModal';
+import { useState, useEffect } from "react";
+import {
+  clientService,
+  type ClientProfile,
+} from "@/services/client/client.service";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CreditCard, CheckCircle2 } from "lucide-react";
+import { RequestPlanModal } from "@/components/modals/RequestPlanModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PlanTab() {
   const [clientData, setClientData] = useState<ClientProfile | null>(null);
@@ -22,7 +26,7 @@ export default function PlanTab() {
       const data = await clientService.getClientProfile();
       setClientData(data);
     } catch (error) {
-      console.error('Error fetching client data:', error);
+      console.error("Error fetching client data:", error);
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,31 @@ export default function PlanTab() {
 
       <Card>
         <CardContent className="pt-6">
-          {clientData?.currentPlan ? (
+          {loading ? (
+            <div className="space-y-6">
+              <div className="p-6 border-2 rounded-lg">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-10 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+                <Skeleton className="h-4 w-full mb-4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-32 mb-3" />
+                  <div className="grid gap-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : clientData?.currentPlan ? (
             <div className="space-y-6">
               <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
                 <div className="flex items-start justify-between mb-4">
@@ -79,9 +107,9 @@ export default function PlanTab() {
               </div>
 
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
+                <Button
+                  variant="outline"
+                  className="flex-1"
                   onClick={() => setIsPlanModalOpen(true)}
                 >
                   Request Plan Change

@@ -2,12 +2,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, LogOut, Settings, Package, FileText } from "lucide-react";
+import { X, User, LogOut, Settings, Package, FileText, LayoutDashboard, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { NAV_LINKS } from "@/config/constants";
 import useAuthStore from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 // types
@@ -16,9 +16,11 @@ import { MobileMenuProps } from "@/types";
 // Variants
 import { linkVariants } from "@/config/variants";
 
-export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+export function MobileMenu({ isOpen, onClose, dashboardTabHandler }: MobileMenuProps) {
   const { isAuthenticated, user, logout } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
+  const isDashboard = pathname === '/dashboard';
 
   const handleLogout = async () => {
     try {
@@ -44,12 +46,33 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     return (first + last).toUpperCase();
   };
 
-  const userMenuItems = [
-    { icon: User, label: 'Profile', href: '/dashboard' },
-    { icon: Package, label: 'My Plans', href: '/dashboard/plans' },
-    { icon: FileText, label: 'Services', href: '/dashboard/services' },
-    { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
+  // Dashboard tab items
+  const dashboardTabs = [
+    { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
+    { id: 'services', icon: Package, label: 'Services' },
+    { id: 'plan', icon: CreditCard, label: 'Plan' },
+    { id: 'invoices', icon: FileText, label: 'Invoices' },
+    { id: 'settings', icon: Settings, label: 'Settings' },
   ];
+
+  // Regular user menu items (when not on dashboard)
+  const userMenuItems = [
+    { icon: User, label: 'Dashboard', href: '/dashboard' },
+    { icon: Package, label: 'My Plans', href: '/dashboard?tab=plan' },
+    { icon: FileText, label: 'Services', href: '/dashboard?tab=services' },
+    { icon: Settings, label: 'Settings', href: '/dashboard?tab=settings' },
+  ];
+
+  const handleDashboardTabClick = (tabId: string) => {
+    if (dashboardTabHandler?.onTabChange) {
+      dashboardTabHandler.onTabChange(tabId);
+      onClose();
+    } else {
+      // Fallback: navigate to dashboard with tab param
+      router.push(`/dashboard?tab=${tabId}`);
+      onClose();
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -107,12 +130,26 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </ul>
             </nav>
 
+            {/* Get a Quote button - shown for all users */}
+            <div className="border-t border-gray-200 dark:border-border/50 pt-6 mt-6">
+              <Button
+                className="w-full px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
+            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                onClick={() => {
+                  router.push('/#quote');
+                  onClose();
+                }}
+              >
+                Get a Quote
+              </Button>
+            </div>
+
             {/* User section for authenticated users */}
             {isAuthenticated && (
               <div className="border-t border-gray-200 dark:border-border/50 pt-6 mt-6">
                 {/* User info */}
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium">
                     {getInitials(user?.fName, user?.lName)}
                   </div>
                   <div>
@@ -125,20 +162,52 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   </div>
                 </div>
 
-                {/* User menu items */}
-                <div className="space-y-1 mb-4">
-                  {userMenuItems.map((item, index) => (
-                    <Link
-                      key={index}
-                      href={item.href}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-muted rounded-lg transition-colors"
-                      onClick={onClose}
-                    >
-                      <item.icon className="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" />
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
+                {/* Dashboard tabs (when on dashboard page) */}
+                {isDashboard && dashboardTabHandler ? (
+                  <div className="space-y-1 mb-4">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-2">
+                      Dashboard
+                    </p>
+                    {dashboardTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      const isActive = dashboardTabHandler.activeTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDashboardTabClick(tab.id);
+                          }}
+                          className={`w-full flex items-center px-4 py-2 text-sm rounded-lg transition-colors ${
+                            isActive
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-muted'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 mr-3" />
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* User menu items (when not on dashboard) */
+                  <div className="space-y-1 mb-4">
+                    {userMenuItems.map((item, index) => (
+                      <Link
+                        key={index}
+                        href={item.href}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-muted rounded-lg transition-colors"
+                        onClick={onClose}
+                      >
+                        <item.icon className="w-4 h-4 mr-3 text-gray-500 dark:text-gray-400" />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
 
                 {/* Logout button */}
                 <button

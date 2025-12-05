@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useContactForm } from '@/hooks/useContactForm';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react';
+import { toast, Toaster } from '@/components/ui/custom-toast';
 
 const ContactSection = () => {
   const [businessType, setBusinessType] = useState<"personal" | "business">("personal");
-  const { form, onSubmit, isSubmitting } = useContactForm();
+  const { form, onSubmit, isSubmitting, success, error } = useContactForm();
 
   const {
     register,
@@ -20,21 +20,29 @@ const ContactSection = () => {
     clearErrors,
   } = form;
 
+  // Show success toast when form is submitted successfully
+  useEffect(() => {
+    if (success) {
+      toast.success('Message sent successfully! We will get back to you soon.');
+    }
+    if (error) {
+      toast.error(error);
+    }
+  }, [success, error]);
+
   const handleFormSubmit = async (data: any) => {
     try {
       data.type = businessType;
-      
       await onSubmit(data);
-      toast.success('Thank you for your message! We will get back to you soon.');
-      reset();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.';
-      toast.error(errorMessage);
+      // Error is handled by useEffect
     }
   };
 
   return (
-    <section id="quote" className="py-20 px-4 sm:px-6 bg-background">
+    <>
+      <Toaster />
+      <section id="quote" className="py-20 px-4 sm:px-6 bg-background">
       <div className="page-container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Side - Contact Form */}
@@ -278,7 +286,7 @@ const ContactSection = () => {
 
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                <div className="shrink-0 p-2 bg-primary/10 rounded-lg">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -288,7 +296,7 @@ const ContactSection = () => {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                <div className="shrink-0 p-2 bg-primary/10 rounded-lg">
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -303,7 +311,7 @@ const ContactSection = () => {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+                <div className="shrink-0 p-2 bg-primary/10 rounded-lg">
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -318,6 +326,7 @@ const ContactSection = () => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 

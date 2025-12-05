@@ -6,9 +6,19 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+const sizeClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  full: 'max-w-7xl',
+};
+
+export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -38,7 +48,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative bg-white dark:bg-[#343438] rounded-2xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className={`relative bg-white dark:bg-[#343438] rounded-2xl shadow-xl ${sizeClasses[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">

@@ -134,32 +134,55 @@ export function ContactForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       setIsSubmitting(true);
-      // Handle form submission here
-      console.log("Form submitted:", { ...formData, type: businessType });
-      // Reset form after submission
-      setTimeout(() => {
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          businessName: "",
-          website: "",
-          streetAddress: "",
-          city: "",
-          state: "",
-          zipCode: "",
-          service: "",
-          message: "",
+      
+      try {
+        const submissionData = {
+          ...formData,
+          type: businessType,
+        };
+
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submissionData),
         });
-        setBusinessType("personal");
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // Reset form after successful submission
+          setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            businessName: "",
+            website: "",
+            streetAddress: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            service: "",
+            message: "",
+          });
+          setBusinessType("personal");
+          
+          // Show success message
+          alert("Thank you for your message! We will get back to you soon.");
+        } else {
+          throw new Error(result.error || 'Failed to send message');
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        alert("Sorry, there was an error sending your message. Please try again later.");
+      } finally {
         setIsSubmitting(false);
-        // Show success message
-        alert("Thank you for your message! We will get back to you soon.");
-      }, 1000);
+      }
     }
   };
 
@@ -177,7 +200,7 @@ export function ContactForm() {
             >
               <p className="relative border-l-4 text-2xl lg:text-3xl border-secondary pl-6  font-bold text-primary dark:text-white  ">
                 Have a question or need more information? information,{" "}
-                <span className="bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-secondary to-secondary/80 bg-clip-text text-transparent">
                   Fill out the form or reach out to us via our social channels.
                 </span>
               </p>
@@ -206,6 +229,9 @@ export function ContactForm() {
                   >
                     <input
                       type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       placeholder="Name *"
                       required
                       className="w-full rounded-lg bg-[#343438] px-4 py-3 text-white placeholder:text-gray-400 focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
@@ -220,6 +246,9 @@ export function ContactForm() {
                   >
                     <input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                       placeholder="Email *"
                       required
                       className="w-full rounded-lg bg-[#343438] px-4 py-3 text-white placeholder:text-gray-400 focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
@@ -510,7 +539,7 @@ export function ContactForm() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`group flex h-[55px] w-[180px] items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all ${
+                    className={`group flex h-[55px] w-[180px] items-center justify-center gap-2 rounded-lg bg-linear-to-r from-secondary to-secondary/80 font-medium text-[#232325] transition-all ${
                       isSubmitting
                         ? "opacity-70 cursor-not-allowed"
                         : "hover:gap-4 hover:shadow-lg hover:shadow-secondary/20"

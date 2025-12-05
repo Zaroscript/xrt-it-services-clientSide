@@ -14,7 +14,7 @@ import { UserAvatarDropdown } from "./ui/UserAvatarDropdown";
 import lightLogo from "../assets/images/logo-light.png";
 import darkLogo from "../assets/images/logo-dark.png";
 import { useThemeDetector } from "@/hooks/useThemeDetector";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useAuth from "@/store/useAuthStore";
 
 const Header = () => {
@@ -22,6 +22,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isDark, isMounted } = useThemeDetector();
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
@@ -93,8 +94,7 @@ const Header = () => {
               {isAuthenticated ? (
                 <>
                   <Button
-                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
-            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                    className="hidden lg:flex px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
                     onClick={() => router.push("/#quote")}
                   >
                     Get a Quote
@@ -105,16 +105,14 @@ const Header = () => {
               ) : (
                 <>
                   <Button
-                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
-            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                    className="hidden lg:flex px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
                     onClick={() => router.push("/#quote")}
                   >
                     Get a Quote
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </Button>
                   <Button
-                    className="px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium flex 
-            items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
+                    className="hidden lg:flex px-4 py-2 group rounded-lg bg-primary text-card cursor-pointer font-medium items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
                     onClick={() => router.push("/auth/login")}
                   >
                     Login
@@ -142,6 +140,17 @@ const Header = () => {
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+        dashboardTabHandler={
+          pathname === '/dashboard'
+            ? {
+                activeTab: searchParams.get('tab') || 'overview',
+                onTabChange: (tab: string) => {
+                  router.push(`/dashboard?tab=${tab}`, { scroll: false });
+                  setIsMobileMenuOpen(false);
+                },
+              }
+            : undefined
+        }
       />
     </header>
   );

@@ -139,12 +139,34 @@ export function LocationSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <div className="aspect-w-16 aspect-h-9 w-full h-[400px] md:h-[500px] lg:h-[600px]">
-            <img
-              src="/map-placeholder.svg"
-              alt="Map placeholder"
-              className="w-full h-full object-cover"
+          <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-t-2xl overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d23668.88642766028!2d-71.43857895000001!3d42.0827645!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e4b5d3c4b3b3b3%3A0x123456789abcdef!2sFranklin%2C%20MA%2002038!5e0!3m2!1sen!2sus!4v1703123456789"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              aria-label="Interactive map showing XRT Tech Headquarters location in Franklin, MA 02038"
+              title="XRT Tech Headquarters Location - Franklin, MA 02038"
+              className="w-full h-full"
             />
+            <noscript>
+              <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
+                <p className="text-gray-600 dark:text-gray-400 text-center px-4">
+                  Interactive map requires JavaScript. Please enable JavaScript to view the map, or 
+                  <a 
+                    href="https://maps.google.com?q=Franklin+MA+02038" 
+                    className="text-secondary hover:underline ml-1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    click here to open in Google Maps
+                  </a>
+                </p>
+              </div>
+            </noscript>
           </div>
 
           <div className="bg-white dark:bg-[#2a2a2d] p-6 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">

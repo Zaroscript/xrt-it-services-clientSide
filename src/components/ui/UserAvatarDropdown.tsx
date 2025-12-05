@@ -5,7 +5,7 @@ import { User, Settings, LogOut, ChevronDown, Package, FileText } from "lucide-r
 import { Button } from "./button";
 import useAuth from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import { toast } from '@/components/ui/custom-toast';
 
 interface UserAvatarDropdownProps {
   className?: string;
@@ -31,16 +31,10 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success('Logged out successfully', {
-        position: 'top-center',
-        duration: 2000,
-      });
+      toast.success('Logged out successfully');
       router.push('/');
     } catch (error) {
-      toast.error('Failed to logout', {
-        position: 'top-center',
-        duration: 3000,
-      });
+      toast.error('Failed to logout');
     }
   };
 
@@ -54,9 +48,9 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
   const menuItems = [
     {
       icon: User,
-      label: 'Profile',
+      label: 'Overview',
       onClick: () => {
-        router.push('/dashboard/#profile');
+        router.push('/dashboard?tab=overview');
         setIsOpen(false);
       },
     },
@@ -64,7 +58,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: Package,
       label: 'My Plan',
       onClick: () => {
-        router.push('/dashboard/#plan');
+        router.push('/dashboard?tab=plan');
         setIsOpen(false);
       },
     },
@@ -72,7 +66,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: FileText,
       label: 'Services',
       onClick: () => {
-        router.push('/dashboard/#services');
+        router.push('/dashboard?tab=services');
         setIsOpen(false);
       },
     },
@@ -80,7 +74,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
       icon: Settings,
       label: 'Settings',
       onClick: () => {
-        router.push('/dashboard/#settings');
+        router.push('/dashboard?tab=settings');
         setIsOpen(false);
       },
     },
@@ -96,7 +90,7 @@ export const UserAvatarDropdown: React.FC<UserAvatarDropdownProps> = ({ classNam
         className="flex items-center space-x-2 h-10 px-3 rounded-full hover:bg-primary/5 transition-colors"
       >
         {/* Avatar */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium text-sm">
+        <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium text-sm">
           {getInitials(user?.fName, user?.lName)}
         </div>
         

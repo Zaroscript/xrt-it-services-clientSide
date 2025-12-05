@@ -199,4 +199,27 @@ export const authService = {
     if (!profile) throw new Error('Failed to update profile');
     return profile;
   },
+
+  async updatePassword(data: { currentPassword: string; newPassword: string }): Promise<{ accessToken?: string; message: string }> {
+    try {
+      const response = await api.patch<ApiResponse<{ accessToken?: string; message?: string }>>(
+        '/auth/update-password',
+        data
+      );
+      
+      // Update token if returned
+      if (response.data.data.accessToken) {
+        setToken(response.data.data.accessToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.accessToken}`;
+      }
+      
+      return {
+        accessToken: response.data.data.accessToken,
+        message: response.data.message || 'Password updated successfully',
+      };
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update password. Please try again.');
+    }
+  },
 };
