@@ -15,6 +15,20 @@ interface PricingCardProps {
   discount?: string;
   features: Feature[];
   isPopular?: boolean;
+  badge?: {
+    text?: string;
+    variant?:
+      | "default"
+      | "secondary"
+      | "destructive"
+      | "outline"
+      | "success"
+      | "warning"
+      | "info"
+      | "premium"
+      | "new"
+      | "limited";
+  };
   className?: string;
   onSelect?: () => void;
   isSubmitting?: boolean;
@@ -31,12 +45,13 @@ export function PricingCard({
   discount,
   features,
   isPopular,
+  badge,
   className,
   onSelect,
   isSubmitting,
-  buttonText = 'Get Started',
-  taxNote = 'Local taxes may apply',
-  guaranteeText = '30 Day Money-Back Guarantee'
+  buttonText = "Get Started",
+  taxNote = "Local taxes may apply",
+  guaranteeText = "30 Day Money-Back Guarantee",
 }: PricingCardProps) {
   return (
     <div
@@ -67,7 +82,12 @@ export function PricingCard({
           <div className="absolute inset-0 bg-gradient-to-b from-[#343438] to-[#1a1a1a] opacity-0 group-hover:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-300 -z-10" />
         </>
       )}
-      <div className={cn("space-y-6 flex flex-col h-full", isPopular && "relative z-10")}>
+      <div
+        className={cn(
+          "space-y-6 flex flex-col h-full",
+          isPopular && "relative z-10"
+        )}
+      >
         <div>
           <div className="flex items-center gap-2">
             <h3
@@ -78,6 +98,38 @@ export function PricingCard({
             >
               {title}
             </h3>
+            {badge?.text && (
+              <span
+                className={cn(
+                  "px-2.5 py-1 text-xs font-semibold rounded-full mt-3 inline-flex items-center gap-1 shadow-sm transition-all duration-200 hover:scale-105",
+                  badge.variant === "destructive"
+                    ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-200/50 dark:shadow-red-900/50"
+                    : badge.variant === "secondary"
+                    ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
+                    : badge.variant === "outline"
+                    ? "bg-transparent border-2 border-gray-400 text-gray-600 dark:border-gray-500 dark:text-gray-300"
+                    : badge.variant === "success"
+                    ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-200/50 dark:shadow-green-900/50"
+                    : badge.variant === "warning"
+                    ? "bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 shadow-yellow-200/50"
+                    : badge.variant === "info"
+                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-200/50 dark:shadow-blue-900/50"
+                    : badge.variant === "premium"
+                    ? "bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 text-gray-900 shadow-amber-200/50 animate-shimmer bg-[length:200%_100%]"
+                    : badge.variant === "new"
+                    ? "bg-gradient-to-r from-purple-500 to-violet-500 text-white shadow-purple-200/50 dark:shadow-purple-900/50"
+                    : badge.variant === "limited"
+                    ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-orange-200/50 animate-pulse"
+                    : "bg-gradient-to-r from-secondary to-secondary/80 text-gray-900 shadow-secondary/30"
+                )}
+              >
+                {badge.variant === "premium" && "✨ "}
+                {badge.variant === "new" && "🆕 "}
+                {badge.variant === "limited" && "⏰ "}
+                {badge.variant === "success" && "✓ "}
+                {badge.text}
+              </span>
+            )}
           </div>
           <div className="flex items-baseline gap-2">
             <h2
@@ -109,7 +161,11 @@ export function PricingCard({
             )}
           </div>
           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-            {description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
+            {description && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {description}
+              </p>
+            )}
             <p className="text-gray-500 dark:text-gray-400">
               No commitment. Cancel Anytime.
             </p>
@@ -127,48 +183,48 @@ export function PricingCard({
 
         <div className="flex-1">
           <ul className="space-y-3">
-          {features.map((feature, index) => (
-            <li
-              key={index}
-              className={cn(
-                "flex items-center gap-3 transition-colors duration-200",
-                isPopular ? "hover:text-secondary" : "hover:text-[#D3B073]"
-              )}
-            >
-              {feature.included ? (
-                <div
-                  className={cn(
-                    "rounded-full p-0.5",
-                    isPopular ? "bg-secondary/10" : "bg-[#D3B073]/10"
-                  )}
-                >
-                  <Check
+            {features.map((feature, index) => (
+              <li
+                key={index}
+                className={cn(
+                  "flex items-center gap-3 transition-colors duration-200",
+                  isPopular ? "hover:text-secondary" : "hover:text-[#D3B073]"
+                )}
+              >
+                {feature.included ? (
+                  <div
                     className={cn(
-                      "h-4 w-4",
-                      isPopular ? "text-secondary" : "text-[#D3B073]"
+                      "rounded-full p-0.5",
+                      isPopular ? "bg-secondary/10" : "bg-[#D3B073]/10"
                     )}
-                  />
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "rounded-full p-0.5",
-                    isPopular ? "bg-secondary/10" : "bg-[#D3B073]/10"
-                  )}
-                >
-                  <Plus
+                  >
+                    <Check
+                      className={cn(
+                        "h-4 w-4",
+                        isPopular ? "text-secondary" : "text-[#D3B073]"
+                      )}
+                    />
+                  </div>
+                ) : (
+                  <div
                     className={cn(
-                      "h-4 w-4",
-                      isPopular ? "text-secondary" : "text-[#D3B073]"
+                      "rounded-full p-0.5",
+                      isPopular ? "bg-secondary/10" : "bg-[#D3B073]/10"
                     )}
-                  />
-                </div>
-              )}
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {feature.text}
-              </span>
-            </li>
-          ))}
+                  >
+                    <Plus
+                      className={cn(
+                        "h-4 w-4",
+                        isPopular ? "text-secondary" : "text-[#D3B073]"
+                      )}
+                    />
+                  </div>
+                )}
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {feature.text}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -197,9 +253,7 @@ export function PricingCard({
         </Button>
 
         <div className="mt-auto pt-4 space-y-2 text-center text-sm">
-          <p className="text-gray-500 dark:text-gray-400">
-            {taxNote}
-          </p>
+          <p className="text-gray-500 dark:text-gray-400">{taxNote}</p>
           <div
             className={cn(
               "flex items-center justify-center gap-2 font-medium",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   clientService,
   type ClientProfile,
@@ -8,12 +9,15 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, CheckCircle2 } from "lucide-react";
+import { CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
 import { RequestPlanModal } from "@/components/modals/RequestPlanModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format, differenceInDays } from "date-fns";
+import { PlanProgress } from "@/components/ui/PlanProgress";
 
 export default function PlanTab() {
   const [clientData, setClientData] = useState<ClientProfile | null>(null);
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
@@ -29,6 +33,19 @@ export default function PlanTab() {
       console.error("Error fetching client data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-green-500 hover:bg-green-600";
+      case "suspended":
+        return "bg-red-500 hover:bg-red-600";
+      case "expired":
+        return "bg-orange-500 hover:bg-orange-600";
+      default:
+        return "bg-gray-500 hover:bg-gray-600";
     }
   };
 
@@ -69,23 +86,69 @@ export default function PlanTab() {
             </div>
           ) : clientData?.currentPlan ? (
             <div className="space-y-6">
+              {/* Expiration/Suspension Alert */}
+              {(clientData.subscription?.status === "expired" ||
+                clientData.subscription?.status === "suspended") && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-red-600">
+                      Subscription Suspended
+                    </h4>
+                    <p className="text-sm text-red-500/90 mt-1">
+                      Your subscription has expired or is suspended. Please
+                      contact support to renew your plan and restore full access
+                      to services.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">
+                    <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
                       {clientData.currentPlan.name}
+                      {clientData.currentPlan.badge?.text && (
+                        <Badge
+                          variant={
+                            clientData.currentPlan.badge.variant || "secondary"
+                          }
+                          className="text-xs"
+                        >
+                          {clientData.currentPlan.badge.text}
+                        </Badge>
+                      )}
                     </h3>
                     <div className="flex items-baseline gap-2">
                       <span className="text-3xl font-bold">
-                        ${clientData.currentPlan.price}
+                        $
+                        {(() => {
+                          const basePrice =
+                            clientData.subscription?.customPrice ??
+                            clientData.currentPlan.price;
+                          const discount =
+                            clientData.subscription?.discount || 0;
+                          const finalPrice =
+                            basePrice - (basePrice * discount) / 100;
+                          return finalPrice.toFixed(2);
+                        })()}
                       </span>
                       <span className="text-muted-foreground">
                         /{clientData.currentPlan.billingCycle}
                       </span>
                     </div>
                   </div>
-                  <Badge variant="default" className="text-sm px-3 py-1">
-                    Active
+                  <Badge
+                    variant="default"
+                    className={`text-sm px-3 py-1 ${getStatusColor(
+                      clientData.subscription?.status || "active"
+                    )}`}
+                  >
+                    {(clientData.subscription?.status || "active")
+                      .charAt(0)
+                      .toUpperCase() +
+                      (clientData.subscription?.status || "active").slice(1)}
                   </Badge>
                 </div>
 
@@ -104,8 +167,48 @@ export default function PlanTab() {
                     ))}
                   </div>
                 </div>
-              </div>
 
+                {/* Plan Progress & Renewal Date */}
+                {clientData.subscription?.startDate &&
+                  clientData.subscription?.endDate && (
+                    <div className="mt-6 pt-6 border-t border-primary/20">
+                      <div className="flex justify-between items-end mb-2">
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            {clientData.subscription.status === "active"
+                              ? "Renews on"
+                              : "Expired on"}
+                          </p>
+                          <p className="text-lg font-bold">
+                            {format(
+                              new Date(clientData.subscription.endDate),
+                              "MMMM d, yyyy"
+                            )}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            {(() => {
+                              const end = new Date(
+                                clientData.subscription.endDate
+                              );
+                              const now = new Date();
+                              const days = differenceInDays(end, now);
+                              return days > 0
+                                ? `${days} days remaining`
+                                : "Expired";
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                      <PlanProgress
+                        startDate={clientData.subscription.startDate}
+                        endDate={clientData.subscription.endDate}
+                        billingCycle={clientData.subscription.billingCycle}
+                      />
+                    </div>
+                  )}
+              </div>
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -114,7 +217,11 @@ export default function PlanTab() {
                 >
                   Request Plan Change
                 </Button>
-                <Button variant="outline" className="flex-1" disabled>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => router.push("/dashboard?tab=invoices")}
+                >
                   View Billing History
                 </Button>
               </div>

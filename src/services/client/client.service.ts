@@ -1,5 +1,5 @@
-import api from '@/lib/api';
-import type { ApiResponse } from '../auth/auth.service';
+import api from "@/lib/api";
+import type { ApiResponse } from "../auth/auth.service";
 
 export interface Service {
   _id: string;
@@ -12,7 +12,7 @@ export interface Service {
   customPrice: number;
   startDate: string;
   endDate?: string;
-  status: 'active' | 'paused' | 'completed' | 'cancelled';
+  status: "active" | "paused" | "completed" | "cancelled";
   notes?: string;
 }
 
@@ -20,9 +20,23 @@ export interface Plan {
   _id: string;
   name: string;
   price: number;
-  billingCycle: 'monthly' | 'yearly';
+  billingCycle: "monthly" | "yearly";
   features: string[];
   description: string;
+  badge?: {
+    text?: string;
+    variant?:
+      | "default"
+      | "secondary"
+      | "destructive"
+      | "outline"
+      | "success"
+      | "warning"
+      | "info"
+      | "premium"
+      | "new"
+      | "limited";
+  };
 }
 
 export interface BusinessLocation {
@@ -44,6 +58,16 @@ export interface ClientProfile {
   isActive: boolean;
   services?: Service[];
   currentPlan?: Plan;
+  subscription?: {
+    plan: Plan | string;
+    status: "active" | "cancelled" | "expired" | "pending" | "suspended";
+    amount: number;
+    customPrice?: number;
+    discount?: number;
+    startDate: string;
+    endDate: string;
+    billingCycle?: "monthly" | "yearly";
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -60,38 +84,59 @@ export interface UpdateClientData {
 
 export const clientService = {
   async getClientProfile(): Promise<ClientProfile> {
-    const response = await api.get<ApiResponse<ClientProfile>>('/clients/me');
+    const response = await api.get<ApiResponse<ClientProfile>>("/clients/me");
     return response.data.data;
   },
 
   async updateClientProfile(data: UpdateClientData): Promise<ClientProfile> {
-    const response = await api.patch<ApiResponse<ClientProfile>>('/clients/me', data);
+    const response = await api.patch<ApiResponse<ClientProfile>>(
+      "/clients/me",
+      data
+    );
     return response.data.data;
   },
 
-  async requestSubscriptionChange(planId: string, reason: string): Promise<{message: string}> {
-    const response = await api.post<ApiResponse<any>>('/clients/subscription-change-request', {
-      planId,
-      reason
-    });
-    return { message: response.data.message || 'Request submitted successfully' };
+  async requestSubscriptionChange(
+    planId: string,
+    reason: string
+  ): Promise<{ message: string }> {
+    const response = await api.post<ApiResponse<any>>(
+      "/clients/subscription-change-request",
+      {
+        planId,
+        reason,
+      }
+    );
+    return {
+      message: response.data.message || "Request submitted successfully",
+    };
   },
 
-  async requestNewService(serviceId: string, notes: string): Promise<{message: string}> {
-    const response = await api.post<ApiResponse<any>>('/clients/service-request', {
-      serviceId,
-      notes
-    });
-    return { message: response.data.message || 'Request submitted successfully' };
+  async requestNewService(
+    serviceId: string,
+    notes: string
+  ): Promise<{ message: string }> {
+    const response = await api.post<ApiResponse<any>>(
+      "/clients/service-request",
+      {
+        serviceId,
+        notes,
+      }
+    );
+    return {
+      message: response.data.message || "Request submitted successfully",
+    };
   },
 
   async getAvailablePlans(): Promise<Plan[]> {
-    const response = await api.get<ApiResponse<{ plans: Plan[] }>>('/plans');
+    const response = await api.get<ApiResponse<{ plans: Plan[] }>>("/plans");
     return response.data.data.plans || response.data.data;
   },
 
   async getAvailableServices(): Promise<any[]> {
-    const response = await api.get<ApiResponse<{ services: any[] }>>('/services');
+    const response = await api.get<ApiResponse<{ services: any[] }>>(
+      "/services"
+    );
     return response.data.data.services || response.data.data;
-  }
+  },
 };

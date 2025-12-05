@@ -60,16 +60,16 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
                 className={cn(
-                  'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-left',
+                  'w-full flex items-center group justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-left',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:hover:text-primary-foreground '
                 )}
               >
                 <div className="flex items-center gap-3">
                   <Icon className={cn(
                     'h-5 w-5',
-                    isActive ? 'text-primary-foreground' : 'text-muted-foreground'
+                    isActive ? 'text-primary-foreground' : 'text-muted-foreground dark:group-hover:text-primary-foreground'
                   )} />
                   <span className="font-medium">{item.label}</span>
                 </div>

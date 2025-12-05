@@ -1,18 +1,30 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import useAuthStore from '@/store/useAuthStore';
-import { clientService, type ClientProfile } from '@/services/client/client.service';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Package, 
-  CreditCard, 
-  DollarSign, 
-  TrendingUp, 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/store/useAuthStore";
+import {
+  clientService,
+  type ClientProfile,
+} from "@/services/client/client.service";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { format, differenceInDays } from "date-fns";
+import { PlanProgress } from "@/components/ui/PlanProgress";
+import {
+  Package,
+  CreditCard,
+  DollarSign,
+  TrendingUp,
   CheckCircle2,
   ArrowRight,
   Activity,
@@ -20,12 +32,12 @@ import {
   Clock,
   AlertCircle,
   Info,
-  Zap
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { RequestServiceModal } from '@/components/modals/RequestServiceModal';
-import { RequestPlanModal } from '@/components/modals/RequestPlanModal';
-import invoiceService from '@/services/invoiceService';
+  Zap,
+} from "lucide-react";
+
+import { RequestServiceModal } from "@/components/modals/RequestServiceModal";
+import { RequestPlanModal } from "@/components/modals/RequestPlanModal";
+import invoiceService from "@/services/invoiceService";
 
 export default function OverviewTab() {
   const { user } = useAuthStore();
@@ -47,7 +59,7 @@ export default function OverviewTab() {
       const data = await clientService.getClientProfile();
       setClientData(data);
     } catch (error) {
-      console.error('Error fetching client data:', error);
+      console.error("Error fetching client data:", error);
     } finally {
       setLoading(false);
     }
@@ -58,13 +70,18 @@ export default function OverviewTab() {
       setIsLoadingSpent(true);
       // Fetch all invoices and filter for paid ones
       const allInvoices = await invoiceService.getMyInvoices();
-      const paidInvoices = allInvoices.filter(invoice => invoice.status === 'paid');
-      
+      const paidInvoices = allInvoices.filter(
+        (invoice) => invoice.status === "paid"
+      );
+
       // Calculate total from paid invoices
-      const total = paidInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+      const total = paidInvoices.reduce(
+        (sum, invoice) => sum + invoice.total,
+        0
+      );
       setTotalSpent(total);
     } catch (error) {
-      console.error('Error fetching total spend:', error);
+      console.error("Error fetching total spend:", error);
       setTotalSpent(0);
     } finally {
       setIsLoadingSpent(false);
@@ -85,7 +102,8 @@ export default function OverviewTab() {
     );
   }
 
-  const activeServicesCount = clientData?.services?.filter(s => s.status === 'active').length || 0;
+  const activeServicesCount =
+    clientData?.services?.filter((s) => s.status === "active").length || 0;
   const totalServices = clientData?.services?.length || 0;
 
   return (
@@ -105,7 +123,9 @@ export default function OverviewTab() {
         {/* Active Services */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Services</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Services
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -124,13 +144,12 @@ export default function OverviewTab() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {clientData?.currentPlan?.name || 'No Plan'}
+              {clientData?.currentPlan?.name || "No Plan"}
             </div>
             <p className="text-xs text-muted-foreground">
-              {clientData?.currentPlan 
+              {clientData?.currentPlan
                 ? `$${clientData.currentPlan.price}/${clientData.currentPlan.billingCycle}`
-                : 'No active subscription'
-              }
+                : "No active subscription"}
             </p>
           </CardContent>
         </Card>
@@ -138,17 +157,20 @@ export default function OverviewTab() {
         {/* Account Status */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Account Status</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Account Status
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Badge variant={clientData?.isActive ? 'default' : 'destructive'}>
-                {clientData?.isActive ? 'Active' : 'Inactive'}
+              <Badge variant={clientData?.isActive ? "default" : "destructive"}>
+                {clientData?.isActive ? "Active" : "Inactive"}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Member since {new Date(clientData?.createdAt || '').toLocaleDateString()}
+              Member since{" "}
+              {new Date(clientData?.createdAt || "").toLocaleDateString()}
             </p>
           </CardContent>
         </Card>
@@ -164,9 +186,9 @@ export default function OverviewTab() {
               <Skeleton className="h-8 w-24" />
             ) : (
               <div className="text-2xl font-bold">
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 }).format(totalSpent)}
@@ -183,10 +205,12 @@ export default function OverviewTab() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Manage your services and subscription</CardDescription>
+          <CardDescription>
+            Manage your services and subscription
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          <Button 
+          <Button
             onClick={() => setIsServiceModalOpen(true)}
             className="justify-start h-auto py-4 px-6"
             variant="outline"
@@ -195,13 +219,15 @@ export default function OverviewTab() {
               <Package className="h-5 w-5" />
               <div className="text-left flex-1">
                 <div className="font-semibold">Request a Service</div>
-                <div className="text-sm text-muted-foreground">Add new services to your account</div>
+                <div className="text-sm text-muted-foreground">
+                  Add new services to your account
+                </div>
               </div>
               <ArrowRight className="h-4 w-4" />
             </div>
           </Button>
 
-          <Button 
+          <Button
             onClick={() => setIsPlanModalOpen(true)}
             className="justify-start h-auto py-4 px-6"
             variant="outline"
@@ -210,7 +236,9 @@ export default function OverviewTab() {
               <CreditCard className="h-5 w-5" />
               <div className="text-left flex-1">
                 <div className="font-semibold">Change Plan</div>
-                <div className="text-sm text-muted-foreground">Upgrade or modify your subscription</div>
+                <div className="text-sm text-muted-foreground">
+                  Upgrade or modify your subscription
+                </div>
               </div>
               <ArrowRight className="h-4 w-4" />
             </div>
@@ -227,22 +255,64 @@ export default function OverviewTab() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-2xl mb-2">Current Plan</CardTitle>
-                  <CardDescription>Your active subscription details</CardDescription>
+                  <CardDescription>
+                    Your active subscription details
+                  </CardDescription>
                 </div>
-                <Badge variant="default" className="text-sm px-3 py-1">
+                <Badge
+                  variant="default"
+                  className={`text-sm px-3 py-1 ${
+                    clientData.subscription?.status === "suspended"
+                      ? "bg-red-500 hover:bg-red-600"
+                      : clientData.subscription?.status === "expired"
+                      ? "bg-orange-500 hover:bg-orange-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                >
                   <Zap className="h-3 w-3 mr-1" />
-                  Active
+                  {(clientData.subscription?.status || "active")
+                    .charAt(0)
+                    .toUpperCase() +
+                    (clientData.subscription?.status || "active").slice(1)}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Expiration/Suspension Alert */}
+              {(clientData.subscription?.status === "expired" ||
+                clientData.subscription?.status === "suspended") && (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3 mb-4">
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-red-600">
+                      Subscription Suspended
+                    </h4>
+                    <p className="text-sm text-red-500/90 mt-1">
+                      Your subscription has expired or is suspended. Please
+                      contact support to renew your plan.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Plan Name & Price */}
               <div>
                 <h3 className="text-3xl font-bold text-primary mb-2">
                   {clientData.currentPlan.name}
                 </h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">${clientData.currentPlan.price}</span>
+                  <span className="text-4xl font-bold">
+                    $
+                    {(() => {
+                      const basePrice =
+                        clientData.subscription?.customPrice ??
+                        clientData.currentPlan.price;
+                      const discount = clientData.subscription?.discount || 0;
+                      const finalPrice =
+                        basePrice - (basePrice * discount) / 100;
+                      return finalPrice.toFixed(2);
+                    })()}
+                  </span>
                   <span className="text-muted-foreground text-lg">
                     /{clientData.currentPlan.billingCycle}
                   </span>
@@ -268,7 +338,46 @@ export default function OverviewTab() {
                 </div>
               </div>
 
-              {/* Billing Cycle Info */}
+              {/* Plan Progress & Renewal Date */}
+              {clientData.subscription?.startDate &&
+                clientData.subscription?.endDate && (
+                  <div className="pt-4 border-t border-primary/20">
+                    <div className="flex justify-between items-end mb-2">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {clientData.subscription.status === "active"
+                            ? "Renews on"
+                            : "Expired on"}
+                        </p>
+                        <p className="text-lg font-bold">
+                          {format(
+                            new Date(clientData.subscription.endDate),
+                            "MMMM d, yyyy"
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {(() => {
+                            const end = new Date(
+                              clientData.subscription.endDate
+                            );
+                            const now = new Date();
+                            const days = differenceInDays(end, now);
+                            return days > 0
+                              ? `${days} days remaining`
+                              : "Expired";
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                    <PlanProgress
+                      startDate={clientData.subscription.startDate}
+                      endDate={clientData.subscription.endDate}
+                      billingCycle={clientData.subscription.billingCycle}
+                    />
+                  </div>
+                )}
               <div className="pt-4 border-t border-border">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Billing Cycle:</span>
@@ -283,10 +392,12 @@ export default function OverviewTab() {
           <Card className="border-2 border-dashed">
             <CardHeader>
               <CardTitle>No Active Plan</CardTitle>
-              <CardDescription>You don't have an active subscription</CardDescription>
+              <CardDescription>
+                You don't have an active subscription
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
+              <Button
                 onClick={() => setIsPlanModalOpen(true)}
                 className="w-full"
               >
@@ -309,8 +420,8 @@ export default function OverviewTab() {
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Account Status</span>
               </div>
-              <Badge variant={clientData?.isActive ? 'default' : 'destructive'}>
-                {clientData?.isActive ? 'Active' : 'Inactive'}
+              <Badge variant={clientData?.isActive ? "default" : "destructive"}>
+                {clientData?.isActive ? "Active" : "Inactive"}
               </Badge>
             </div>
 
@@ -321,10 +432,9 @@ export default function OverviewTab() {
                 <span className="text-sm font-medium">Member Since</span>
               </div>
               <span className="text-sm text-muted-foreground">
-                {clientData?.createdAt 
-                  ? format(new Date(clientData.createdAt), 'MMM dd, yyyy')
-                  : 'N/A'
-                }
+                {clientData?.createdAt
+                  ? format(new Date(clientData.createdAt), "MMM dd, yyyy")
+                  : "N/A"}
               </span>
             </div>
 
@@ -335,7 +445,7 @@ export default function OverviewTab() {
                 <span className="text-sm font-medium">Company</span>
               </div>
               <span className="text-sm text-muted-foreground font-medium">
-                {clientData?.companyName || 'N/A'}
+                {clientData?.companyName || "N/A"}
               </span>
             </div>
 
@@ -344,16 +454,18 @@ export default function OverviewTab() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">Total Investment</p>
-                  <p className="text-xs text-muted-foreground">All-time spending</p>
+                  <p className="text-xs text-muted-foreground">
+                    All-time spending
+                  </p>
                 </div>
                 {isLoadingSpent ? (
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
                       }).format(totalSpent)}
@@ -375,9 +487,16 @@ export default function OverviewTab() {
               <div className="flex-1">
                 <h4 className="font-semibold mb-2">Plan Information</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Your plan is billed {clientData.currentPlan.billingCycle === 'monthly' ? 'monthly' : 'annually'}</li>
+                  <li>
+                    • Your plan is billed{" "}
+                    {clientData.currentPlan.billingCycle === "monthly"
+                      ? "monthly"
+                      : "annually"}
+                  </li>
                   <li>• You can request plan changes at any time</li>
-                  <li>• All features are available immediately upon activation</li>
+                  <li>
+                    • All features are available immediately upon activation
+                  </li>
                   <li>• Contact support for any billing questions</li>
                 </ul>
               </div>

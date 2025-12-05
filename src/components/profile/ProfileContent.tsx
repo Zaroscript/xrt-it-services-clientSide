@@ -34,6 +34,8 @@ import {
   XCircle,
   FileText,
 } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
+import { PlanProgress } from "@/components/ui/PlanProgress";
 import { RequestServiceModal } from "../modals/RequestServiceModal";
 import { RequestPlanModal } from "../modals/RequestPlanModal";
 import { InvoicesList } from "./InvoicesList";
@@ -64,6 +66,7 @@ export default function ProfileContent() {
   const [clientData, setClientData] = useState<ClientProfileType | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
     email: "",
@@ -230,7 +233,7 @@ export default function ProfileContent() {
         )}
       </div>
 
-      <Tabs defaultValue="profile" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="business">Business</TabsTrigger>
@@ -559,22 +562,74 @@ export default function ProfileContent() {
                   <div className="p-6 border-2 border-primary rounded-lg bg-primary/5">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-2xl font-bold mb-2">
+                        <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
                           {clientData.currentPlan.name}
+                          {clientData.currentPlan.badge?.text && (
+                            <Badge
+                              variant={
+                                clientData.currentPlan.badge.variant ||
+                                "secondary"
+                              }
+                              className="text-xs"
+                            >
+                              {clientData.currentPlan.badge.text}
+                            </Badge>
+                          )}
                         </h3>
                         <div className="flex items-baseline gap-2">
                           <span className="text-3xl font-bold">
-                            ${clientData.currentPlan.price}
+                            $
+                            {(() => {
+                              const basePrice =
+                                clientData.subscription?.customPrice ??
+                                clientData.currentPlan.price;
+                              const discount =
+                                clientData.subscription?.discount || 0;
+                              const finalPrice =
+                                basePrice - (basePrice * discount) / 100;
+                              return finalPrice.toFixed(2);
+                            })()}
                           </span>
                           <span className="text-muted-foreground">
                             /{clientData.currentPlan.billingCycle}
                           </span>
                         </div>
                       </div>
-                      <Badge variant="default" className="text-sm px-3 py-1">
-                        Active
+                      <Badge
+                        variant="default"
+                        className={`text-sm px-3 py-1 ${
+                          clientData.subscription?.status === "suspended"
+                            ? "bg-red-500 hover:bg-red-600"
+                            : clientData.subscription?.status === "expired"
+                            ? "bg-orange-500 hover:bg-orange-600"
+                            : "bg-green-500 hover:bg-green-600"
+                        }`}
+                      >
+                        {(clientData.subscription?.status || "active")
+                          .charAt(0)
+                          .toUpperCase() +
+                          (clientData.subscription?.status || "active").slice(
+                            1
+                          )}
                       </Badge>
                     </div>
+
+                    {/* Expiration/Suspension Alert */}
+                    {(clientData.subscription?.status === "expired" ||
+                      clientData.subscription?.status === "suspended") && (
+                      <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3 mb-4">
+                        <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="text-sm font-semibold text-red-600">
+                            Subscription Suspended
+                          </h4>
+                          <p className="text-sm text-red-500/90 mt-1">
+                            Your subscription has expired or is suspended.
+                            Please contact support to renew your plan.
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <p className="text-muted-foreground mb-4">
                       {clientData.currentPlan.description}
@@ -596,8 +651,48 @@ export default function ProfileContent() {
                         )}
                       </div>
                     </div>
-                  </div>
 
+                    {/* Plan Progress & Renewal Date */}
+                    {clientData.subscription?.startDate &&
+                      clientData.subscription?.endDate && (
+                        <div className="mt-6 pt-6 border-t border-primary/20">
+                          <div className="flex justify-between items-end mb-2">
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {clientData.subscription.status === "active"
+                                  ? "Renews on"
+                                  : "Expired on"}
+                              </p>
+                              <p className="text-lg font-bold">
+                                {format(
+                                  new Date(clientData.subscription.endDate),
+                                  "MMMM d, yyyy"
+                                )}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {(() => {
+                                  const end = new Date(
+                                    clientData.subscription.endDate
+                                  );
+                                  const now = new Date();
+                                  const days = differenceInDays(end, now);
+                                  return days > 0
+                                    ? `${days} days remaining`
+                                    : "Expired";
+                                })()}
+                              </p>
+                            </div>
+                          </div>
+                          <PlanProgress
+                            startDate={clientData.subscription.startDate}
+                            endDate={clientData.subscription.endDate}
+                            billingCycle={clientData.subscription.billingCycle}
+                          />
+                        </div>
+                      )}
+                  </div>
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
@@ -606,7 +701,11 @@ export default function ProfileContent() {
                     >
                       Request Plan Change
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setActiveTab("invoices")}
+                    >
                       View Billing History
                     </Button>
                   </div>

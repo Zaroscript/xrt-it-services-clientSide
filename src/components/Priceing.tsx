@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { FadeIn } from "@/components/ui/FadeIn";
 import { PricingToggle } from "@/components/ui/PricingToggle";
@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { getPlans, getFeaturedPlans, requestPlan } from "@/lib/api/plans";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Loader } from "@/components/ui/Loader";
 
 interface PlanDisplay {
@@ -25,14 +25,28 @@ interface PlanDisplay {
   yearlyPrice?: number;
   calculatedMonthlyPrice?: number;
   calculatedYearlyPrice?: number;
-  billingCycle: 'monthly' | 'yearly';
+  billingCycle: "monthly" | "yearly";
   duration: number;
   features: string[];
   maxRestaurants: number;
   isActive: boolean;
   isFeatured: boolean;
+  badge?: {
+    text?: string;
+    variant?:
+      | "default"
+      | "secondary"
+      | "destructive"
+      | "outline"
+      | "success"
+      | "warning"
+      | "info"
+      | "premium"
+      | "new"
+      | "limited";
+  };
   discount?: {
-    type: 'percentage' | 'fixed';
+    type: "percentage" | "fixed";
     value: number;
     isActive: boolean;
     code?: string;
@@ -58,24 +72,38 @@ const Priceing = () => {
   const [isRequesting, setIsRequesting] = useState<Record<string, boolean>>({});
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null);
-  const [customizationNote, setCustomizationNote] = useState('');
+  const [customizationNote, setCustomizationNote] = useState("");
 
   // Calculate average yearly savings from plans
   const calculateYearlySavings = () => {
     if (plans.length === 0) return undefined;
-    
-    const savings = plans.map(plan => {
-      const monthlyPrice = plan.discountedMonthlyPrice || plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price;
-      const yearlyPrice = plan.discountedYearlyPrice || plan.calculatedYearlyPrice || plan.yearlyPrice || (monthlyPrice * 12);
-      const monthlyTotal = monthlyPrice * 12;
-      
-      if (monthlyTotal > yearlyPrice) {
-        return Math.round(((monthlyTotal - yearlyPrice) / monthlyTotal) * 100);
-      }
-      return 0;
-    }).filter(saving => saving > 0);
-    
-    return savings.length > 0 ? Math.round(savings.reduce((a, b) => a + b, 0) / savings.length) : undefined;
+
+    const savings = plans
+      .map((plan) => {
+        const monthlyPrice =
+          plan.discountedMonthlyPrice ||
+          plan.calculatedMonthlyPrice ||
+          plan.monthlyPrice ||
+          plan.price;
+        const yearlyPrice =
+          plan.discountedYearlyPrice ||
+          plan.calculatedYearlyPrice ||
+          plan.yearlyPrice ||
+          monthlyPrice * 12;
+        const monthlyTotal = monthlyPrice * 12;
+
+        if (monthlyTotal > yearlyPrice) {
+          return Math.round(
+            ((monthlyTotal - yearlyPrice) / monthlyTotal) * 100
+          );
+        }
+        return 0;
+      })
+      .filter((saving) => saving > 0);
+
+    return savings.length > 0
+      ? Math.round(savings.reduce((a, b) => a + b, 0) / savings.length)
+      : undefined;
   };
 
   const yearlySavings = calculateYearlySavings();
@@ -86,20 +114,20 @@ const Priceing = () => {
         setIsLoading(true);
         const [regularPlans, featuredPlans] = await Promise.all([
           getPlans(),
-          getFeaturedPlans()
+          getFeaturedPlans(),
         ]);
 
         // Mark featured plans
-        const featuredPlanIds = new Set(featuredPlans.map(p => p._id));
-        const plansWithFeatured = regularPlans.map(plan => ({
+        const featuredPlanIds = new Set(featuredPlans.map((p) => p._id));
+        const plansWithFeatured = regularPlans.map((plan) => ({
           ...plan,
-          isFeatured: featuredPlanIds.has(plan._id)
+          isFeatured: featuredPlanIds.has(plan._id),
         }));
 
         setPlans(plansWithFeatured);
       } catch (err) {
-        console.error('Error fetching plans:', err);
-        setError('Failed to load plans. Please try again later.');
+        console.error("Error fetching plans:", err);
+        setError("Failed to load plans. Please try again later.");
         setPlans([]);
       } finally {
         setIsLoading(false);
@@ -111,12 +139,12 @@ const Priceing = () => {
 
   const handlePlanSelect = (plan: PlanDisplay) => {
     // Check authentication using auth store
-    const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+    const authState = JSON.parse(localStorage.getItem("auth-storage") || "{}");
     const token = authState.state?.tokens?.accessToken;
-    
+
     if (!token) {
       // Redirect to login if not authenticated
-      router.push('/auth/login?redirect=/pricing');
+      router.push("/auth/login?redirect=/pricing");
       return;
     }
 
@@ -129,42 +157,45 @@ const Priceing = () => {
     if (!selectedPlan) return;
 
     try {
-      setIsRequesting(prev => ({ ...prev, [selectedPlan._id]: true }));
-      
+      setIsRequesting((prev) => ({ ...prev, [selectedPlan._id]: true }));
+
       const message = customize ? customizationNote : undefined;
       await requestPlan(selectedPlan._id, message);
-      
-      toast.success(customize ? 
-        'Custom plan request submitted successfully!' : 
-        'Plan request submitted successfully!', {
-        position: 'top-center',
-        duration: 2000,
-      });
-      
+
+      toast.success(
+        customize
+          ? "Custom plan request submitted successfully!"
+          : "Plan request submitted successfully!",
+        {
+          position: "top-center",
+          duration: 2000,
+        }
+      );
+
       // Reset modal state
       setShowCustomizationModal(false);
       setSelectedPlan(null);
-      setCustomizationNote('');
-      
+      setCustomizationNote("");
+
       // Add a small delay before redirecting
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }, 500);
     } catch (error) {
-      console.error('Error requesting plan:', error);
-      toast.error('Failed to request plan. Please try again.', {
-        position: 'top-center',
+      console.error("Error requesting plan:", error);
+      toast.error("Failed to request plan. Please try again.", {
+        position: "top-center",
         duration: 3000,
       });
     } finally {
-      setIsRequesting(prev => ({ ...prev, [selectedPlan._id]: false }));
+      setIsRequesting((prev) => ({ ...prev, [selectedPlan._id]: false }));
     }
   };
 
   const handleModalClose = () => {
     setShowCustomizationModal(false);
     setSelectedPlan(null);
-    setCustomizationNote('');
+    setCustomizationNote("");
   };
 
   if (isLoading) {
@@ -173,7 +204,7 @@ const Priceing = () => {
 
   if (error) {
     return (
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -187,32 +218,32 @@ const Priceing = () => {
   }
 
   return (
-    <motion.section 
+    <motion.section
       initial="initial"
       animate="animate"
       exit="exit"
       variants={{
         initial: { opacity: 0 },
-        animate: { 
+        animate: {
           opacity: 1,
-          transition: { 
+          transition: {
             staggerChildren: 0.1,
-            when: "beforeChildren"
-          } 
+            when: "beforeChildren",
+          },
         },
-        exit: { opacity: 0 }
+        exit: { opacity: 0 },
       }}
       className="relative py-16 bg-background"
     >
-      <motion.div 
+      <motion.div
         className="page-container"
         variants={{
           initial: { opacity: 0, y: 20 },
-          animate: { 
-            opacity: 1, 
+          animate: {
+            opacity: 1,
             y: 0,
-            transition: { duration: 0.6 }
-          }
+            transition: { duration: 0.6 },
+          },
         }}
       >
         <div className="mb-12 text-center">
@@ -252,7 +283,7 @@ const Priceing = () => {
           />
         </FadeIn>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
@@ -265,49 +296,68 @@ const Priceing = () => {
                   key={plan._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
+                  transition={{
                     duration: 0.6,
                     delay: 0.1 * index,
-                    ease: [0.2, 0.65, 0.3, 0.9]
+                    ease: [0.2, 0.65, 0.3, 0.9],
                   }}
                   className="h-full"
                 >
                   <PricingCard
                     title={plan.name}
                     description={plan.description}
-                    price={`$${
+                    price={`$${Math.round(
                       isYearly
-                        ? (
-                          plan.discount?.isActive && plan.discount?.value > 0
-                            ? plan.discountedYearlyPrice || plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
-                            : plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
-                        )
-                        : (
-                          plan.discount?.isActive && plan.discount?.value > 0
-                            ? plan.discountedMonthlyPrice || plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
-                            : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
-                        )
-                    }/${isYearly ? 'yr' : 'mo'}`}
+                        ? plan.discount?.isActive && plan.discount?.value > 0
+                          ? plan.discountedYearlyPrice ||
+                            plan.calculatedYearlyPrice ||
+                            plan.yearlyPrice ||
+                            plan.price * 12
+                          : plan.calculatedYearlyPrice ||
+                            plan.yearlyPrice ||
+                            plan.price * 12
+                        : plan.discount?.isActive && plan.discount?.value > 0
+                        ? plan.discountedMonthlyPrice ||
+                          plan.calculatedMonthlyPrice ||
+                          plan.monthlyPrice ||
+                          plan.price
+                        : plan.calculatedMonthlyPrice ||
+                          plan.monthlyPrice ||
+                          plan.price
+                    )}/${isYearly ? "yr" : "mo"}`}
                     originalPrice={
                       plan.discount?.isActive && plan.discount?.value > 0
-                        ? `${isYearly
-                            ? plan.calculatedYearlyPrice || plan.yearlyPrice || (plan.price * 12)
-                            : plan.calculatedMonthlyPrice || plan.monthlyPrice || plan.price
-                          }/${isYearly ? 'yr' : 'mo'}`
+                        ? `$${Math.round(
+                            isYearly
+                              ? plan.calculatedYearlyPrice ||
+                                  plan.yearlyPrice ||
+                                  plan.price * 12
+                              : plan.calculatedMonthlyPrice ||
+                                  plan.monthlyPrice ||
+                                  plan.price
+                          )}/${isYearly ? "yr" : "mo"}`
                         : undefined
                     }
                     discount={
                       plan.discount?.isActive && plan.discount?.value > 0
-                        ? `${plan.discount.value}%`
+                        ? plan.discount.type === "percentage"
+                          ? `${plan.discount.value}%`
+                          : `$${Math.round(plan.discount.value)}`
                         : undefined
                     }
-                    features={plan.features.map(feature => ({ text: feature, included: true }))}
+                    features={plan.features.map((feature) => ({
+                      text: feature,
+                      included: true,
+                    }))}
                     isPopular={plan.isFeatured}
+                    badge={plan.badge}
                     onSelect={() => handlePlanSelect(plan)}
                     isSubmitting={!!isRequesting[plan._id]}
                     buttonText={plan.buttonText || "Get Started"}
                     taxNote={plan.taxNote || "Local taxes may apply"}
-                    guaranteeText={plan.guaranteeText || "30 Day Money-Back Guarantee"}
+                    guaranteeText={
+                      plan.guaranteeText || "30 Day Money-Back Guarantee"
+                    }
                   />
                 </motion.div>
               ))}
@@ -319,7 +369,7 @@ const Priceing = () => {
           )}
         </motion.div>
       </motion.div>
-      
+
       {/* Customization Modal */}
       <Modal
         isOpen={showCustomizationModal}
@@ -328,9 +378,10 @@ const Priceing = () => {
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-300">
-            Would you like to customize your <span className="font-semibold">{selectedPlan?.name}</span> plan?
+            Would you like to customize your{" "}
+            <span className="font-semibold">{selectedPlan?.name}</span> plan?
           </p>
-          
+
           <div className="space-y-3">
             <Button
               onClick={() => handleCustomizationSubmit(false)}
@@ -342,7 +393,7 @@ const Priceing = () => {
               ) : null}
               Continue with Standard Plan
             </Button>
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300 dark:border-gray-600" />
@@ -353,7 +404,7 @@ const Priceing = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="customization-note">
                 Tell us what you'd like to customize
@@ -366,7 +417,7 @@ const Priceing = () => {
                 className="min-h-[100px]"
               />
             </div>
-            
+
             <Button
               onClick={() => handleCustomizationSubmit(true)}
               variant="outline"
