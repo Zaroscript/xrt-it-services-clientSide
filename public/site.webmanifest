@@ -1,7 +1,7 @@
 {
   "name": "XRT IT Services",
-  "short_name": "XRT",
-  "description": "Premium IT services and digital solutions",
+  "short_name": "XRT Services",
+  "description": "Professional IT services and solutions for your business",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

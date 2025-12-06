@@ -18,6 +18,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/custom-toast";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 // Lazy load ChatWidget (not needed for initial render)
 const ChatWidget = dynamic(() => import("@/components/chat/ChatWidget"), {
@@ -145,6 +146,7 @@ export default function RootLayout({
               <Footer />
               <ChatWidget />
               <Toaster />
+              <PWAInstallPrompt />
             </div>
           </Suspense>
         </ThemeProvider>
