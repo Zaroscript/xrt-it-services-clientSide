@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Invoice } from "@/services/invoiceService";
 import { companySettingsService, type CompanySettings } from "@/services/companySettingsService";
 import { format } from "date-fns";
+import { getLogoUrl, convertToDataUrl } from "@/utils/logoUtils";
 import { Download, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "@/components/ui/custom-toast";
@@ -23,25 +24,6 @@ export function InvoiceDetailModal({
 }: InvoiceDetailModalProps) {
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-
-  // Get API base URL for logo
-  const getApiBaseUrl = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-    // Remove /api/v1 to get base server URL
-    return apiUrl.replace(/\/api\/v1$/, '');
-  };
-
-  // Construct full logo URL
-  const getLogoUrl = (logoPath: string | undefined | null): string | undefined => {
-    if (!logoPath) return undefined;
-    // If already a full URL, return as is
-    if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
-      return logoPath;
-    }
-    // If it's a relative path, prepend with base URL
-    const baseUrl = getApiBaseUrl();
-    return `${baseUrl}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`;
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -70,6 +52,15 @@ export function InvoiceDetailModal({
 
     try {
       setIsDownloading(true);
+
+      // Convert logo to data URL for PDF compatibility
+      let logoDataUrl: string | undefined;
+      if (companySettings.logo) {
+        const logoUrl = getLogoUrl(companySettings.logo);
+        if (logoUrl) {
+          logoDataUrl = await convertToDataUrl(logoUrl);
+        }
+      }
 
       // Dynamically import PDF components
       const { pdf } = await import('@react-pdf/renderer');
@@ -175,8 +166,8 @@ export function InvoiceDetailModal({
             {/* Header */}
             <View style={styles.header}>
               <View>
-                {companySettings.logo && getLogoUrl(companySettings.logo) && (
-                  <PDFImage src={getLogoUrl(companySettings.logo)!} style={styles.logo} />
+                {logoDataUrl && (
+                  <PDFImage src={logoDataUrl} style={styles.logo} />
                 )}
               </View>
               <View style={styles.companyInfo}>
@@ -401,8 +392,11 @@ export function InvoiceDetailModal({
                     alt={companySettings.companyName || "Company Logo"}
                     width={120}
                     height={40}
-                    className="object-contain max-w-full h-auto"
-                    unoptimized
+                    className="object-contain"
+                    onError={(e) => {
+                      console.error('Preview image failed to load:', companySettings.logo);
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </div>
               )}

@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { InvoiceDetailModal } from "../modals/InvoiceDetailModal";
+import { getLogoUrl, convertToDataUrl } from "@/utils/logoUtils";
 
 export function InvoicesList() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -56,6 +57,21 @@ export function InvoicesList() {
 
       // Fetch company settings to get logo and company info
       const companySettings = await companySettingsService.getSettings();
+      console.log('Company settings fetched:', companySettings);
+
+      // Convert logo to data URL for PDF compatibility
+      let logoDataUrl: string | undefined;
+      if (companySettings.logo) {
+        console.log('Logo found in settings:', companySettings.logo);
+        const logoUrl = getLogoUrl(companySettings.logo);
+        console.log('Logo URL constructed:', logoUrl);
+        if (logoUrl) {
+          logoDataUrl = await convertToDataUrl(logoUrl);
+          console.log('Logo data URL result:', logoDataUrl ? 'success' : 'failed');
+        }
+      } else {
+        console.log('No logo found in company settings');
+      }
 
       // Dynamically import PDF components
       const { pdf } = await import('@react-pdf/renderer');
@@ -137,25 +153,6 @@ export function InvoicesList() {
         footer: { marginTop: 40, paddingTop: 20, borderTop: '1 solid #e2e8f0' },
       });
 
-      // Get API base URL for logo
-      const getApiBaseUrl = () => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-        // Remove /api/v1 to get base server URL
-        return apiUrl.replace(/\/api\/v1$/, '');
-      };
-
-      // Construct full logo URL
-      const getLogoUrl = (logoPath: string | undefined | null): string | undefined => {
-        if (!logoPath) return undefined;
-        // If already a full URL, return as is
-        if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
-          return logoPath;
-        }
-        // If it's a relative path, prepend with base URL
-        const baseUrl = getApiBaseUrl();
-        return `${baseUrl}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`;
-      };
-
       // Helper functions
       const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-US', {
@@ -180,8 +177,8 @@ export function InvoicesList() {
             {/* Header */}
             <View style={styles.header}>
               <View>
-                {companySettings.logo && getLogoUrl(companySettings.logo) && (
-                  <Image src={getLogoUrl(companySettings.logo)!} style={styles.logo} />
+                {logoDataUrl && (
+                  <Image src={logoDataUrl} style={styles.logo} />
                 )}
               </View>
               <View style={styles.companyInfo}>

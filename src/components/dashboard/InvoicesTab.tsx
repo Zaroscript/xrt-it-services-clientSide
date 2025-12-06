@@ -10,6 +10,7 @@ import invoiceService, { type Invoice } from '@/services/invoiceService';
 import { companySettingsService, type CompanySettings } from '@/services/companySettingsService';
 import { toast } from '@/components/ui/custom-toast';
 import { InvoiceDetailModal } from '@/components/modals/InvoiceDetailModal';
+import { getLogoUrl, convertToDataUrl } from '@/utils/logoUtils';
 
 export default function InvoicesTab() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -74,6 +75,15 @@ export default function InvoicesTab() {
 
       // Fetch company settings to get logo and company info
       const companySettings = await companySettingsService.getSettings();
+
+      // Convert logo to data URL for PDF compatibility
+      let logoDataUrl: string | undefined;
+      if (companySettings.logo) {
+        const logoUrl = getLogoUrl(companySettings.logo);
+        if (logoUrl) {
+          logoDataUrl = await convertToDataUrl(logoUrl);
+        }
+      }
 
       // Dynamically import PDF components
       const { pdf } = await import('@react-pdf/renderer');
@@ -155,25 +165,6 @@ export default function InvoicesTab() {
         footer: { marginTop: 40, paddingTop: 20, borderTop: '1 solid #e2e8f0' },
       });
 
-      // Get API base URL for logo
-      const getApiBaseUrl = () => {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-        // Remove /api/v1 to get base server URL
-        return apiUrl.replace(/\/api\/v1$/, '');
-      };
-
-      // Construct full logo URL
-      const getLogoUrl = (logoPath: string | undefined | null): string | undefined => {
-        if (!logoPath) return undefined;
-        // If already a full URL, return as is
-        if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
-          return logoPath;
-        }
-        // If it's a relative path, prepend with base URL
-        const baseUrl = getApiBaseUrl();
-        return `${baseUrl}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`;
-      };
-
       // Helper functions
       const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-US', {
@@ -198,8 +189,8 @@ export default function InvoicesTab() {
             {/* Header */}
             <View style={styles.header}>
               <View>
-                {companySettings.logo && getLogoUrl(companySettings.logo) && (
-                  <Image src={getLogoUrl(companySettings.logo)!} style={styles.logo} />
+                {logoDataUrl && (
+                  <Image src={logoDataUrl} style={styles.logo} />
                 )}
               </View>
               <View style={styles.companyInfo}>
