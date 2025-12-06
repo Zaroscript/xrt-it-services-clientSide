@@ -371,23 +371,23 @@ export default function InvoicesTab() {
           <CardContent>
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-8 w-8" />
-                    <div>
-                      <Skeleton className="h-4 w-24 mb-2" />
-                      <Skeleton className="h-3 w-20" />
+                <div key={i} className="p-4 border rounded-lg space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-8 w-8" />
+                      <div>
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
+                    <div className="flex-1 sm:text-right">
                       <Skeleton className="h-4 w-16 mb-2" />
                       <Skeleton className="h-6 w-16" />
                     </div>
-                    <div className="flex gap-2">
-                      <Skeleton className="h-8 w-16" />
-                      <Skeleton className="h-8 w-20" />
-                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <Skeleton className="h-8 w-16 sm:w-auto" />
+                    <Skeleton className="h-8 w-20 sm:w-auto" />
                   </div>
                 </div>
               ))}
@@ -439,49 +439,51 @@ export default function InvoicesTab() {
           <CardContent>
             <div className="space-y-4">
               {invoices.map((invoice) => (
-                <div key={invoice._id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
-                    <div>
-                      <p className="font-semibold">Invoice #{invoice.invoiceNumber}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(invoice.issueDate)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Due: {formatDate(invoice.dueDate)}
-                      </p>
+                <div key={invoice._id} className="p-4 border rounded-lg space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-8 w-8 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="font-semibold">Invoice #{invoice.invoiceNumber}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(invoice.issueDate)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Due: {formatDate(invoice.dueDate)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="font-semibold">${invoice.total.toFixed(2)}</p>
-                      <Badge variant={getStatusVariant(invoice.status)}>
+                    <div className="flex-1 sm:text-right">
+                      <p className="font-semibold text-lg">${invoice.total.toFixed(2)}</p>
+                      <Badge variant={getStatusVariant(invoice.status)} className="mt-1">
                         {invoice.status}
                       </Badge>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewInvoice(invoice)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadPdf(invoice)}
-                        disabled={isDownloading === invoice._id}
-                      >
-                        {isDownloading === invoice._id ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4 mr-2" />
-                        )}
-                        Download
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewInvoice(invoice)}
+                      className="w-full sm:w-auto justify-center"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownloadPdf(invoice)}
+                      disabled={isDownloading === invoice._id}
+                      className="w-full sm:w-auto justify-center"
+                    >
+                      {isDownloading === invoice._id ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Download
+                    </Button>
                   </div>
                 </div>
               ))}

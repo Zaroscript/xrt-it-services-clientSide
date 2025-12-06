@@ -390,27 +390,27 @@ export function InvoiceDetailModal({
         </div>
 
         {/* Invoice Content */}
-        <div className="bg-white p-8 rounded-lg border-2 border-gray-200 shadow-lg text-gray-900">
+        <div className="bg-white p-4 sm:p-8 rounded-lg border-2 border-gray-200 shadow-lg text-gray-900 overflow-x-auto">
           {/* Header */}
-          <div className="flex justify-between items-start mb-10 border-b-2 border-gray-300 pb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 sm:mb-10 border-b-2 border-gray-300 pb-6 sm:pb-8 gap-6">
             <div className="flex-1">
               {companySettings?.logo && getLogoUrl(companySettings.logo) && (
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <Image
                     src={getLogoUrl(companySettings.logo)!}
                     alt={companySettings.companyName || "Company Logo"}
-                    width={150}
-                    height={50}
-                    className="object-contain"
+                    width={120}
+                    height={40}
+                    className="object-contain max-w-full h-auto"
                     unoptimized
                   />
                 </div>
               )}
-              <h2 className="text-3xl font-bold text-primary mb-2 tracking-tight">INVOICE</h2>
-              <p className="text-base text-gray-600 font-medium">#{invoice.invoiceNumber}</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2 tracking-tight">INVOICE</h2>
+              <p className="text-sm sm:text-base text-gray-600 font-medium">#{invoice.invoiceNumber}</p>
             </div>
-            <div className="text-right space-y-1">
-              <div className="font-bold text-xl text-gray-900 mb-2">
+            <div className="text-left sm:text-right space-y-1">
+              <div className="font-bold text-lg sm:text-xl text-gray-900 mb-2">
                 {companySettings?.companyName || 
                   (typeof invoice.user !== "string" &&
                     (invoice.user as any).companyName) ||
@@ -472,62 +472,64 @@ export function InvoiceDetailModal({
           </div>
 
           {/* Items Table */}
-          <div className="mb-10 overflow-hidden rounded-lg border-2 border-gray-200">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-primary/10 border-b-2 border-gray-300">
-                  <th className="text-left py-4 px-6 text-sm font-bold text-gray-700 uppercase tracking-wide">
-                    Description
-                  </th>
-                  <th className="text-center py-4 px-6 text-sm font-bold text-gray-700 uppercase tracking-wide">
-                    Duration
-                  </th>
-                  <th className="text-right py-4 px-6 text-sm font-bold text-gray-700 uppercase tracking-wide">
-                    Price
-                  </th>
-                  <th className="text-right py-4 px-6 text-sm font-bold text-gray-700 uppercase tracking-wide">
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoice.items.map((item, index) => {
-                  const durationType = (item as any).durationType || 'one-time';
-                  const durationLabel = durationType === 'one-time' ? 'One-time' :
-                                       durationType === 'monthly' ? 'Monthly' :
-                                       durationType === 'quarterly' ? 'Quarterly' :
-                                       durationType === 'annual' ? 'Annual' : durationType;
-                  return (
-                    <tr key={index} className={`border-b border-gray-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                      <td className="py-4 px-6 text-sm font-medium text-gray-900">{item.description}</td>
-                      <td className="text-center py-4 px-6">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-                          {durationLabel}
-                        </span>
-                      </td>
-                      <td className="text-right py-4 px-6 text-sm text-gray-700">
-                        {formatCurrency(item.unitPrice)}
-                      </td>
-                      <td className="text-right py-4 px-6 text-sm font-semibold text-gray-900">
-                        {formatCurrency(1 * item.unitPrice)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="mb-6 sm:mb-10 overflow-hidden rounded-lg border-2 border-gray-200">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[500px]">
+                <thead>
+                  <tr className="bg-primary/10 border-b-2 border-gray-300">
+                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Description
+                    </th>
+                    <th className="text-center py-3 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Duration
+                    </th>
+                    <th className="text-right py-3 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Price
+                    </th>
+                    <th className="text-right py-3 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoice.items.map((item, index) => {
+                    const durationType = (item as any).durationType || 'one-time';
+                    const durationLabel = durationType === 'one-time' ? 'One-time' :
+                                         durationType === 'monthly' ? 'Monthly' :
+                                         durationType === 'quarterly' ? 'Quarterly' :
+                                         durationType === 'annual' ? 'Annual' : durationType;
+                    return (
+                      <tr key={index} className={`border-b border-gray-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                        <td className="py-3 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-medium text-gray-900">{item.description}</td>
+                        <td className="text-center py-3 sm:py-4 px-2 sm:px-6">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                            {durationLabel}
+                          </span>
+                        </td>
+                        <td className="text-right py-3 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm text-gray-700">
+                          {formatCurrency(item.unitPrice)}
+                        </td>
+                        <td className="text-right py-3 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm font-semibold text-gray-900">
+                          {formatCurrency(1 * item.unitPrice)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Totals */}
-          <div className="flex justify-end mb-10">
-            <div className="w-80 space-y-3 bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
-              <div className="flex justify-between items-center text-base">
+          <div className="flex justify-end mb-6 sm:mb-10">
+            <div className="w-full sm:w-80 space-y-3 bg-gray-50 p-4 sm:p-6 rounded-lg border-2 border-gray-200">
+              <div className="flex justify-between items-center text-sm sm:text-base">
                 <span className="text-gray-700 font-medium">Subtotal:</span>
                 <span className="font-semibold text-gray-900">
                   {formatCurrency(invoice.subtotal)}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-base">
+              <div className="flex justify-between items-center text-sm sm:text-base">
                 <span className="text-gray-700 font-medium">Tax:</span>
                 <span className="font-semibold text-gray-900">
                   {formatCurrency(invoice.tax)}
@@ -535,8 +537,8 @@ export function InvoiceDetailModal({
               </div>
               <div className="border-t-2 border-gray-300 pt-3 mt-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold text-gray-900">Total:</span>
-                  <span className="text-2xl font-bold text-primary">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900">Total:</span>
+                  <span className="text-xl sm:text-2xl font-bold text-primary">
                     {formatCurrency(invoice.total)}
                   </span>
                 </div>
@@ -546,21 +548,21 @@ export function InvoiceDetailModal({
 
           {/* Notes */}
           {invoice.notes && (
-            <div className="mt-10 pt-8 border-t-2 border-gray-200">
-              <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
+            <div className="mt-6 sm:mt-10 pt-6 sm:pt-8 border-t-2 border-gray-200">
+              <h4 className="text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
                 Notes:
               </h4>
-              <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
                 {invoice.notes}
               </p>
             </div>
           )}
           
           {/* Status Badge */}
-          <div className="mt-8 pt-6 border-t-2 border-gray-200 flex items-center justify-between">
+          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status:</span>
-              <span className={`ml-3 inline-flex items-center px-4 py-2 rounded-full text-sm font-bold ${
+              <span className={`ml-3 inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold ${
                 invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
                 invoice.status === 'sent' ? 'bg-blue-100 text-blue-800' :
                 invoice.status === 'overdue' ? 'bg-red-100 text-red-800' :

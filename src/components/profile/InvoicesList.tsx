@@ -413,14 +413,14 @@ export function InvoicesList() {
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
           >
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                  <FileText className="h-5 w-5 text-primary shrink-0" />
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {invoice.invoiceNumber}
                   </h4>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                    className={`text-xs px-2 py-1 rounded-full shrink-0 ${getStatusColor(
                       invoice.status
                     )}`}
                   >
@@ -431,33 +431,33 @@ export function InvoicesList() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400 mt-3">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      Issued:{" "}
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      Issued: {" "}
                       {format(new Date(invoice.issueDate), "MMM dd, yyyy")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
                       Due: {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-primary" />
+                    <DollarSign className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                       {formatCurrency(invoice.total)}
                     </span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1"
+                      className="gap-1 w-full sm:w-auto justify-center"
                       onClick={() => handleViewInvoice(invoice)}
                     >
                       <Eye className="h-4 w-4" />
@@ -466,7 +466,7 @@ export function InvoicesList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1"
+                      className="gap-1 w-full sm:w-auto justify-center"
                       onClick={() => handleDownloadPdf(invoice)}
                       disabled={isDownloading === invoice._id}
                     >
