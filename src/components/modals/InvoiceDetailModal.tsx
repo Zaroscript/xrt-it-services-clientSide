@@ -394,7 +394,6 @@ export function InvoiceDetailModal({
                     height={40}
                     className="object-contain"
                     onError={(e) => {
-                      console.error('Preview image failed to load:', companySettings.logo);
                       e.currentTarget.style.display = 'none';
                     }}
                   />

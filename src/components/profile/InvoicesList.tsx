@@ -57,20 +57,14 @@ export function InvoicesList() {
 
       // Fetch company settings to get logo and company info
       const companySettings = await companySettingsService.getSettings();
-      console.log('Company settings fetched:', companySettings);
 
       // Convert logo to data URL for PDF compatibility
       let logoDataUrl: string | undefined;
       if (companySettings.logo) {
-        console.log('Logo found in settings:', companySettings.logo);
         const logoUrl = getLogoUrl(companySettings.logo);
-        console.log('Logo URL constructed:', logoUrl);
         if (logoUrl) {
           logoDataUrl = await convertToDataUrl(logoUrl);
-          console.log('Logo data URL result:', logoDataUrl ? 'success' : 'failed');
         }
-      } else {
-        console.log('No logo found in company settings');
       }
 
       // Dynamically import PDF components

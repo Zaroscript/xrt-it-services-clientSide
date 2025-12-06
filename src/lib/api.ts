@@ -5,7 +5,7 @@ import axios, {
   AxiosRequestConfig,
 } from "axios";
 import { toast } from "@/components/ui/custom-toast";
-import { getToken, setToken, clearAuthData } from "./auth";
+import { getToken, getRefreshToken, setToken, clearAuthData } from "./auth";
 
 // Extend the AxiosRequestConfig type to include our custom property
 declare module "axios" {
@@ -16,7 +16,7 @@ declare module "axios" {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
   withCredentials: true, // Important for cookies
   timeout: 10000, // 10 seconds
   headers: {
@@ -77,11 +77,16 @@ api.interceptors.response.use(
 
       try {
         // Attempt to refresh the token
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
         const refreshResponse = await axios.post(
           `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1"
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"
           }/auth/refresh-token`,
-          {},
+          { refreshToken }, // Send the refresh token in the body
           {
             withCredentials: true,
             // Don't use the interceptor for the refresh token request
@@ -89,10 +94,10 @@ api.interceptors.response.use(
           }
         );
 
-        const { accessToken } = refreshResponse.data.data;
+        const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data;
         if (accessToken) {
-          // Use our auth utility to store the token
-          setToken(accessToken);
+          // Use our auth utility to store the tokens
+          setToken(accessToken, newRefreshToken);
 
           // Update the original request with the new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;

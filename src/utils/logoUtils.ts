@@ -4,22 +4,17 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
 export const getApiBaseUrl = (): string => {
-  console.log('LogoUtils - API_URL:', API_URL);
   return API_URL;
 };
 
 // Construct full logo URL
 export const getLogoUrl = (logoPath: string | undefined | null): string | undefined => {
-  console.log('getLogoUrl called with:', logoPath);
-  
   if (!logoPath) {
-    console.log('No logo path provided');
     return undefined;
   }
   
   // If already a full URL, return as is
   if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
-    console.log('Logo path is already a full URL:', logoPath);
     return logoPath;
   }
   
@@ -31,15 +26,12 @@ export const getLogoUrl = (logoPath: string | undefined | null): string | undefi
   const fullUrl = `${serverBaseUrl}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`;
   // Add cache-busting parameter to prevent browser caching issues
   const cacheBustedUrl = `${fullUrl}?t=${Date.now()}`;
-  console.log('Constructed logo URL:', cacheBustedUrl, 'from path:', logoPath);
-  console.log('Server base URL:', serverBaseUrl);
   return cacheBustedUrl;
 };
 
 // Convert logo URL to data URL for PDF compatibility
 export const convertToDataUrl = async (url: string): Promise<string | undefined> => {
   try {
-    console.log('Attempting to fetch logo from:', url);
     const response = await fetch(url, {
       mode: 'cors',
       credentials: 'omit'
@@ -51,13 +43,11 @@ export const convertToDataUrl = async (url: string): Promise<string | undefined>
     }
     
     const blob = await response.blob();
-    console.log('Logo blob size:', blob.size, 'type:', blob.type);
     
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
-        console.log('Data URL generated successfully, length:', result.length);
         resolve(result);
       };
       reader.onerror = (error) => {

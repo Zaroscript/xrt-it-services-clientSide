@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { devtools, persist, createJSONStorage } from "zustand/middleware";
 import { authService } from "@/services/auth/auth.service";
+import { getRefreshToken } from "@/lib/auth";
 import type {
   LoginCredentials,
   RegisterData,
@@ -25,6 +26,7 @@ export interface User {
 
 export interface Tokens {
   accessToken: string;
+  refreshToken?: string;
 }
 
 export interface ClientProfile {
@@ -104,9 +106,10 @@ const useAuthStore = create<AuthStore>()(
             } as LoginCredentials);
 
             // Update the state with the new auth data
+            const refreshToken = getRefreshToken();
             set({
               user,
-              tokens: { accessToken },
+              tokens: { accessToken, refreshToken: refreshToken || undefined },
               clientProfile: clientProfile ?? null,
               isAuthenticated: true,
               isLoading: false,

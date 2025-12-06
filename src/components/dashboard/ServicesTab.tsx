@@ -24,7 +24,6 @@ export default function ServicesTab() {
   const fetchClientData = async () => {
     try {
       const data = await clientService.getClientProfile();
-      console.log("Fetched Client Data:", data);
       setClientData(data);
     } catch (error) {
       console.error("Error fetching client data:", error);

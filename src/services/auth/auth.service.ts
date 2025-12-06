@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import { setToken, clearAuthData, getToken } from '@/lib/auth';
+import { setToken, clearAuthData, getToken, getAccessToken } from '@/lib/auth';
 import type { User, ClientProfile, Tokens } from '@/store/useAuthStore';
 
 export interface ApiResponse<T> {
@@ -11,6 +11,7 @@ export interface ApiResponse<T> {
 interface LoginResponse {
   user: User;
   accessToken: string;
+  refreshToken: string;
   clientProfile?: ClientProfile;
 }
 
@@ -79,7 +80,8 @@ export const authService = {
       // Clear any existing tokens first
       if (typeof document !== 'undefined') {
         document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
 
       // Make the login request with credentials
@@ -89,14 +91,14 @@ export const authService = {
         { withCredentials: true } // Ensure cookies are sent with the request
       );
       
-      const { accessToken, user, clientProfile } = response.data.data;
+      const { accessToken, refreshToken, user, clientProfile } = response.data.data;
       
       if (!accessToken) {
         throw new Error('No access token received from server');
       }
       
-      // Store the token in both localStorage and cookies
-      setToken(accessToken);
+      // Store both tokens
+      setToken(accessToken, refreshToken);
       
       // Set the token in an HTTP-only cookie for server-side auth
       if (typeof document !== 'undefined') {
@@ -116,7 +118,8 @@ export const authService = {
       // Clear any partial auth data on error
       if (typeof document !== 'undefined') {
         document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
       throw error;
     }
@@ -143,8 +146,9 @@ export const authService = {
       console.error('Logout API error:', error);
       // Even if the API call fails, we want to proceed with clearing local state
     } finally {
-      // Always remove the token from localStorage
-      localStorage.removeItem('accessToken');
+      // Always remove the tokens from localStorage
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
     }
   },
 
@@ -209,8 +213,9 @@ export const authService = {
       
       // Update token if returned
       if (response.data.data.accessToken) {
-        setToken(response.data.data.accessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.accessToken}`;
+        const responseData = response.data.data as any; // Type assertion to access refreshToken
+        setToken(responseData.accessToken, responseData.refreshToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${responseData.accessToken}`;
       }
       
       return {
