@@ -261,7 +261,7 @@ const Priceing = () => {
             transition={{ delay: 0.2 }}
             className="text-3xl font-bold text-primary dark:text-secondary sm:text-4xl"
           >
-            Built for Small Businesses — Simple, Affordable, and Ready to Grow
+            Built for Small Businesses Simple, Affordable, and Ready to Grow
           </motion.h2>
 
           <motion.p
@@ -270,7 +270,7 @@ const Priceing = () => {
             transition={{ delay: 0.3 }}
             className="text-lg mt-4 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Choose the plan that fits your journey — from your first online
+            Choose the plan that fits your journey from your first online
             order to full-scale digital success.
           </motion.p>
         </div>
