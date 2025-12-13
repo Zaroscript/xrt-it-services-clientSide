@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { getPlans, getFeaturedPlans, requestPlan } from "@/lib/api/plans";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/Loader";
+import { usePlansPolling } from "@/hooks/usePlansPolling";
 
 interface PlanDisplay {
   _id: string;
@@ -45,6 +46,7 @@ interface PlanDisplay {
       | "new"
       | "limited";
   };
+  isCustom?: boolean;
   discount?: {
     type: "percentage" | "fixed";
     value: number;
@@ -61,14 +63,13 @@ interface PlanDisplay {
   buttonText?: string;
   taxNote?: string;
   guaranteeText?: string;
+  displayOrder?: number;
 }
 
 const Priceing = () => {
   const router = useRouter();
   const [isYearly, setIsYearly] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [plans, setPlans] = useState<PlanDisplay[]>([]);
+  const { plans, isLoading, error } = usePlansPolling(5000);
   const [isRequesting, setIsRequesting] = useState<Record<string, boolean>>({});
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null);
@@ -107,35 +108,6 @@ const Priceing = () => {
   };
 
   const yearlySavings = calculateYearlySavings();
-
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        setIsLoading(true);
-        const [regularPlans, featuredPlans] = await Promise.all([
-          getPlans(),
-          getFeaturedPlans(),
-        ]);
-
-        // Mark featured plans
-        const featuredPlanIds = new Set(featuredPlans.map((p) => p._id));
-        const plansWithFeatured = regularPlans.map((plan) => ({
-          ...plan,
-          isFeatured: featuredPlanIds.has(plan._id),
-        }));
-
-        setPlans(plansWithFeatured);
-      } catch (err) {
-        console.error("Error fetching plans:", err);
-        setError("Failed to load plans. Please try again later.");
-        setPlans([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPlans();
-  }, []);
 
   const handlePlanSelect = (plan: PlanDisplay) => {
     // Check authentication using auth store
@@ -270,8 +242,8 @@ const Priceing = () => {
             transition={{ delay: 0.3 }}
             className="text-lg mt-4 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Choose the plan that fits your journey from your first online
-            order to full-scale digital success.
+            Choose the plan that fits your journey from your first online order
+            to full-scale digital success.
           </motion.p>
         </div>
 
@@ -306,27 +278,35 @@ const Priceing = () => {
                   <PricingCard
                     title={plan.name}
                     description={plan.description}
-                    price={`$${Math.round(
-                      isYearly
-                        ? plan.discount?.isActive && plan.discount?.value > 0
-                          ? plan.discountedYearlyPrice ||
-                            plan.calculatedYearlyPrice ||
-                            plan.yearlyPrice ||
-                            plan.price * 12
-                          : plan.calculatedYearlyPrice ||
-                            plan.yearlyPrice ||
-                            plan.price * 12
-                        : plan.discount?.isActive && plan.discount?.value > 0
-                        ? plan.discountedMonthlyPrice ||
-                          plan.calculatedMonthlyPrice ||
-                          plan.monthlyPrice ||
-                          plan.price
-                        : plan.calculatedMonthlyPrice ||
-                          plan.monthlyPrice ||
-                          plan.price
-                    )}/${isYearly ? "yr" : "mo"}`}
+                    price={
+                      plan.isCustom
+                        ? "Customize it"
+                        : `$${Math.round(
+                            isYearly
+                              ? plan.discount?.isActive &&
+                                plan.discount?.value > 0
+                                ? plan.discountedYearlyPrice ||
+                                  plan.calculatedYearlyPrice ||
+                                  plan.yearlyPrice ||
+                                  plan.price * 12
+                                : plan.calculatedYearlyPrice ||
+                                  plan.yearlyPrice ||
+                                  plan.price * 12
+                              : plan.discount?.isActive &&
+                                plan.discount?.value > 0
+                              ? plan.discountedMonthlyPrice ||
+                                plan.calculatedMonthlyPrice ||
+                                plan.monthlyPrice ||
+                                plan.price
+                              : plan.calculatedMonthlyPrice ||
+                                plan.monthlyPrice ||
+                                plan.price
+                          )}/${isYearly ? "yr" : "mo"}`
+                    }
                     originalPrice={
-                      plan.discount?.isActive && plan.discount?.value > 0
+                      !plan.isCustom &&
+                      plan.discount?.isActive &&
+                      plan.discount?.value > 0
                         ? `$${Math.round(
                             isYearly
                               ? plan.calculatedYearlyPrice ||

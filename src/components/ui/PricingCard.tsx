@@ -134,7 +134,8 @@ export function PricingCard({
           <div className="flex items-baseline gap-2">
             <h2
               className={cn(
-                "pb-4 pt-2 text-3xl font-bold",
+                "pb-4 pt-2 font-bold",
+                price.length > 20 ? "text-xl" : "text-3xl",
                 isPopular
                   ? "bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent"
                   : "text-[#D3B073]"

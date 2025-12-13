@@ -29,6 +29,25 @@ export interface Plan {
   isDiscountActive?: boolean;
   createdAt: string;
   updatedAt: string;
+  isCustom?: boolean;
+  badge?: {
+    text?: string;
+    variant?:
+      | "default"
+      | "secondary"
+      | "destructive"
+      | "outline"
+      | "success"
+      | "warning"
+      | "info"
+      | "premium"
+      | "new"
+      | "limited";
+  };
+  displayOrder?: number;
+  buttonText?: string;
+  taxNote?: string;
+  guaranteeText?: string;
 }
 
 export const getPlans = async (): Promise<Plan[]> => {

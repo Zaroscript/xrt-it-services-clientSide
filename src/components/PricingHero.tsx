@@ -32,7 +32,7 @@ export function PricingHero() {
                 >
                   Transparent
                 </motion.span>{" "}
-                Pricing 0
+                Pricing
               </h1>
             </FadeIn>
             <FadeIn direction="up" delay={0.3}>
