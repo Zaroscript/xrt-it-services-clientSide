@@ -48,7 +48,7 @@ export const TWITTER_DEFAULT = {
 export const PAGE_METADATA = {
   home: {
     title:
-      "Online Ordering, Web Design & IT Services for Small Business | XRT Tech",
+      "XRT Tech | Online Ordering, Web Design & IT Services for Small Business",
     description:
       "XRT Tech delivers online ordering systems, website design, hosting, IT services, and digital signage solutions for restaurants and small businesses. Fast & affordable.",
     keywords: [
@@ -65,13 +65,13 @@ export const PAGE_METADATA = {
       "one-stop tech agency for small business",
     ],
     openGraph: {
-      title: "XRT Tech - Technology Solutions for Small Businesses",
+      title: "XRT Tech | Technology Solutions for Small Businesses",
       description:
         "Complete IT services, web design, online ordering systems, and digital signage for restaurants and small businesses.",
     },
   },
   services: {
-    title: "Small Business Tech Services & Digital Solutions | XRT Tech",
+    title: "XRT Tech | Small Business Tech Services & Digital Solutions ",
     description:
       "Explore XRT Tech services: online ordering, website development, hosting, digital signage, IT support and SaaS tools for restaurants and small businesses.",
     keywords: [
@@ -87,13 +87,13 @@ export const PAGE_METADATA = {
       "cloud dashboard for business",
     ],
     openGraph: {
-      title: "Our Digital Services - XRT Tech",
+      title: "XRT Tech | Our Digital Services",
       description:
         "Comprehensive IT and digital services tailored for small businesses and restaurants.",
     },
   },
   onlineOrdering: {
-    title: "No-Commission Restaurant Online Ordering System | XRT Tech",
+    title: "XRT Tech | No-Commission Restaurant Online Ordering System",
     description:
       "Get a custom online ordering system for your restaurant with no commissions. WooCommerce-powered, Stripe-ready, WhatsApp notifications, and multi-branch support.",
     keywords: [
@@ -115,7 +115,7 @@ export const PAGE_METADATA = {
     },
   },
   websiteDesign: {
-    title: "WordPress Website Design for Small Businesses | XRT Tech",
+    title: "XRT Tech | WordPress Website Design for Small Businesses",
     description:
       "Affordable, responsive, SEO-friendly website design for restaurants and small businesses. WooCommerce integration, fast hosting, custom UI, and multilingual support.",
     keywords: [
@@ -131,13 +131,13 @@ export const PAGE_METADATA = {
       "professional website redesign",
     ],
     openGraph: {
-      title: "Professional Website Design Services - XRT Tech",
+      title: "XRT Tech | Professional Website Design Services",
       description:
         "Custom WordPress websites designed for small businesses and restaurants.",
     },
   },
   hosting: {
-    title: "Fast, Secure Website Hosting for Small Businesses | XRT Tech",
+    title: "XRT Tech | Fast, Secure Website Hosting for Small Businesses",
     description:
       "Reliable hosting with SSL, daily backups, email setup, and WordPress optimization. Perfect for local businesses and restaurants.",
     keywords: [
