@@ -62,6 +62,57 @@ export const metadata: Metadata = {
     "digital signage for restaurants",
     "managed tech solutions",
     "web design & hosting",
+    "XRT Tech",
+    "restaurant technology solutions",
+    "small business IT support",
+    "website development services",
+    "online ordering platform",
+    "restaurant POS systems",
+    "digital menu boards",
+    "cloud hosting services",
+    "website maintenance",
+    "e-commerce development",
+    "mobile app development",
+    "IT consulting services",
+    "business technology solutions",
+    "restaurant management software",
+    "web hosting for businesses",
+    "custom website design",
+    "WordPress development",
+    "WooCommerce integration",
+    "digital transformation services",
+    "IT infrastructure setup",
+    "network configuration",
+    "cybersecurity services",
+    "data backup solutions",
+    "email hosting services",
+    "restaurant online ordering",
+    "commission-free ordering system",
+    "restaurant website design",
+    "small business website",
+    "IT support for restaurants",
+    "digital menu display",
+    "restaurant technology",
+    "business website hosting",
+    "custom online ordering",
+    "restaurant management system",
+    "affordable IT services",
+    "local business website",
+    "restaurant web design",
+    "online food ordering",
+    "restaurant POS integration",
+    "website design company",
+    "IT services provider",
+    "restaurant digital solutions",
+    "small business tech support",
+    "web development agency",
+    "restaurant software solutions",
+    "business technology consulting",
+    "website maintenance services",
+    "cloud services for restaurants",
+    "restaurant automation",
+    "digital signage solutions",
+    "restaurant marketing tools",
   ],
   authors: [{ name: "XRT Tech" }],
   creator: "XRT Tech",
@@ -107,8 +158,11 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
+    icon: [
+      { url: "/assets/images/favicon.ico", sizes: "any" },
+      { url: "/assets/images/favicon.ico", type: "image/x-icon" },
+    ],
+    shortcut: "/assets/images/favicon.ico",
     apple: "/logo.png",
   },
   manifest: "/site.webmanifest",
@@ -124,6 +178,11 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        {/* Favicon for all devices */}
+        <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         
         {/* Resource hints for better performance */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
