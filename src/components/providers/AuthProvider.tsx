@@ -103,7 +103,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Show loading state while checking auth status
   if (isLoading || isCheckingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div 
+        className="flex items-center justify-center min-h-screen"
+        style={{
+          willChange: 'opacity',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+        }}
+      >
         <Loader size="lg" />
       </div>
     );

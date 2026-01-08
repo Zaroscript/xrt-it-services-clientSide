@@ -385,6 +385,64 @@
       transform: translateX(100%);
     }
   }
+
+  /* Loader animations - optimized for performance */
+  .loader-container {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .loader-rotate-slow {
+    animation: loader-rotate-slow 3s linear infinite;
+    transform-origin: center;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  .loader-rotate-reverse {
+    animation: loader-rotate-reverse 4s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  .loader-pulse-center {
+    animation: loader-pulse-center 1.5s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  @keyframes loader-rotate-slow {
+    from {
+      transform: rotate(0deg) translateZ(0);
+    }
+    to {
+      transform: rotate(360deg) translateZ(0);
+    }
+  }
+
+  @keyframes loader-rotate-reverse {
+    0% {
+      transform: rotate(0deg) scale(1) translateZ(0);
+    }
+    50% {
+      transform: rotate(-90deg) scale(1.1) translateZ(0);
+    }
+    100% {
+      transform: rotate(-180deg) scale(1) translateZ(0);
+    }
+  }
+
+  @keyframes loader-pulse-center {
+    0%, 100% {
+      transform: scale(1) translateZ(0);
+    }
+    50% {
+      transform: scale(1.2) translateZ(0);
+    }
+  }
 }
 
 @layer base {

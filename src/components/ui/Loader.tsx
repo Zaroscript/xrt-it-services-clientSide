@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 interface LoaderProps {
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -16,17 +14,9 @@ export function Loader({ size = "md", className = "" }: LoaderProps) {
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <div className={`relative ${sizeClasses[size]}`}>
-        {/* Rotating outer hexagon */}
-        <motion.div
-          className="absolute inset-0"
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 3,
-            ease: "linear",
-            repeat: Infinity,
-          }}
-        >
+      <div className={`relative ${sizeClasses[size]} loader-container`}>
+        {/* Rotating outer hexagon - using CSS animation for better performance */}
+        <div className="absolute inset-0 loader-rotate-slow">
           <svg
             className="w-full h-full"
             viewBox="0 0 100 100"
@@ -35,47 +25,17 @@ export function Loader({ size = "md", className = "" }: LoaderProps) {
           >
             <path
               d="M50 5L90 27.5V72.5L50 95L10 72.5V27.5L50 5Z"
-              stroke="url(#hexagon-gradient)"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinejoin="round"
               fill="none"
+              className="text-foreground/60"
             />
-            <defs>
-              <linearGradient
-                id="hexagon-gradient"
-                x1="10"
-                y1="5"
-                x2="90"
-                y2="95"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0%" stopColor="#1a1a1a" />
-                <stop offset="100%" stopColor="#1a1a1a" />
-              </linearGradient>
-            </defs>
           </svg>
-        </motion.div>
+        </div>
 
-        {/* Pulsing inner circle with tech pattern */}
-        <motion.div
-          className="absolute inset-4"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: -180,
-          }}
-          transition={{
-            scale: {
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            },
-            rotate: {
-              duration: 4,
-              repeat: Infinity,
-              ease: "linear",
-            },
-          }}
-        >
+        {/* Pulsing inner circle with tech pattern - using CSS animation */}
+        <div className="absolute inset-4 loader-rotate-reverse">
           <svg
             className="w-full h-full"
             viewBox="0 0 100 100"
@@ -85,48 +45,27 @@ export function Loader({ size = "md", className = "" }: LoaderProps) {
             {/* Circuit pattern */}
             <path
               d="M50 20L80 50L50 80L20 50L50 20Z"
-              stroke="url(#circuit-gradient)"
+              stroke="currentColor"
               strokeWidth="1.5"
-              fill="rgba(26, 26, 26, 0.1)"
+              fill="rgba(0, 0, 0, 0.05)"
+              className="text-foreground/40"
             />
             <circle
               cx="50"
               cy="50"
               r="15"
-              stroke="url(#circuit-gradient)"
+              stroke="currentColor"
               strokeWidth="1.5"
               fill="none"
+              className="text-foreground/40"
             />
-            <defs>
-              <linearGradient
-                id="circuit-gradient"
-                x1="20"
-                y1="20"
-                x2="80"
-                y2="80"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0%" stopColor="#1a1a1a" />
-                <stop offset="100%" stopColor="#1a1a1a" />
-              </linearGradient>
-            </defs>
           </svg>
-        </motion.div>
+        </div>
 
-        {/* Center dot */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          animate={{
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a] shadow-[0_0_8px_#1a1a1a]" />
-        </motion.div>
+        {/* Center dot - using CSS animation */}
+        <div className="absolute inset-0 flex items-center justify-center loader-pulse-center">
+          <div className="w-1.5 h-1.5 rounded-full bg-foreground shadow-[0_0_8px_currentColor]" />
+        </div>
       </div>
     </div>
   );
